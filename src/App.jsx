@@ -1,5 +1,11 @@
+/* eslint-disable */
+
 import React, { useEffect, useState } from "react";
 import XMLParser from "react-xml-parser";
+
+import { Button } from "./components/button";
+import { NavigationBar } from "./components/navigationBar";
+import { Container } from "./components/container";
 
 import "./App.css";
 
@@ -20,7 +26,14 @@ function App() {
       .catch(() => console.log("err"));
   }, []);
 
-  return <div></div>;
+  return (
+    <>
+      <Container>
+        <Button />
+        <NavigationBar />
+      </Container>
+    </>
+  );
 }
 
 export default App;
