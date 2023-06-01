@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import colors from "../constants/colors";
 
 export const Button = () => {
   return (
@@ -14,9 +15,9 @@ const ButtonStyle = styled.button`
 
   font-weight: 700;
   color: white;
-  border: 1px solid #00954f;
+  border: 1px solid ${colors.borderOut};
   border-radius: 5px;
-  background-color: #00ad5c;
+  background-color: ${colors.primary};
   cursor: pointer;
 
   padding: 1% 3.5%;
