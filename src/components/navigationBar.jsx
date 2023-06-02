@@ -1,10 +1,15 @@
 /* eslint-disable */
 
+// 이미지 링크
 import star from "../assets/star.svg";
 import map from "../assets/map.svg";
 import miniLogo from "../assets/miniLogo.svg";
 import myInfo from "../assets/myInfo.svg";
 import reservation from "../assets/reservation.svg";
+
+// 상수값 연결
+import colors from "../constants/colors";
+import fontSize from "../constants/fontSize";
 
 import React from "react";
 import styled from "styled-components";
@@ -55,9 +60,9 @@ export const NavigationBar = () => {
 
 const Nav = styled.div`
   width: 100%;
-  border-top: 1px solid #b2b2b2;
-  background-color: antiquewhite;
+  border-top: 1px solid ${colors.InputBorderOut};
   margin: auto;
+  z-index: 99;
 `;
 
 const NavUl = styled.ul`
@@ -75,7 +80,7 @@ padding: 1%;
 `;
 
 const NavA = styled.a`
-  color: #121212;
+  color: ${colors.fontColor};
 `;
 
 const NavImg = styled.img`

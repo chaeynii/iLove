@@ -1,8 +1,9 @@
+/* eslint-disable */
 import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
-const CardBox = ({ children, linkTo }) => {
+export const CardBox = ({ children, linkTo }) => {
   return (
     <CardBoxStyle>
       <Link to={linkTo}>{children}</Link>
