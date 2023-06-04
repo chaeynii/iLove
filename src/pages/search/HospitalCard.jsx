@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { useRecoilValue } from "recoil";
+// import { useRecoilValue } from "recoil";
 // import { favoriteState } from "../../recoil/RecoilAtoms";
 import IconClock from "../../assets/iconClock.svg";
 import IconLocationGray from "../../assets/iconLocationGray.svg";
@@ -19,7 +19,7 @@ const HospitalCard = ({
   const week = ["월", "화", "수", "목", "금", "토", "일", "공휴일"];
   const todayText = week[today - 1];
   // const favorite = useRecoilValue(favoriteState);
-  // console.log("hpid:", hpid);
+  console.log("hpid:", hpid);
 
   return (
     <>
