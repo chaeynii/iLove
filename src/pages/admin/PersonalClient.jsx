@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useQuery, useQueryClient } from "react-query";
 import { fetchList } from "../../server/Fetcher";
-import { Button } from "../../components/Button";
+import { Button } from "../../components/button";
 
 export const PersonalClient = () => {
   const [currentPage, setCurrentPage] = useState(0);

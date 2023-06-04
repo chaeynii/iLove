@@ -6,7 +6,7 @@ import IconDown from "../assets/iconDown.svg";
 import IconAlarm from "../assets/iconAlarm.svg";
 import locationData from "../assets/addressList.json";
 
-const SearchBar = () => {
+export const SearchBar = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const openModal = () => {
