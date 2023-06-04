@@ -1,0 +1,69 @@
+{
+    "success": true,
+    "data": [
+        {
+            "id": 6,
+            "name": "노은탁",
+            "email": "popcron12@gmail.com",
+            "emailVerified": null,
+            "password": "$2b$10$d1nCqnf./gZIF0hhNHytpOPYWxonVf1F/6wyNPraumprc35120tiu",
+            "phoneNumber": "010-5490-4147",
+            "role": "client",
+            "createdAt": "2023-06-03T15:30:30.698Z",
+            "updatedAt": "2023-06-03T15:30:30.698Z",
+            "hospitalId": null,
+            "adminVerified": null,
+            "address": "서울 특별시 광진구 용매산로 44 상경빌딩 2층",
+            "haveChild": [
+                {
+                    "id": 5,
+                    "parentId": 7,
+                    "name": "김아들",
+                    "gender": "남",
+                    "birth": "2004-05-05",
+                    "img": null,
+                    "memo": null
+                },
+                {
+                    "id": 6,
+                    "parentId": 7,
+                    "name": "김이쁨",
+                    "gender": "여",
+                    "birth": "2005-11-15",
+                    "img": null,
+                    "memo": null
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "name": "김엄마",
+            "email": "nestjs@good.stack",
+            "emailVerified": null,
+            "password": "$2b$10$Pqbzxphsx24Mn4OQiNrMEOzZkQl.sQFzwF1n2F8zGAwJR7wwu/POm",
+            "phoneNumber": "01010041004",
+            "role": "client",
+            "createdAt": "2023-06-03T15:33:06.151Z",
+            "updatedAt": "2023-06-03T15:33:06.151Z",
+            "hospitalId": null,
+            "adminVerified": null,
+            "address": null,
+            "haveChild": []
+        },
+        {
+            "id": 8,
+            "name": "박준형",
+            "email": "123123213@gmail.com",
+            "emailVerified": null,
+            "password": "$2b$10$X0rRatd5VGPKfFnyl6xPwuVfmANBe6C/zNXdoNHpxqYtGiV2klCd6",
+            "phoneNumber": "010-0000-0000",
+            "role": "client",
+            "createdAt": "2023-06-03T15:37:52.978Z",
+            "updatedAt": "2023-06-03T15:37:52.978Z",
+            "hospitalId": null,
+            "adminVerified": null,
+            "address": null,
+            "haveChild": []
+        }
+    ]
+}
