@@ -3,7 +3,7 @@ import DaumPostCode from "react-daum-postcode";
 import styled from "styled-components";
 import colors from "../../constants/colors";
 import { InputBox, InputContent, InputName } from "./RegisterForm";
-import { Button } from "../../components/button";
+import { Button } from "../../components/Button";
 
 const ModalContainer = styled.div`
   position: fixed;

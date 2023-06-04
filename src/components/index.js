@@ -1,4 +1,9 @@
-export { default as Button } from "./Button";
-export { default as CardBox } from "./CardBox";
-export { default as Header } from "./Header";
-export { default as NavigationBar } from "./NavigationBar";
+import { Button } from "./Button";
+import { CardBox } from "./CardBox";
+import { Header } from "./Header";
+import { NavigationBar } from "./NavigationBar";
+import { Container } from "./Container";
+import { Footer } from "./Footer";
+import { SearchBar } from "./SearchBar";
+
+export { Button, CardBox, Header, NavigationBar, Container, Footer, SearchBar };

@@ -1,7 +1,7 @@
 import React from "react";
 // import styled from "styled-components";
 import { useQuery } from "react-query";
-import SearchHeader from "./SearchHeader";
+// import { SearchHeader } from "../../components";
 import HospitalCard from "./HospitalCard";
 import { NavigationBar } from "../../components/NavigationBar";
 
@@ -43,7 +43,7 @@ const SearchPage = () => {
 
   return (
     <>
-      <SearchHeader total={hospitals.length} />
+      {/* <SearchHeader total={hospitals.length} /> */}
       <div>
         {hospitals.map((hospital) => {
           const dutyTimeStart = hospital[`dutyTime${today}s`]; // 오늘 요일에 해당하는 dutyTime 시작 시간
