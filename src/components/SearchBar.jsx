@@ -1,318 +1,165 @@
+import * as Style from "./styles/SearchBarStyle";
 import React, { useState } from "react";
-import styled, { css } from "styled-components";
-import IconSearch from "../assets/iconSearch.svg";
-import IconUp from "../assets/iconUp.svg";
-import IconDown from "../assets/iconDown.svg";
-import IconAlarm from "../assets/iconAlarm.svg";
-import locationData from "../assets/addressList.json";
 
-export const SearchBar = () => {
-  const [modalIsOpen, setModalIsOpen] = useState(false);
+//아이콘 & 행정구역데이터 - assets
+import {
+  addressList as locationData,
+  IconSearch,
+  IconDown,
+  IconAlarm,
+} from "../assets/index";
 
-  const openModal = () => {
-    setModalIsOpen(true);
+// 공통 컴포넌트
+import { Modal } from "../components/index";
+
+export const SearchBar = ({ onSearch }) => {
+  //--------------------검색부분
+  //검색어
+  const [search, setSearch] = useState("");
+  const onChange = (e) => {
+    setSearch(e.target.value);
   };
-  const closeModal = () => {
-    setModalIsOpen(false);
-    // Modal closed시에 선택된 주소 보여줌
-    setSelectedLocationFirst(locationFirst);
-    setSelectedLocationSecond(locationSecond);
+  // 폼 전송 처리 함수
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSearch(search);
   };
+  //--------------------위치선택&위치선택 모달창(알람모달과 구분 필요)
+  //위치선택 값(모달 내부), 초기값은 [서울/전체]
   const [locationFirst, setLocationFirst] = useState(
     locationData[0]["시/도"][1]
   );
   const [locationSecond, setLocationSecond] = useState(
     locationData[0]["시/군/구"][0]
   );
+  //위치선택 값(모달->페이지로 전달된 값)
   const [selectedLocationFirst, setSelectedLocationFirst] =
     useState(locationFirst);
   const [selectedLocationSecond, setSelectedLocationSecond] =
     useState(locationSecond);
-  //   console.log(location_data);
-  // 시/도 드롭다운 컴포넌트
+  // 모달 열기 상태
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  //모달 열기, 닫기 함수
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+  //모달 확인 버튼 -> 위치정보 저장됨
+  const onSaved = () => {
+    setSelectedLocationFirst(locationFirst);
+    setSelectedLocationSecond(locationSecond);
+    closeModal(); // 위치 저장 후 모달창을 닫음
+  };
+  // 모달내부 : 시/도 드롭다운 함수&컴포넌트
   const handleLocationFirstChange = (event) => {
     setLocationFirst(event.target.value);
+    setLocationSecond("전체"); // 시/도 클릭시 시/군/구 옵션을 전체로 초기화
   };
-
   const locationFirstOptions = locationData.map((location) => (
-    <DropdownMenuItem
+    <Style.DropdownMenuItem
       key={location["시/도"][0]}
       value={location["시/도"][1]}
       selected={locationFirst === location["시/도"][1]}
       onClick={handleLocationFirstChange}
     >
       {location["시/도"][1]}
-    </DropdownMenuItem>
+    </Style.DropdownMenuItem>
   ));
-
-  // 시/군/구 드롭다운 컴포넌트
+  // 모달내부: 시/군/구 드롭다운 함수&컴포넌트
   const handleLocationSecondChange = (event) => {
     const selectedCity = event.target.value;
     setLocationSecond(selectedCity);
   };
-
   const locationSecondOptions = locationData.map((location) => {
     if (location["시/도"][1] === locationFirst) {
       return location["시/군/구"].map((city) => (
-        <DropdownMenuItem
+        <Style.DropdownMenuItem
           key={city}
           value={city}
           selected={locationSecond === city}
           onClick={handleLocationSecondChange}
         >
           {city}
-        </DropdownMenuItem>
+        </Style.DropdownMenuItem>
       ));
     } else {
       return null;
     }
   });
-
-  const [search, setSearch] = useState("");
-  const onChange = (e) => {
-    setSearch(e.target.value);
+  //------------알람 모달창 관련
+  const [isAlarmModalOpen, setIsAlarmModalOpen] = useState(false);
+  const openAlarmModal = () => {
+    setIsAlarmModalOpen(true);
+  };
+  const closeAlarmModal = () => {
+    setIsAlarmModalOpen(false);
+  };
+  const onSavedAlarmModal = () => {
+    // 알람모달에서 확인버튼 클릭 시
+    closeAlarmModal(); // 알람 모달을 닫음
   };
   return (
-    <Wrapper>
+    <Style.Wrapper>
       <div>
-        <Location>
-          <BtnShowLocation onClick={openModal}>
-            <img alt="icon-down" src={IconDown}></img>
-          </BtnShowLocation>
+        <Style.Location>
+          <button onClick={openModal}>
+            <img alt="icon-down" src={IconDown} />
+          </button>
           <span>{selectedLocationFirst + " " + selectedLocationSecond}</span>
-          <Modal isOpen={modalIsOpen} onClose={closeModal}>
-            <ModalContent>
-              <ModalHeader>
-                <BtnCloseModal onClick={closeModal}>
-                  <img alt="icon-up" src={IconUp}></img>
-                </BtnCloseModal>
+          {/* ModalOpen이 true일 경우에 Modal 컴포넌트 렌더링 실행 */}
+          {isModalOpen && (
+            <Modal
+              title="위치선택"
+              onClose={closeModal}
+              isOpen="true"
+              onSaved={onSaved}
+            >
+              <Style.ModalContent>
                 <div>
-                  <span>위치선택</span>
-                </div>
-                <BtnSelected>{locationFirst}</BtnSelected>
-                <BtnSelected>{locationSecond}</BtnSelected>
-              </ModalHeader>
-              <Dropdown>
-                <div>
-                  <DropdownMenu>
-                    {locationFirstOptions.length > 6 ? (
-                      <div>{locationFirstOptions}</div>
-                    ) : (
-                      locationFirstOptions
-                    )}
-                  </DropdownMenu>
+                  <Style.BtnSelected>{locationFirst}</Style.BtnSelected>
+                  <Style.BtnSelected>{locationSecond}</Style.BtnSelected>
                 </div>
                 <div>
-                  <DropdownMenu>
-                    {locationSecondOptions.length > 6 ? (
-                      <div>{locationSecondOptions}</div>
-                    ) : (
-                      locationSecondOptions
-                    )}
-                  </DropdownMenu>
+                  <Style.DropdownMenu>
+                    {locationFirstOptions}
+                  </Style.DropdownMenu>
+                  <Style.DropdownMenu>
+                    {locationSecondOptions}
+                  </Style.DropdownMenu>
                 </div>
-              </Dropdown>
-            </ModalContent>
+              </Style.ModalContent>
+            </Modal>
+          )}
+        </Style.Location>
+        <button onClick={openAlarmModal}>
+          <img alt="icon-alarm" src={IconAlarm} />
+        </button>
+        {isAlarmModalOpen && (
+          <Modal
+            title="알람"
+            onClose={closeAlarmModal}
+            isOpen="true"
+            onSaved={onSavedAlarmModal}
+          >
+            <div>등록된 알림이 없습니다.</div>
           </Modal>
-        </Location>
-        <Alarm>
-          <img alt="icon-alarm" src={IconAlarm}></img>
-        </Alarm>
+        )}
       </div>
-      <InputBox>
-        <input
-          type="text"
-          value={search}
-          onChange={onChange}
-          placeholder="병원 이름을 검색해보세요"
-        />
-        <BtnSearch>
-          <img alt="search-button" src={IconSearch}></img>
-        </BtnSearch>
-      </InputBox>
-    </Wrapper>
+      <Style.InputBox>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            value={search}
+            onChange={onChange}
+            placeholder="병원 이름을 검색해보세요"
+          />
+          <button type="submit">
+            <img alt="search-button" src={IconSearch} />
+          </button>
+        </form>
+      </Style.InputBox>
+    </Style.Wrapper>
   );
 };
-
-export default SearchBar;
-
-const Wrapper = styled.div`
-  position: relative;
-  max-width: 100%;
-  padding-top: 2%;
-  margin: 2%;
-
-  & > div {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-  }
-`;
-
-const Location = styled.div`
-  width: 100%;
-  display: flex;
-  justify-contents: center;
-  align-items: center;
-
-  & > span {
-    font-size: 24px;
-  }
-`;
-
-const Alarm = styled.button`
-  background: none;
-  border: none;
-  padding-right: 2%;
-`;
-
-const BtnShowLocation = styled.button`
-  background: none;
-  border: none;
-`;
-
-const InputBox = styled.div`
-  width: 100%;
-  border: 1px solid #b2b2b2;
-  margin-top: 2%;
-  padding: 2% 2.5%;
-  box-sizing: border-box;
-  border-radius: 28px;
-  text-align: center;
-
-  & > input {
-    font-size: 24px;
-    border: none;
-    width: 100%;
-  }
-  & > input::placeholder {
-    color: #d9d9d9;
-  }
-  & > input:focus {
-    outline: none;
-  }
-`;
-
-const BtnSearch = styled.button`
-  background: none;
-  border: none;
-`;
-
-const Modal = styled.div`
-  display: ${({ isOpen }) => (isOpen ? "block" : "none")};
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
-  font-size: 25px;
-`;
-
-const ModalContent = styled.div`
-  background-color: #ffffff;
-  width: 600px;
-  margin: 10%;
-  margin-left: 2%;
-  padding: 1%;
-  border-radius: 4px;
-`;
-
-const ModalHeader = styled.div`
-  display: flex;
-  justify-content: left;
-  align-items: center;
-
-  & > div:nth-child(2) {
-    color: #00ad5c;
-    font-weight: 600;
-    padding: 2%;
-    margin: 2%;
-    border-bottom: 2px solid;
-  }
-
-  & > span {
-    width: 100%;
-  }
-`;
-
-const BtnCloseModal = styled.button`
-  background: none;
-  border: none;
-`;
-
-const BtnSelected = styled.div`
-  width: fit-content;
-  background: #00ad5c;
-  border: 1px solid #00a758;
-  border-radius: 11px;
-  color: #ffffff;
-  padding: 1% 5%;
-  margin: 2%;
-  font-size: 20px;
-  //   white-space: nowrap;
-`;
-
-const Dropdown = styled.div`
-  position: relative;
-  display: flex;
-  background: none;
-
-  & > div {
-    width: 100%;
-    border: 1px solid #d0d0d0;
-    border-radius: 18px;
-    padding: 2%;
-    margin: 2%;
-  }
-`;
-
-const DropdownMenu = styled.div`
-  top: 100%;
-  left: 0;
-  width: 100%;
-  max-height: 200px; /* 최대 높이 설정 */
-  overflow-y: auto; /* 스크롤 적용 */
-  background: rgba(0, 0, 0, 0);
-  margin: 1%;
-
-  /* 스크롤바 스타일 */
-  direction: ltr;
-  scrollbar-width: thin; /* 스크롤바의 너비 */
-  scrollbar-color: transparent transparent; /* 스크롤바의 색상 (트랙, 썸네일 순서) */
-  scrollbar-track-color: transparent; /* 스크롤바 트랙 색상 */
-
-  ::-webkit-scrollbar {
-    width: 8px; /* 스크롤바의 너비 */
-  }
-
-  ::-webkit-scrollbar-track {
-    background: #d9d9d9; /* 스크롤바 트랙 배경색 */
-    border-radius: 4px;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: #b2b2b2; /* 스크롤바 썸네일 색상 */
-    border-radius: 4px; /* 스크롤바 썸네일의 둥근 모서리 */
-  }
-
-  /* 스크롤바 위치 조정 */
-  ::-webkit-scrollbar-track-piece:start {
-    margin-left: 2px; /* 스크롤바 트랙 시작 위치 조정 */
-  }
-`;
-
-const DropdownMenuItem = styled.option`
-  cursor: pointer;
-  background: rgba(0, 0, 0, 0);
-  text-align: left;
-  color: #d0d0d0;
-  font-weight: 600;
-
-  ${(props) =>
-    props.selected &&
-    css`
-      color: #00ad5c;
-    `}
-`;

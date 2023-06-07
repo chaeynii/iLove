@@ -13,9 +13,7 @@ export const CardBox = ({ children, linkTo, bxShadow}) => {
   );
 };
 
-export default CardBox;
-
-const CardBoxStyle = styled.div`
+export const CardBoxStyle = styled.div`
   position: relative;
   width: 100%;
   background-color: #ffffff;

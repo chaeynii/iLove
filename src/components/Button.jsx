@@ -36,7 +36,7 @@ export const Button = ({
   );
 };
 
-const ButtonStyle = styled.button`
+export const ButtonStyle = styled.button`
   font-size: ${(props) => props.fontSize};
   font-weight: 700;
   color: ${(props) => props.color};
