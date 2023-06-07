@@ -27,7 +27,7 @@ import "slick-carousel/slick/slick-theme.css";
 // 더미 데이터
 import { dataHome } from "./data";
 
-export const Home = ({ LinkTo }) => {
+export const Home = ({ linkTo }) => {
   return (
     <>
       <Container>
@@ -40,13 +40,13 @@ export const Home = ({ LinkTo }) => {
           <FlexGrow></FlexGrow>
 
           <MenuSeb>
-            <Link to={LinkTo}>
+            <Link to={linkTo}>
               <SebP>로그인</SebP>
             </Link>
           </MenuSeb>
 
           <MenuSeb>
-            <Link to={LinkTo}>
+            <Link to={linkTo}>
               <SebP>회원가입</SebP>
             </Link>
           </MenuSeb>
@@ -59,7 +59,7 @@ export const Home = ({ LinkTo }) => {
         </Banner>
 
         <BannerSeb>
-          <Link to={LinkTo}>
+          <Link to={linkTo}>
             <BanContainer>
               <BannerSebDiv1>
                 <BannerSebIcon
@@ -86,9 +86,6 @@ export const Home = ({ LinkTo }) => {
         <SiliderMargin>
           <SimpleSlider />
         </SiliderMargin>
-
-        <Footer />
-        <NavigationBar />
       </Container>
     </>
   );

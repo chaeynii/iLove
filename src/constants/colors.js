@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-const colors = {
+export const colors = {
   primary: "#00AD5C",
   BtnborderOut: "#00954f",
   InputBorderInFont: "#d9d9d9",

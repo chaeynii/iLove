@@ -1,18 +1,22 @@
 /* eslint-disable */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import axios from "axios";
 
 // 이미지 링크
 import mainLogo from "../../assets/mainLogo.svg";
 
 // 공통 컴포넌트 연결 링크
-import { Button } from "../../components/button";
-import { NavigationBar } from "../../components/NavigationBar";
-import { Container } from "../../components/Container";
-import { Footer } from "../../components/Footer";
-import { CardBox } from "../../components/CardBox";
-import { SearchBar } from "../../components/SearchBar";
+import {
+  Button,
+  CardBox,
+  Header,
+  NavigationBar,
+  Container,
+  Footer,
+  SearchBar,
+} from "../../components/index";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import colors from "../../constants/colors";
@@ -64,12 +68,113 @@ export default SignUp;
 
 // 일반 회원 창
 const UserView = () => {
+  // 이메일
+  const [email, setEmail] = useState("");
+
+  //비밀번호
+  const [pw, setPw] = useState("");
+  const [pwValid, setPwValid] = useState(false);
+
+  // 비밀번호 확인
+  const [pwCheck, setPwCheck] = useState("");
+  const [pwCheckValid, setPwCheckValid] = useState(false);
+
+  // 핸드폰번호
+  const [phone, setPhone] = useState("");
+
+  // 이름
+  const [name, setName] = useState("");
+  const [nameValid, setNameValid] = useState(false);
+
+  //버튼 활성화
+  const [notAllow, setNotAllow] = useState(true);
+
+  // 이메일 유효성 검사
+  const handleEmail = (e) => {
+    setEmail(e.target.value);
+  };
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailValid = emailRegex.test(email) ? true : false;
+
+  // 비밀번호 유효성 검사
+  const handlePassword = (e) => {
+    setPw(e.target.value);
+    if (e.target.value.length >= 8) {
+      setPwValid(true);
+    } else {
+      setPwValid(false);
+    }
+    console.log(e.target.value);
+  };
+
+  // 비밀번호 확인 검사
+  const handlePasswordCheck = (e) => {
+    setPwCheck(e.target.value);
+    if (pw === e.target.value) {
+      setPwCheckValid(true);
+    } else {
+      setPwCheckValid(false);
+    }
+    console.log(e.target.value);
+  };
+
+  // 핸드폰 유효성 검사
+  const handlePhone = (e) => {
+    setPhone(e.target.value);
+  };
+  const phoneRegex = /^01[0-9]{1}-[0-9]{4}-[0-9]{4}$/;
+  const phoneValid = phoneRegex.test(phone) ? true : false;
+
+  // 이름 빈값인지 확인
+  const handleName = (e) => {
+    setName(e.target.value);
+    if (e.target.value !== "") {
+      setNameValid(true);
+    } else {
+      setNameValid(false);
+    }
+  };
+
+  // 버튼 활성화
+  useEffect(() => {
+    if (emailValid && pwValid && pwCheckValid && nameValid && phoneValid) {
+      setNotAllow(false);
+      return;
+    }
+    setNotAllow(true);
+  }, [emailValid, pwValid, pwCheckValid, nameValid, phoneValid]);
+
+  // 폼 전송 구현
+  const register = () => {
+    // axios를 사용하여 POST 요청 만들기
+    axios
+      .post("/users/clientsignup", {
+        name: name,
+        email: email,
+        password: pw,
+        phoneNumber: phone,
+      })
+      .then((response) => {
+        // 성공적인 응답 처리
+        console.log("등록 성공", response.data);
+      })
+      .catch((error) => {
+        // 오류 처리
+        console.error("등록 에러", error);
+      });
+  };
+
   return (
     <>
       <SignUpForm>
         <SignUpInputDiv>
           <InputTitle>이름</InputTitle>
-          <SignUpInput placeholder="test@naver.com" type="text"></SignUpInput>
+          <SignUpInput
+            placeholder="아이사"
+            type="text"
+            value={name}
+            onChange={handleName}
+          ></SignUpInput>
         </SignUpInputDiv>
 
         <SignUpInputDiv>
@@ -77,12 +182,25 @@ const UserView = () => {
           <SignUpInput
             placeholder="test123@test.com"
             type="email"
+            value={email}
+            onChange={handleEmail}
           ></SignUpInput>
+          {!emailValid && email.length > 0 && (
+            <ErrorMaessage>올바른 이메일을 입력해주세요.</ErrorMaessage>
+          )}
         </SignUpInputDiv>
 
         <SignUpInputDiv>
           <InputTitle>핸드폰번호</InputTitle>
-          <SignUpInput placeholder="010-0000-0000" type="text"></SignUpInput>
+          <SignUpInput
+            placeholder="010-0000-0000"
+            type="text"
+            value={phone}
+            onChange={handlePhone}
+          ></SignUpInput>
+          {!phoneValid && phone.length > 0 && (
+            <ErrorMaessage>-을 붙여서 입력해주세요</ErrorMaessage>
+          )}
         </SignUpInputDiv>
 
         <SignUpInputDiv>
@@ -90,7 +208,12 @@ const UserView = () => {
           <SignUpInput
             placeholder="8자리 이상 입력해주세요"
             type="password"
+            value={pw}
+            onChange={handlePassword}
           ></SignUpInput>
+          {!pwValid && pw.length > 0 && (
+            <ErrorMaessage>8자리 이상 입력해주세요.</ErrorMaessage>
+          )}
         </SignUpInputDiv>
 
         <SignUpInputDiv>
@@ -98,7 +221,12 @@ const UserView = () => {
           <SignUpInput
             placeholder="8자리 이상 입력해주세요"
             type="password"
+            value={pwCheck}
+            onChange={handlePasswordCheck}
           ></SignUpInput>
+          {!pwCheckValid && pwCheck.length > 0 && (
+            <ErrorMaessage>비밀번호가 다릅니다</ErrorMaessage>
+          )}
         </SignUpInputDiv>
 
         <SignUpBtn>
@@ -110,6 +238,10 @@ const UserView = () => {
             borderOutLine={colors.BtnborderOut}
             width={"90%"}
             height={"70px"}
+            disabled={notAllow}
+            onClick={() => {
+              register();
+            }}
           />
         </SignUpBtn>
       </SignUpForm>
@@ -118,12 +250,114 @@ const UserView = () => {
 };
 
 const HospitalView = () => {
+  // 이메일
+  const [email, setEmail] = useState("");
+
+  //비밀번호
+  const [pw, setPw] = useState("");
+  const [pwValid, setPwValid] = useState(false);
+
+  // 비밀번호 확인
+  const [pwCheck, setPwCheck] = useState("");
+  const [pwCheckValid, setPwCheckValid] = useState(false);
+
+  // 핸드폰번호
+  const [phone, setPhone] = useState("");
+
+  // 이름
+  const [name, setName] = useState("");
+  const [nameValid, setNameValid] = useState(false);
+
+  //버튼 활성화
+  const [notAllow, setNotAllow] = useState(true);
+
+  // 이메일 유효성 검사
+  const handleEmail = (e) => {
+    setEmail(e.target.value);
+  };
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailValid = emailRegex.test(email) ? true : false;
+
+  // 비밀번호 유효성 검사
+  const handlePassword = (e) => {
+    setPw(e.target.value);
+    if (e.target.value.length >= 8) {
+      setPwValid(true);
+    } else {
+      setPwValid(false);
+    }
+    console.log(e.target.value);
+  };
+
+  // 비밀번호 확인 검사
+  const handlePasswordCheck = (e) => {
+    setPwCheck(e.target.value);
+    if (pw === e.target.value) {
+      setPwCheckValid(true);
+    } else {
+      setPwCheckValid(false);
+    }
+    console.log(e.target.value);
+  };
+
+  // 핸드폰 유효성 검사
+  const handlePhone = (e) => {
+    setPhone(e.target.value);
+  };
+  const phoneRegex = /^01[0-9]{1}-[0-9]{4}-[0-9]{4}$/;
+  const phoneValid = phoneRegex.test(phone) ? true : false;
+
+  // 이름 빈값인지 확인
+  const handleName = (e) => {
+    setName(e.target.value);
+    if (e.target.value !== "") {
+      setNameValid(true);
+    } else {
+      setNameValid(false);
+    }
+  };
+
+  // 버튼 활성화
+  useEffect(() => {
+    if (emailValid && pwValid && pwCheckValid && nameValid && phoneValid) {
+      setNotAllow(false);
+      return;
+    }
+    setNotAllow(true);
+  }, [emailValid, pwValid, pwCheckValid, nameValid, phoneValid]);
+
+  // 폼 전송 구현
+  const register = () => {
+    // axios를 사용하여 POST 요청 만들기
+    axios
+      .post("/users/managersignup", {
+        hospitalId: name,
+        name: name,
+        email: email,
+        password: pw,
+        phoneNumber: phone,
+      })
+      .then((response) => {
+        // 성공적인 응답 처리
+        console.log("등록 성공", response.data);
+      })
+      .catch((error) => {
+        // 오류 처리
+        console.error("등록 에러", error);
+      });
+  };
+
   return (
     <>
       <SignUpForm>
         <SignUpInputDiv>
           <InputTitle>담당자 성함</InputTitle>
-          <SignUpInput placeholder="테스트" type="text"></SignUpInput>
+          <SignUpInput
+            placeholder="테스트"
+            type="text"
+            value={name}
+            onChange={handleName}
+          ></SignUpInput>
         </SignUpInputDiv>
 
         <SignUpInputDiv>
@@ -140,12 +374,28 @@ const HospitalView = () => {
 
         <SignUpInputDiv>
           <InputTitle>담당자 핸드폰번호</InputTitle>
-          <SignUpInput placeholder="010-0000-0000" type="text"></SignUpInput>
+          <SignUpInput
+            placeholder="010-0000-0000"
+            type="text"
+            value={phone}
+            onChange={handlePhone}
+          ></SignUpInput>
+          {!phoneValid && phone.length > 0 && (
+            <ErrorMaessage>-을 붙여서 입력해주세요</ErrorMaessage>
+          )}
         </SignUpInputDiv>
 
         <SignUpInputDiv>
           <InputTitle>담당자 이메일</InputTitle>
-          <SignUpInput placeholder="test@naver.com" type="text"></SignUpInput>
+          <SignUpInput
+            placeholder="test@naver.com"
+            type="email"
+            value={email}
+            onChange={handleEmail}
+          ></SignUpInput>
+          {!emailValid && email.length > 0 && (
+            <ErrorMaessage>올바른 이메일을 입력해주세요.</ErrorMaessage>
+          )}
         </SignUpInputDiv>
 
         <SignUpInputDiv>
@@ -153,7 +403,12 @@ const HospitalView = () => {
           <SignUpInput
             placeholder="8자리 이상 입력해주세요"
             type="password"
+            value={pw}
+            onChange={handlePassword}
           ></SignUpInput>
+          {!pwValid && pw.length > 0 && (
+            <ErrorMaessage>8자리 이상 입력해주세요.</ErrorMaessage>
+          )}
         </SignUpInputDiv>
 
         <SignUpInputDiv>
@@ -161,7 +416,12 @@ const HospitalView = () => {
           <SignUpInput
             placeholder="8자리 이상 입력해주세요"
             type="password"
+            value={pwCheck}
+            onChange={handlePasswordCheck}
           ></SignUpInput>
+          {!pwCheckValid && pwCheck.length > 0 && (
+            <ErrorMaessage>비밀번호가 다릅니다</ErrorMaessage>
+          )}
         </SignUpInputDiv>
 
         <SignUpBtn>
@@ -173,6 +433,10 @@ const HospitalView = () => {
             borderOutLine={colors.BtnborderOut}
             width={"90%"}
             height={"70px"}
+            disabled={notAllow}
+            onClick={() => {
+              register();
+            }}
           />
         </SignUpBtn>
       </SignUpForm>
@@ -285,4 +549,8 @@ const P = styled.p`
   font-size: 14px;
   color: #c20000;
   margin-bottom: 3%;
+`;
+
+const ErrorMaessage = styled.p`
+  color: #c20000;
 `;

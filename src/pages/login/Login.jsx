@@ -1,25 +1,70 @@
 // /* eslint-disable */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 
 // 이미지 링크
 import mainLogo from "../../assets/mainLogo.svg";
-import MainBanner from "../../assets/mainBanner.png";
-import iconPeople from "../../assets/iconPeople.svg";
-import arrowRight from "../../assets/arrowRight.svg";
 
 // 공통 컴포넌트 연결 링크
-import { Button } from "../../components/button";
-import { Container } from "../../components/Container";
-import { Footer } from "../../components/Footer";
+import { Button, Container } from "../../components/index";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import colors from "../../constants/colors";
 import fontSize from "../../constants/fontSize";
 
+const UserData = {
+  email: "test@naver.com",
+  pw: "123456789",
+};
+
 export const Login = () => {
+  const [email, setEmail] = useState("");
+  const [pw, setPw] = useState("");
+  const [emailValid, setEmailValid] = useState(false);
+  const [pwValid, setPwValid] = useState(false);
+  // 버튼 활성화 비활성화 여부
+  const [notAllow, setNotAllow] = useState(true);
+
+  // 이메일 유효성 검사
+  const handleEmail = (e) => {
+    setEmail(e.target.value);
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (regex.test(email)) {
+      setEmailValid(true);
+    } else {
+      setEmailValid(false);
+    }
+  };
+
+  // 비밀번호 유효성 검사
+  const handlePassword = (e) => {
+    setPw(e.target.value);
+    if (pw.length >= 8) {
+      setPwValid(true);
+    } else {
+      setPwValid(false);
+    }
+  };
+
+  // 회원가입으로 등록된 고객정보랑 일치하는지 확인
+  const ConfirmBut = () => {
+    if (email === UserData.email && pw === UserData.pw) {
+      alert("로그인에 성공했습니다.");
+    } else {
+      alert("등록되지 않은 회원입니다.");
+    }
+  };
+
+  useEffect(() => {
+    if (emailValid && pwValid) {
+      setNotAllow(false);
+      return;
+    }
+    setNotAllow(true);
+  }, [emailValid, pwValid]);
+
   return (
     <>
       <Container>
@@ -30,11 +75,24 @@ export const Login = () => {
 
         <LoginFormDiv>
           <LoginForm>
-            <LoginInput placeholder="test@naver.com" type="text"></LoginInput>
+            <LoginInput
+              placeholder="test123@test.com"
+              type="email"
+              value={email}
+              onChange={handleEmail}
+            ></LoginInput>
+            {!emailValid && email.length > 0 && (
+              <ErrorMaessage>올바른 이메일을 입력해주세요.</ErrorMaessage>
+            )}
             <LoginInput
               placeholder="8자리 이상 입력해주세요"
               type="password"
+              value={pw}
+              onChange={handlePassword}
             ></LoginInput>
+            {!pwValid && pw.length > 0 && (
+              <ErrorMaessage>8자리 이상 입력해주세요.</ErrorMaessage>
+            )}
 
             <LoginBtn>
               <Button
@@ -45,6 +103,8 @@ export const Login = () => {
                 borderOutLine={colors.BtnborderOut}
                 width={"90%"}
                 height={"70px"}
+                disabled={notAllow}
+                onClick={ConfirmBut}
               />
             </LoginBtn>
           </LoginForm>
@@ -64,6 +124,10 @@ export const Login = () => {
   );
 };
 export default Login;
+
+const ErrorMaessage = styled.p`
+  color: #c20000;
+`;
 
 const MainLogoDiv = styled.div`
   margin-top: 4%;
