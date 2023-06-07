@@ -1,12 +1,16 @@
 import React from "react";
-import { ReservationMemo } from "./memoModal";
-import { MyCalendar } from "./myCalendar";
+import { MyCalendar } from "./MyCalendar";
+
+// 공통 컴포넌트 연결해서 테스트함
+import { Header, NavigationBar, Footer } from "../../components/index";
 
 const ReservationChk = () => {
   return (
     <>
+      <Header label={"예약 현황"} />
       <MyCalendar />
-      <ReservationMemo label={"아이사랑 소아과"} />
+      <Footer />
+      <NavigationBar />
     </>
   );
 };
