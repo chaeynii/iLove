@@ -3,31 +3,31 @@ import styled from "styled-components";
 import { useQuery, useQueryClient } from "react-query";
 import { fetchList } from "../../server/Fetcher";
 import { Button } from "../../components/Button";
+import colors from "../../constants/colors";
+import { check } from "prettier";
 
 export const PersonalClient = () => {
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0); // 페이지 숫자 상태
 
   const maxPostPage = 10;
+
+  // useQuery 이용한 통신
   const queryClient = useQueryClient();
+  const { isLoading, data: list } = useQuery("list", () => fetchList());
 
-  const token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZpcnN0QHRlc3QuZ29vZCIsInN1YiI6IjY0NzdlOTk2YTkwZTQwOWYxYTQ4NzIyMSIsInJvbGUiOiJjbGllbnQiLCJpYXQiOjE2ODU1ODA0MTQsImV4cCI6MTcxNzEzODAxNH0.cWYJrF8kSJrmC4csSlR2x5B4v_ASZhinvKl5NFoShGc";
-  const { isLoading, data: list } = useQuery("list", () => fetchList(token));
-
-  const [checkValue, setCheckValue] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [checkList, setCheckList] = useState([]);
+  const [checkValue, setCheckValue] = useState(""); // 검색창 인풋
+  const [submitted, setSubmitted] = useState(false); // 검색창 submit 상태
+  const [checkList, setCheckList] = useState([]); // 체크박스
   const onChange = (e) => {
     setCheckValue(e.target.value);
     setSubmitted(false);
-    console.log(checkValue);
   };
 
   const onSubmit = (e) => {
     e.preventDefault();
     setSubmitted(true);
   };
-  /* 아직삭제가 안됩니다*/
+
   const handleSingleCheck = (checked, id) => {
     if (checked) {
       setCheckList((prev) => [...prev, id]);
@@ -35,10 +35,26 @@ export const PersonalClient = () => {
       setCheckList((prev) => prev.filter((el) => el !== id));
     }
   };
+  const handleDelete = async (item) => {
+    // 페이지네이션 데이터의 id와 체크된 열의 id 값 필터
+
+    console.log("삭제할 id:", item);
+    await fetch(`/admin/delete/${item.id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization:
+          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjFAMS4xIiwic3ViIjoxLCJpYXQiOjE2ODYxMDg4MzksImV4cCI6MTcxNzY2NjQzOX0.KoXifXgRmenLuMXmJ_RP1ZJnjinLlyhjD-HN1GAXc5A",
+      },
+    });
+    //React Query에서 'invalidateQueries' 기능 사용해서 업데이트 된 목록 다시
+    queryClient.invalidateQueries("list");
+  };
+
+  //페이지네이션 로직
   useEffect(() => {
-    if (currentPage <= maxPostPage - 2) {
+    if (currentPage <= maxPostPage - 1) {
       const nextPage = currentPage + 1;
-      queryClient.prefetchQuery(["posts", nextPage], () => fetchList(nextPage));
+      queryClient.prefetchQuery(["posts", nextPage], () => fetchList());
     }
   }, [currentPage, queryClient]);
 
@@ -46,10 +62,12 @@ export const PersonalClient = () => {
     return <h1>로딩중입니다..</h1>;
   }
 
-  const filteredList = list?.filter(
+  // 검색창 value와 데이터의 이메일 값 비교해서 같으면 데이터 재구성
+  const filteredList = list.data?.filter(
     (item) => !submitted || item.email === checkValue
   );
 
+  //페이지네이션 로직
   const startIndex = currentPage * 10;
   const endIndex = startIndex + 10;
   const paginatedList = filteredList.slice(startIndex, endIndex);
@@ -77,23 +95,27 @@ export const PersonalClient = () => {
         </thead>
         <tbody>
           {paginatedList.map((item) => (
-            <tr key={item._id.$oid}>
+            <TableRow key={item.id}>
               <TableData>
                 <Checkbox
-                  onChange={(e) =>
-                    handleSingleCheck(e.target.checked, item._id.$oid)
-                  }
-                  checked={checkList.includes(item._id.$oid)}
+                  onChange={(e) => handleSingleCheck(e.target.checked, item.id)}
                 />
               </TableData>
-              <TableData>{item.createdAt.$date.slice(0, 10)}</TableData>
+              <TableData>{item.createdAt.slice(0, 10)}</TableData>
               <TableData>{item.name}</TableData>
               <TableData>{item.email}</TableData>
               <TableData>{item.phoneNumber}</TableData>
               <TableData>
-                <Button width={"100px"} height={"50px"} label={"삭제"} />
+                <Button
+                  width={"80px"}
+                  height={"30px"}
+                  label={"삭제"}
+                  bgcolor={colors.primary}
+                  btnColor={"white"}
+                  onClick={() => handleDelete(item)}
+                />
               </TableData>
-            </tr>
+            </TableRow>
           ))}
         </tbody>
       </Table>
@@ -149,8 +171,13 @@ const TableData = styled.td`
   font-weight: 600;
   font-size: 24px;
   padding: 10px;
+  height: 5%;
+  padding-top: 2%;
 `;
 
+const TableRow = styled.tr`
+  height: 70px;
+`;
 const Checkbox = styled.input.attrs({ type: "checkbox" })`
   width: 100%;
   cursor: pointer;
@@ -171,19 +198,32 @@ const InputContent = styled.input`
   height: 100%;
   outline: none;
   border: none;
-  border-radius: 5px;
-
   font-family: "Inter";
   font-style: normal;
   font-weight: 400;
-  font-size: 20px;
-  line-height: 15px;
+  font-size: 18px;
+  line-height: 24px;
 `;
 
 const ButtonBox = styled.div`
-  width: 40%;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-top: 2%;
+
+  button {
+    background-color: #e5e5e5;
+    border: none;
+    padding: 12px 20px;
+    margin-right: 10px;
+    cursor: pointer;
+    outline: none;
+  }
+
+  span {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 600;
+    font-size: 24px;
+  }
 `;

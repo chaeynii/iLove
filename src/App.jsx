@@ -36,12 +36,9 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <>
-      <Container>
-        <Router>
-          <Footer />
-          <NavigationBar />
-        </Router>
-      </Container>
+      <Router>
+        <AdminHome />
+      </Router>
     </>
   );
 }

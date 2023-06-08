@@ -1,6 +1,10 @@
 import React, { useState, Suspense } from "react";
 import styled from "styled-components";
-
+import { fetchList } from "../../server/Fetcher";
+fetchList();
+// 필요할 때마다 동적 로딩을 위한 react.lazy 함수 사용 코드
+// 각 컴포넌트를 로딩하기 위한 코드
+// 아래 Suspense 는 지연 시 보여주는 화면 설정
 const HospitalClient = React.lazy(() =>
   import("./HospitalClient").then((module) => ({
     default: module.HospitalClient,
@@ -26,6 +30,7 @@ export const AdminHome = () => {
   const [content, setContent] = useState(null);
   const [selectedMenu, setSelectedMenu] = useState("");
 
+  // Menu 탭 클릭 시 switch 문을 통해서 정의 해둔 각 컴포넌트를 로딩
   const handleMenuClick = (menu) => {
     switch (menu) {
       case "개인 클라이언트 관리":
@@ -40,6 +45,7 @@ export const AdminHome = () => {
         setContent(<HospitalRegister />);
         setSelectedMenu("병원 등록 관리");
         break;
+      //아무것도 클릭 하지 않았다면 AdminHome
       default:
         setContent(null);
         setSelectedMenu(null);

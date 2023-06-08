@@ -86,6 +86,8 @@ export const Home = ({ linkTo }) => {
         <SiliderMargin>
           <SimpleSlider />
         </SiliderMargin>
+        <Footer />
+        <NavigationBar />
       </Container>
     </>
   );
@@ -148,13 +150,10 @@ const BannerSeb = styled.div`
 `;
 
 const BanContainer = styled.div`
-display: flex;
-border: 1px solid ${colors.primary};
-border-radius: 10px;
-padding: 3%;
-
-
-}
+  display: flex;
+  border: 1px solid ${colors.primary};
+  border-radius: 10px;
+  padding: 3%;
 `;
 
 const BannerSebDiv1 = styled.div`
