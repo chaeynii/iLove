@@ -40,6 +40,7 @@ function App() {
         <Router>
           <Footer />
           <NavigationBar />
+          <SearchBar />
         </Router>
       </Container>
     </>
@@ -47,4 +48,3 @@ function App() {
 }
 
 export default App;
-

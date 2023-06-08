@@ -7,8 +7,8 @@ import { useQuery } from "react-query";
 import star from "../../assets/star.svg";
 import locationWhite from "../../assets/iconLocationWhite.svg";
 import locationGreen from "../../assets/iconLocationGreen.svg";
-import arrowButtonRight from "../../assets/arrowbutton.png"
-import arrowButtonLeft from "../../assets/arrowbutton.png"
+import arrowButtonRight from "../../assets/arrowbutton.png";
+import arrowButtonLeft from "../../assets/arrowbutton.png";
 import phoneGreen from "../../assets/phoneGreen.svg";
 import clockGreen from "../../assets/clockGreen.svg";
 import tagGreen from "../../assets/tagGreen.svg";
@@ -42,36 +42,52 @@ const NewHeader = ({ label, onClick }) => {
         <div>
           <h2>{label}</h2>
         </div>
-        <HeaderStar><img alt="star" src={star}></img></HeaderStar>
+        <HeaderStar>
+          <img alt="star" src={star}></img>
+        </HeaderStar>
       </HeaderWrap>
     </>
   );
 };
 
-
-
 const Detail = () => {
-
-// 병원정보
-
+  // 병원정보
 
   return (
     <>
       <Container>
         <HeaderContainer>
-          <NewHeader label={"병원이름더미데이터"}/>
+          <NewHeader label={"병원이름더미데이터"} />
         </HeaderContainer>
         <SlideContainer>
-          <SlideImg><img src={NoImage} alt="" /></SlideImg>
-          <ArrowRigth><img src={arrowButtonRight} alt="" /></ArrowRigth>
-          <ArrowLeft><img src={arrowButtonLeft} alt="" /></ArrowLeft>
+          <SlideImg>
+            <img src={NoImage} alt="" />
+          </SlideImg>
+          <ArrowRigth>
+            <img src={arrowButtonRight} alt="" />
+          </ArrowRigth>
+          <ArrowLeft>
+            <img src={arrowButtonLeft} alt="" />
+          </ArrowLeft>
         </SlideContainer>
         <TopContentContainer>
           <div>병원이름더미데이터</div>
-          <Button width={"73px"} height={"39px"} bgcolor={colors.primary} label={<div><img src={locationWhite} alt="" /><span>지도</span></div>} 
-          borderOutLine={"#ffffff"} btnColor={"white"} btnFontSize={"16px"} LinkTo={"/map"}>
-          </Button>
-            <UnderLine />
+          <Button
+            width={"73px"}
+            height={"39px"}
+            bgcolor={colors.primary}
+            label={
+              <div>
+                <img src={locationWhite} alt="" />
+                <span>지도</span>
+              </div>
+            }
+            borderOutLine={"#ffffff"}
+            btnColor={"white"}
+            btnFontSize={"16px"}
+            LinkTo={"/map"}
+          ></Button>
+          <UnderLine />
         </TopContentContainer>
         <BottomContentContainer>
           <HpInfo>
@@ -95,18 +111,24 @@ const Detail = () => {
             <img src={smileGreen} alt="" />
             <h1>이런 점이 좋았어요</h1>
           </HpInfo>
-          <div>
-            {/* 리뷰컨테이너 */}
-          </div>
+          <div>{/* 리뷰컨테이너 */}</div>
           <ReserveContainer>
-            <Button width={"237px"} height={"69px"} bgcolor={colors.primary} label={"예약하기"} borderOutLine={"#ffffff"} btnColor={"white"} btnFontSize={"30px"} LinkTo={"/reserve"}/>
+            <Button
+              width={"237px"}
+              height={"69px"}
+              bgcolor={colors.primary}
+              label={"예약하기"}
+              borderOutLine={"#ffffff"}
+              btnColor={"white"}
+              btnFontSize={"30px"}
+              LinkTo={"/reserve"}
+            />
           </ReserveContainer>
         </BottomContentContainer>
       </Container>
     </>
   );
 };
-
 
 //스타일 - 헤더
 const HeaderContainer = styled.div`
@@ -123,7 +145,7 @@ const HeaderStar = styled.div`
   float: right;
   width: 29px;
   height: 28px;
-`
+`;
 const HeaderWrap = styled.div`
   width: 100%;
   display: flex;
@@ -158,7 +180,7 @@ const SlideImg = styled.div`
     height: 350px;
     border-radius: 20px;
     object-fit: cover;
-  };
+  }
 `;
 
 const ArrowRigth = styled.div`
@@ -230,7 +252,7 @@ const HpInfoCard = styled.span`
   font-weight: 400;
   font-size: 16px;
   padding: 7px 15px 7px 15px;
-  border: solid 1px #BEBEBE;
+  border: solid 1px #bebebe;
   border-radius: 17.5px;
 `;
 
@@ -241,7 +263,7 @@ const ReserveContainer = styled.div`
   width: 100%;
   justify-content: center;
   button {
-    border: 1px solid #00A758;
+    border: 1px solid #00a758;
     border-radius: 11px;
     box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.25);
   }

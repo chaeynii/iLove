@@ -1,4 +1,5 @@
-import * as Style from "./styles/ModalStyle";
+import React from "react";
+import * as Style from "./ModalStyle";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import colors from "../constants/colors";
@@ -12,7 +13,6 @@ export const Modal = ({
   onSaved,
 }) => {
   const onSaveHandler = () => {
-    console.log("Save button clicked");
     onSaved(); // onSaved 함수 호출
     onClose(); // onClose 함수 호출
   };

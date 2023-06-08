@@ -1,8 +1,8 @@
 import styled from "styled-components";
 
 // 공통 컴포넌트 스타일 불러오기
-import { CardBoxStyle } from "../CardBox";
-import { ButtonStyle } from "../Button";
+import { CardBoxStyle } from "./CardBox";
+import { ButtonStyle } from "./Button";
 
 export const ModalContainer = styled.div`
   // Modal을 구현하는데 전체적으로 필요한 CSS를 구현
@@ -43,4 +43,6 @@ export const ModalBtn = styled(ButtonStyle)`
   margin: 1% 2%;
 `;
 
-export const ModalView = styled(CardBoxStyle)``;
+export const ModalView = styled(CardBoxStyle)`
+  width: 833px;
+`;
