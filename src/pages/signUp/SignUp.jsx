@@ -4,6 +4,10 @@ import styled from "styled-components";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import axios from "axios";
 
+// 알림창 라이브러리
+import "react-toastify/dist/ReactToastify.css";
+import { toast, ToastContainer } from "react-toastify";
+
 // 이미지 링크
 import mainLogo from "../../assets/mainLogo.svg";
 
@@ -62,6 +66,7 @@ export const SignUp = () => {
           {isHospitalView && <HospitalView />}
         </SignUpFormDiv>
       </div>
+      <NavigationBar />
     </>
   );
 };
@@ -156,17 +161,27 @@ const UserView = () => {
         phoneNumber: phone,
       })
       .then((response) => {
-        // 성공적인 응답 처리
+        // 회원가입 성공
+        // 홈으로 이동
+        window.location.href = "/";
         console.log("등록 성공", response.data);
       })
       .catch((error) => {
         // 오류 처리
+        toast("이미 가입된 사용자입니다.");
         console.error("등록 에러", error);
       });
   };
 
   return (
     <>
+      <ToastContainer
+        position="top-center"
+        limit={1}
+        closeButton={false}
+        autoClose={4000}
+        hideProgressBar
+      />
       <SignUpForm>
         <SignUpInputDiv>
           <InputTitle>이름</InputTitle>
@@ -340,16 +355,25 @@ const HospitalView = () => {
       })
       .then((response) => {
         // 성공적인 응답 처리
+        window.location.href = "/";
         console.log("등록 성공", response.data);
       })
       .catch((error) => {
         // 오류 처리
         console.error("등록 에러", error);
+        toast("이미 가입된 사용자입니다.");
       });
   };
 
   return (
     <>
+      <ToastContainer
+        position="top-center"
+        limit={1}
+        closeButton={false}
+        autoClose={4000}
+        hideProgressBar
+      />
       <SignUpForm>
         <SignUpInputDiv>
           <InputTitle>담당자 성함</InputTitle>

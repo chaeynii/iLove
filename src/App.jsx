@@ -56,18 +56,16 @@ function App() {
       <Container>
         <Router>
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Home />}></Route>
+            <Route path="/login" element={<Login />}></Route>
+            <Route path="/SignUp" element={<SignUp />}></Route>
             <Route path="/register" element={<RegisterForm />} />
             <Route path="admin" element={<AdminHome />} />
             {/* <Route path="/reserve" element={<ReservationChk />} /> */}
             <Route path="/search" element={<SearchPage />} />
-            <Route path="login" element={<Login />} />
-            <Route path="sign" element={<SignUp />} />
             <Route path="/detail" element={<Detail />} />
             <Route path="/detail/reserve" element={<Reserve />} />
           </Routes>
-          <Footer />
-          <NavigationBar />
         </Router>
       </Container>
     </>

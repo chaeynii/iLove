@@ -5,11 +5,15 @@ import styled from "styled-components";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import axios from "axios";
 
+// 알림창 라이브러리
+import "react-toastify/dist/ReactToastify.css";
+import { toast, ToastContainer } from "react-toastify";
+
 // 이미지 링크
 import mainLogo from "../../assets/mainLogo.svg";
 
 // 공통 컴포넌트 연결 링크
-import { Button, Container } from "../../components/index";
+import { Button, Container, NavigationBar } from "../../components/index";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import colors from "../../constants/colors";
@@ -49,15 +53,6 @@ export const Login = () => {
     }
   };
 
-  // 회원가입으로 등록된 고객정보랑 일치하는지 확인
-  // const ConfirmBut = () => {
-  //   if (email === UserData.email && pw === UserData.pw) {
-  //     alert("로그인에 성공했습니다.");
-  //   } else {
-  //     alert("등록되지 않은 회원입니다.");
-  //   }
-  // };
-
   useEffect(() => {
     if (emailValid && pwValid) {
       setNotAllow(false);
@@ -75,15 +70,19 @@ export const Login = () => {
         password: pw,
       })
       .then((response) => {
-        // 성공 응답
+        // 로그인 성공
+        // 홈으로 이동
+        window.location.href = "/";
         console.log("로그인 성공", response.data);
-        const token = response.data.data.token;
 
+        // 토큰 저장
+        const token = response.data.data.token;
         // 토큰 local storage에 저장
         localStorage.setItem("token", token);
       })
       .catch((error) => {
         // 오류처리
+        toast("이메일 또는 비밀번호가 잘못되었습니다..");
         console.log("로그인 실패", error);
       });
   };
@@ -91,6 +90,13 @@ export const Login = () => {
   return (
     <>
       <Container>
+        <ToastContainer
+          position="top-center"
+          limit={1}
+          closeButton={false}
+          autoClose={4000}
+          hideProgressBar
+        />
         <MainLogoDiv>
           <MainLogoImg src={mainLogo}></MainLogoImg>
           <H1>환영합니다!</H1>
@@ -135,13 +141,20 @@ export const Login = () => {
 
         <Div>
           <LoginUl>
-            <LoginLi>아이디찾기</LoginLi>
+            {/* <Link to="/">
+              <LoginLi>아이디찾기</LoginLi>
+            </Link>
             <LoginLi> | </LoginLi>
-            <LoginLi>비밀번호찾기</LoginLi>
-            <LoginLi> | </LoginLi>
-            <LoginLi>회원가입</LoginLi>
+            <Link to="/">
+              <LoginLi>비밀번호찾기</LoginLi>
+            </Link>
+            <LoginLi> | </LoginLi> */}
+            <Link to="/signUp">
+              <LoginLi>회원가입</LoginLi>
+            </Link>
           </LoginUl>
         </Div>
+        <NavigationBar />
       </Container>
     </>
   );
@@ -201,6 +214,6 @@ padding: 1%;
 }`;
 
 const LoginLi = styled.div`
-  padding: 0.5%;
+  // padding: 0.5%;
   color: #b2b2b2;
 `;

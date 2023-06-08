@@ -1,7 +1,17 @@
 /* eslint-disable */
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useNavigate,
+} from "react-router-dom";
+
+// 알림창 라이브러리
+import "react-toastify/dist/ReactToastify.css";
+import { toast, ToastContainer } from "react-toastify";
 
 // 이미지 링크
 import mainLogo from "../../assets/mainLogo.svg";
@@ -27,10 +37,51 @@ import "slick-carousel/slick/slick-theme.css";
 // 더미 데이터
 import { dataHome } from "./data";
 
-export const Home = ({ linkTo }) => {
+export const Home = () => {
+  const handleLogout = () => {
+    // 토큰 가져오기
+    const token = window.localStorage.getItem("token");
+
+    if (token) {
+      // 토큰이 존재하므로 삭제 진행
+      window.localStorage.removeItem("token");
+      toast("로그아웃 성공");
+    } else {
+      // 오류 알림표시
+      toast("오류로 인해 로그아웃하지 못했습니다.");
+    }
+  };
+
+  // 위치정보 depth1, depth2
+  const [depth1, setDepth1] = useState("");
+  const [depth2, setDepth2] = useState("");
+  // 위치정보만 받았을 때의 전체 병원리스트
+  const [hospitalList, setHospitalList] = useState([]);
+  // 키워드 검색어
+  const [searchKeyword, setSearchKeyword] = useState("");
+  //키워드 검색 후 필터링 된 병원 리스트
+  const [keywordFilteredHospitals, setKeywordFilteredHospitals] = useState([]);
+
+  // 검색바
+  const handleDepthChange = (first, second) => {
+    setDepth1(first);
+    setDepth2(second);
+  };
+
+  const handleSearch = (keyword) => {
+    setSearchKeyword(keyword);
+  };
+
   return (
     <>
       <Container>
+        <ToastContainer
+          position="top-center"
+          limit={1}
+          closeButton={false}
+          autoClose={4000}
+          hideProgressBar
+        />
         <MainLogoImg src={mainLogo} alt="mainLogo"></MainLogoImg>
 
         <TopMenuBar>
@@ -40,26 +91,35 @@ export const Home = ({ linkTo }) => {
           <FlexGrow></FlexGrow>
 
           <MenuSeb>
-            <Link to={linkTo}>
+            <Link to="/login">
               <SebP>로그인</SebP>
             </Link>
           </MenuSeb>
 
           <MenuSeb>
-            <Link to={linkTo}>
+            <LogoutBut onClick={handleLogout}>로그아웃</LogoutBut>
+          </MenuSeb>
+
+          <MenuSeb>
+            <Link to="SignUp">
               <SebP>회원가입</SebP>
             </Link>
           </MenuSeb>
         </TopMenuBar>
 
-        <SearchBar />
+        <SearchBar
+          onSearch={handleSearch}
+          depth1={depth1}
+          depth2={depth2}
+          onLocationChange={handleDepthChange}
+        />
 
         <Banner>
           <Img src={MainBanner} alt="star"></Img>
         </Banner>
 
         <BannerSeb>
-          <Link to={linkTo}>
+          <Link to="/SignUp">
             <BanContainer>
               <BannerSebDiv1>
                 <BannerSebIcon
@@ -122,6 +182,8 @@ const MenuSeb = styled.div`
 `;
 
 const SebP = styled.p``;
+
+const LogoutBut = styled.p``;
 
 const LogoP = styled.p`
   color: ${colors.primary};
