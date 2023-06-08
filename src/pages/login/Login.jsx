@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import axios from "axios";
 
 // 이미지 링크
 import mainLogo from "../../assets/mainLogo.svg";
@@ -41,7 +42,7 @@ export const Login = () => {
   // 비밀번호 유효성 검사
   const handlePassword = (e) => {
     setPw(e.target.value);
-    if (pw.length >= 8) {
+    if (e.target.value.length >= 8) {
       setPwValid(true);
     } else {
       setPwValid(false);
@@ -49,13 +50,13 @@ export const Login = () => {
   };
 
   // 회원가입으로 등록된 고객정보랑 일치하는지 확인
-  const ConfirmBut = () => {
-    if (email === UserData.email && pw === UserData.pw) {
-      alert("로그인에 성공했습니다.");
-    } else {
-      alert("등록되지 않은 회원입니다.");
-    }
-  };
+  // const ConfirmBut = () => {
+  //   if (email === UserData.email && pw === UserData.pw) {
+  //     alert("로그인에 성공했습니다.");
+  //   } else {
+  //     alert("등록되지 않은 회원입니다.");
+  //   }
+  // };
 
   useEffect(() => {
     if (emailValid && pwValid) {
@@ -64,6 +65,28 @@ export const Login = () => {
     }
     setNotAllow(true);
   }, [emailValid, pwValid]);
+
+  // 로그인 폼 전송
+  const getUserLoginInfo = async () => {
+    // axios를 사용하여 post 요청
+    axios
+      .post("/users/login", {
+        email: email,
+        password: pw,
+      })
+      .then((response) => {
+        // 성공 응답
+        console.log("로그인 성공", response.data);
+        const token = response.data.data.token;
+
+        // 토큰 local storage에 저장
+        localStorage.setItem("token", token);
+      })
+      .catch((error) => {
+        // 오류처리
+        console.log("로그인 실패", error);
+      });
+  };
 
   return (
     <>
@@ -104,7 +127,7 @@ export const Login = () => {
                 width={"90%"}
                 height={"70px"}
                 disabled={notAllow}
-                onClick={ConfirmBut}
+                onClick={getUserLoginInfo}
               />
             </LoginBtn>
           </LoginForm>
