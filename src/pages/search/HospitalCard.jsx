@@ -1,13 +1,18 @@
 import React from "react";
-import styled from "styled-components";
-// import { useRecoilValue } from "recoil";
-// import { favoriteState } from "../../recoil/RecoilAtoms";
-import IconClock from "../../assets/iconClock.svg";
-import IconLocationGray from "../../assets/iconLocationGray.svg";
-import IconStarEmpty from "../../assets/iconStarEmpty.svg";
-import IconStarFilled from "../../assets/iconStarFilled.svg";
+import * as Style from "./styles/HospitalCardStyle";
 
-const HospitalCard = ({
+//아이콘
+import {
+  IconClockHospital,
+  IconLocationHospital,
+  IconStarEmpty,
+  IconStarFilled,
+} from "../../assets/index";
+
+//요일 정보 지정을 위한 상수
+const WEEK = ["월", "화", "수", "목", "금", "토", "일", "공휴일"];
+
+export const HospitalCard = ({
   hpid,
   hospitalName,
   hospitalAddress,
@@ -15,76 +20,53 @@ const HospitalCard = ({
   dutyTimeStart,
   dutyTimeClose,
   favorite,
+  handleFavorite,
 }) => {
-  const week = ["월", "화", "수", "목", "금", "토", "일", "공휴일"];
-  const todayText = week[today - 1];
-  // const favorite = useRecoilValue(favoriteState);
-  console.log("hpid:", hpid);
+  //요일 정보 변환
+  const todayText = WEEK[today - 1];
 
+  // 시간 형식을 변환하는 함수
+  const formatTime = (time) => {
+    const hours = time.slice(0, 2);
+    const minutes = time.slice(2);
+    return `${hours}:${minutes}`;
+  };
+
+  // InfoCard에 넣어줄 요소
+  const INFO_PROPS = [
+    {
+      alt: "icon-clock",
+      icon: IconClockHospital,
+      content: `${todayText}요일 ${formatTime(dutyTimeStart)} ~ ${formatTime(
+        dutyTimeClose
+      )}`,
+    },
+    {
+      alt: "icon-location",
+      icon: IconLocationHospital,
+      content: hospitalAddress,
+    },
+  ];
+  const handleFavoriteClick = () => {
+    handleFavorite(hpid); // 즐겨찾기 핸들러 함수 호출
+  };
   return (
     <>
-      <CardBox>
-        <HospitalName>{hospitalName}</HospitalName>
-        <div>
-          <img alt={"icon-clock"} src={IconClock} />
-          <span>
-            {todayText + "요일 " + dutyTimeStart + " ~ " + dutyTimeClose}
-          </span>
-        </div>
-        <div>
-          <img alt={"icon-location"} src={IconLocationGray} />
-          <span>{hospitalAddress}</span>
-        </div>
-        <Favorite>
+      <Style.HospitalCardBox>
+        <div>{hospitalName}</div>
+        {INFO_PROPS.map((prop) => (
+          <div key={prop.alt}>
+            <img alt={prop.alt} src={prop.icon} />
+            <span>{prop.content}</span>
+          </div>
+        ))}
+        <Style.Favorite onClick={handleFavoriteClick}>
           <img
             alt={"icon-favorite"}
             src={favorite ? IconStarFilled : IconStarEmpty}
           ></img>
-        </Favorite>
-      </CardBox>
+        </Style.Favorite>
+      </Style.HospitalCardBox>
     </>
   );
 };
-
-export default HospitalCard;
-
-const CardBox = styled.button`
-  position: relative;
-  width: 100%;
-  background: none;
-  border: solid 1px #b2b2b2;
-  border-radius: 20px;
-  box-sizing: border-box;
-  padding: 2%;
-  margin: 1% 0;
-
-  & > div {
-    display: flex;
-    font-size: 16px;
-    justify-content: left;
-    align-items: center;
-    margin: 1%;
-  }
-  & > div:first-child {
-    font-size: 30px;
-    color: #121212;
-    font-weight: 700;
-    margin: 2%;
-    margin-top: 1%;
-  }
-  & img {
-    margin-right: 1%;
-  }
-`;
-
-const HospitalName = styled.div``;
-// const HospitalAddress = styled.div``;
-// const DutyTime = styled.div``;
-
-const Favorite = styled.button`
-  background: none;
-  border: none;
-  position: absolute;
-  top: 10%;
-  right: 3%;
-`;
