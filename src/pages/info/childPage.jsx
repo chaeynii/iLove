@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import userData from "./userdb.json";
+import newKidMockData from "./newKidMockData.json";
 
 // 공통 컴포넌트 연결해서 테스트함
 import { Button } from "../../components/Button";
@@ -12,10 +13,16 @@ import { Container } from "../../components/Container";
 import { Footer } from "../../components/Footer";
 import { CardBox } from "../../components/CardBox";
 import { Header } from "../../components/Header";
+import { ChildBox } from "../../components/ChildBox";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import styled from "styled-components";
 import colors from "../../constants/colors";
+
+import MyPage from "./MyPage";
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
 const Space = styled.div`
   margin-bottom: 20px;
@@ -41,142 +48,6 @@ const Input2Box = styled.input`
   padding: 2%;
 `;
 
-const SaveButton = styled.button`
-  font-size: 30px;
-  font-weight: 900;
-  color: white;
-  border: 1px solid ${colors.BtnborderOut};
-  border-radius: 5px;
-  background-color: ${colors.primary};
-  cursor: pointer;
-  padding: 0% 2.5%;
-`;
-
-const ChildBox = ({ linkTo }) => {
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [name, setName] = useState("");
-  const [birthYear, setBirthYear] = useState("");
-  const [birthMonth, setBirthMonth] = useState("");
-  const [birthDay, setBirthDay] = useState("");
-  const [isEditable, setIsEditable] = useState(true);
-
-  const handleImageChange = (e) => {
-    setSelectedImage(URL.createObjectURL(e.target.files[0]));
-  };
-
-  const handleNameChange = (e) => {
-    setName(e.target.value);
-  };
-
-  const handleBirthYearChange = (e) => {
-    setBirthYear(e.target.value);
-  };
-
-  const handleBirthMonthChange = (e) => {
-    setBirthMonth(e.target.value);
-  };
-
-  const handleBirthDayChange = (e) => {
-    setBirthDay(e.target.value);
-  };
-
-  const removeImage = () => {
-    setSelectedImage(null);
-  };
-
-  const handleSaveClick = () => {
-    setIsEditable(false);
-  };
-
-  return (
-    <ChildBoxStyle>
-      <div style={{ display: "flex", alignItems: "flex-start" }}>
-        <div>
-          {selectedImage ? (
-            <>
-              <img src={selectedImage} alt="Selected" />
-              <button onClick={removeImage}>Remove Image</button>
-            </>
-          ) : (
-            <input type="file" accept="image/*" onChange={handleImageChange} />
-          )}
-        </div>
-        <div style={{ marginLeft: "10px" }}>
-          <div>
-            {isEditable ? (
-              <>
-                <label htmlFor="nameInput" style={{ fontWeight: "bold" }}>이름 </label>
-                <InputBox
-                  id="nameInput"
-                  type="text"
-                  value={name}
-                  onChange={handleNameChange}
-                  style={{ fontWeight: "bold" }}
-                />
-              </>
-            ) : (
-              <p style={{fontWeight: 'bold', textAlign: 'left'}}>{name}</p>
-            )}
-          </div>
-          <Space2 />
-          <div>
-            {isEditable ? (
-              <>
-                <label htmlFor="birthYearInput">생년 </label>
-                <Input2Box
-                  id="birthYearInput"
-                  type="text"
-                  value={birthYear}
-                  onChange={handleBirthYearChange}
-                  style={{ fontWeight: "bold" }}
-                />
-              </>
-            ) : (
-              <p style={{fontWeight: 'bold', textAlign: 'left'}}>{birthYear}</p>
-            )}
-            <label htmlFor="birthMonthInput" style={{ fontWeight: "bold" }}> 월일 </label>
-            <Input2Box
-              id="birthMonthInput"
-              type="text"
-              value={birthMonth}
-              onChange={handleBirthMonthChange}
-              style={{ fontWeight: "bold" }}
-            />
-            <Input2Box
-              id="birthDayInput"
-              type="text"
-              value={birthDay}
-              onChange={handleBirthDayChange}
-              style={{ fontWeight: "bold", marginLeft: "10px" }}
-            />
-          </div>
-        </div>
-      </div>
-      <SaveButton style={{ alignSelf: "flex-end" }} onClick={handleSaveClick}>저장</SaveButton>
-    </ChildBoxStyle>
-  );
-};
-
-const ChildBoxStyle = styled.div`
-  position: relative;
-  width: 100%;
-  height: 150px;
-  background-color: #ffffff;
-  border: solid 1px #b2b2b2;
-  border-radius: 20px;
-  box-sizing: border-box;
-  padding: 2%;
-  margin: 1% 0;
-  display: flex; 
-  flex-direction: column; 
-  align-items: flex-start;
-  justify-content: space-between;
-  img {
-    max-width: 100px;
-    margin-right: 10px;
-  }
-`;
-
 const MyButton = styled.button`
   font-size: 30px;
   font-weight: 700;
@@ -188,18 +59,22 @@ const MyButton = styled.button`
   padding: 1% 5.5%;
 `;
 
+const BackButton = styled(Button)`
+  margin-top: 20px;
+  text-align: center;
+`;
+
 function ChildPage() {
-  const [boxes, setBoxes] = useState([]);
+  const [boxCreators, setBoxCreators] = useState([]);
 
   const handleClick = () => {
-    const newBox = (
-      <>
-        <ChildBox />
-        <Space />
-      </>
-    );
+    const newBoxId = Date.now();
+    const newBoxCreator = () => <ChildBox key={newBoxId} id={newBoxId} onRemove={handleRemove} />;
+    setBoxCreators((prevCreators) => [newBoxCreator, ...prevCreators]);
+  };
 
-    setBoxes((prevBoxes) => [newBox, ...prevBoxes]);
+  const handleRemove = (id) => {
+    setBoxCreators((prevCreators) => prevCreators.filter(creator => creator().props.id !== id));
   };
 
   return (
@@ -211,12 +86,15 @@ function ChildPage() {
         }}
       />
       <Space />
-      {boxes}
-      <CardBox linkTo="/link-1">
+      {boxCreators.map(createBox => createBox())}
+      <CardBox>
         <div>
           <MyButton onClick={handleClick}>추가하기</MyButton>
         </div>
       </CardBox>
+      <BackButton as={Link} to="/MyPage">돌아가기</BackButton>
+      <Space />
+      <NavigationBar />
     </Container>
   );
 }
