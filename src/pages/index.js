@@ -10,6 +10,8 @@ import { SignUp } from "./signUp/SignUp";
 import Detail from "./detail/Detailpage";
 import Reserve from "./detail/Detailreserve";
 import { SearchPage } from "./search/SearchPage";
+import { MapHospital } from "./map/MapHospital";
+import { MapMyPage } from "./map/MapMyPage";
 
 export {
   AdminHome,
@@ -22,4 +24,6 @@ export {
   Detail,
   SearchPage,
   Reserve,
+  MapHospital,
+  MapMyPage
 };

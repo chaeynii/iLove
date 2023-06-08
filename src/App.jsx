@@ -30,6 +30,8 @@ import {
   SignUp,
   Detail,
   Reserve,
+  MapHospital,
+  MapMyPage,
 } from "./pages/index";
 
 // const queryClient = new QueryClient();
@@ -65,6 +67,8 @@ function App() {
             <Route path="/search" element={<SearchPage />} />
             <Route path="/detail" element={<Detail />} />
             <Route path="/detail/reserve" element={<Reserve />} />
+            <Route path="/detail/map" element={<MapHospital />} />
+            <Route path="/mypage/map" element={<MapMyPage />} />
           </Routes>
         </Router>
       </Container>
