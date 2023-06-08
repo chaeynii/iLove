@@ -43,4 +43,6 @@ export const ModalBtn = styled(ButtonStyle)`
   margin: 1% 2%;
 `;
 
-export const ModalView = styled(CardBoxStyle)``;
+export const ModalView = styled(CardBoxStyle)`
+  width: 833px;
+`;

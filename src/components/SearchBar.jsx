@@ -1,5 +1,5 @@
 import * as Style from "./styles/SearchBarStyle";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 //아이콘 & 행정구역데이터 - assets
 import {
@@ -12,7 +12,7 @@ import {
 // 공통 컴포넌트
 import { Modal } from "../components/index";
 
-export const SearchBar = ({ onSearch }) => {
+export const SearchBar = ({ onSearch, depth1, depth2, onLocationChange }) => {
   //--------------------검색부분
   //검색어
   const [search, setSearch] = useState("");
@@ -51,7 +51,21 @@ export const SearchBar = ({ onSearch }) => {
     setSelectedLocationFirst(locationFirst);
     setSelectedLocationSecond(locationSecond);
     closeModal(); // 위치 저장 후 모달창을 닫음
+    // SearchPage로 변경사항 전달
+    // locationFirst가 locationData 배열에서 몇 번째 값인지 찾기
+    const index = locationData.findIndex(
+      (location) => location["시/도"][1] === locationFirst
+    );
+
+    // 해당 인덱스의 "시/도" 배열의 0번째 값을 depth1로 전달
+    if (index !== -1) {
+      const depth1Value = locationData[index]["시/도"][0];
+      onLocationChange(depth1Value, locationSecond);
+    }
   };
+  useEffect(() => {
+    onLocationChange(depth1, depth2);
+  }, [depth1, depth2, onLocationChange]);
   // 모달내부 : 시/도 드롭다운 함수&컴포넌트
   const handleLocationFirstChange = (event) => {
     setLocationFirst(event.target.value);

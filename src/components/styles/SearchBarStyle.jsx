@@ -3,8 +3,9 @@ import styled, { css } from "styled-components";
 export const Wrapper = styled.div`
   position: relative;
   max-width: 100%;
+  display: block !important;
   padding-top: 2%;
-  margin: 2%;
+  margin: 2% auto;
 
   & > div {
     width: 100%;

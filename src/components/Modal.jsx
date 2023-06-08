@@ -12,7 +12,6 @@ export const Modal = ({
   onSaved,
 }) => {
   const onSaveHandler = () => {
-    console.log("Save button clicked");
     onSaved(); // onSaved 함수 호출
     onClose(); // onClose 함수 호출
   };
