@@ -1,6 +1,6 @@
 import { AdminHome } from "./admin/AdminHome";
 import { Home } from "./home/Home";
-import MyPage from "./info/myPage";
+import MyPage from "./info/MyPage";
 import { Login } from "./login/Login";
 import { Post } from "./registerForm/Post";
 // import { MyCalendar } from "./reservationCheck/MyCalendar";

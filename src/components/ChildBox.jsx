@@ -3,9 +3,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import userData from "../pages/info/userdb.json";
-import newKidMockData from "../pages/info/newKidMockData.json";
-
 import styled from "styled-components";
 import colors from "../constants/colors";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

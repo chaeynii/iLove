@@ -3,9 +3,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import userData from "./userdb.json";
-import newKidMockData from "./newKidMockData.json";
-
 // 공통 컴포넌트 연결해서 테스트함
 import { Button } from "../../components/Button";
 import { NavigationBar } from "../../components/NavigationBar";
