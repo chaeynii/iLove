@@ -16,8 +16,8 @@ import { HospitalCard } from "./HospitalCard";
 
 //검색 정렬 옵션
 const SORT_OPTIONS = [
-  { name: "인기순", state: "byPopular" },
-  { name: "이름순", state: "byName" },
+  { name: "인기순", state: "review" },
+  { name: "이름순", state: "name" },
 ];
 
 //URL
@@ -59,16 +59,17 @@ export const SearchPage = () => {
       throw error;
     }
   });
-  // 병원리스트 받아오기
+  // 병원리스트 받아오기 - 키 값: 위치정보/정렬옵션/키워드 변경 시 자동렌더링
+  // 백엔드에 키워드 Parameters 추가요청한 상태입니다!
   const { data: hospitalsQuery, hospitalListIsLoading } = useQuery(
-    ["hospitals", depth1, depth2],
+    ["hospitals", depth1, depth2, option],
     async () => {
       try {
         const response = await axios.get(
           // depth2가 전체면 depth1만 넣어서 요청보냄
           depth2 === "전체"
-            ? `${BE_URL}hospital?depth1=${depth1}&size=10&page=0`
-            : `${BE_URL}hospital?depth1=${depth1}&depth2=${depth2}&size=10&page=0`
+            ? `${BE_URL}hospital?depth1=${depth1}&size=10&page=0&sort=${option.state}`
+            : `${BE_URL}hospital?depth1=${depth1}&depth2=${depth2}&size=10&page=0&sort=${option.state}`
         );
         return response.data;
       } catch (error) {
@@ -139,7 +140,9 @@ export const SearchPage = () => {
       <Header label={"병원 찾기"} />
       <Style.Wrapper>
         <SearchBar
-          onSearch={() => {}}
+          onSearch={(search) => {
+            console.log("키워드:", search);
+          }}
           depth1={depth1}
           depth2={depth2}
           onLocationChange={handleDepthChange}
@@ -168,8 +171,11 @@ export const SearchPage = () => {
         </Style.SearchHeader>
         {hospitalList.length > 0 ? (
           hospitalList.map((hospital) => {
-            const dutyTimeStart = hospital[`dutyTime${today}s`]; // 오늘 요일에 해당하는 dutyTime 시작 시간
-            const dutyTimeClose = hospital[`dutyTime${today}c`]; // 오늘 요일에 해당하는 dutyTime 종료 시간
+            //today가 0일 경우(일요일) 7번째 dutyTime값을 가져오도록 함
+            const dutyTimeStart =
+              today === 0 ? hospital.dutyTime7s : hospital[`dutyTime${today}s`]; // 오늘 요일에 해당하는 dutyTime 시작 시간
+            const dutyTimeClose =
+              today === 0 ? hospital.dutyTime7c : hospital[`dutyTime${today}c`]; // 오늘 요일에 해당하는 dutyTime 종료 시간
 
             //즐겨찾기 해당여부 체크
             const favorite = favoritesList.some(
@@ -193,7 +199,7 @@ export const SearchPage = () => {
             );
           })
         ) : (
-          <div>검색 결과가 없습니다.</div>
+          <p>검색 결과가 없습니다.</p>
         )}
       </Style.Wrapper>
       <NavigationBar />
