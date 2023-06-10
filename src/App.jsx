@@ -33,6 +33,7 @@ import {
   MapHospital,
   MapMyPage,
   ReservationChk,
+  Favorite,
 } from "./pages/index";
 
 // const queryClient = new QueryClient();
@@ -70,6 +71,7 @@ function App() {
             <Route path="/detail/reserve" element={<Reserve />} />
             <Route path="/detail/map" element={<MapHospital />} />
             <Route path="/mypage/map" element={<MapMyPage />} />
+            <Route path="/favorite" element={<Favorite />} />
           </Routes>
         </Router>
       </Container>

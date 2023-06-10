@@ -12,6 +12,7 @@ import Reserve from "./detail/Detailreserve";
 import { SearchPage } from "./search/SearchPage";
 import { MapHospital } from "./map/MapHospital";
 import { MapMyPage } from "./map/MapMyPage";
+import { Favorite } from "./favorite/Favorite";
 
 export {
   AdminHome,
@@ -26,5 +27,6 @@ export {
   Reserve,
   MapHospital,
   MapMyPage,
-  ReservationChk
+  ReservationChk,
+  Favorite
 };
