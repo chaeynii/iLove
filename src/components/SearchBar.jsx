@@ -1,5 +1,5 @@
 import * as Style from "./styles/SearchBarStyle";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 
 //아이콘 & 행정구역데이터 - assets
 import {
@@ -65,43 +65,49 @@ export const SearchBar = ({ onSearch, depth1, depth2, onLocationChange }) => {
   };
   useEffect(() => {
     onLocationChange(depth1, depth2);
-  }, [depth1, depth2, onLocationChange]);
+  }, [depth1, depth2]);
+
   // 모달내부 : 시/도 드롭다운 함수&컴포넌트
   const handleLocationFirstChange = (event) => {
     setLocationFirst(event.target.value);
     setLocationSecond("전체"); // 시/도 클릭시 시/군/구 옵션을 전체로 초기화
   };
-  const locationFirstOptions = locationData.map((location) => (
-    <Style.DropdownMenuItem
-      key={location["시/도"][0]}
-      value={location["시/도"][1]}
-      selected={locationFirst === location["시/도"][1]}
-      onClick={handleLocationFirstChange}
-    >
-      {location["시/도"][1]}
-    </Style.DropdownMenuItem>
-  ));
+  const locationFirstOptions = useMemo(() => {
+    return locationData.map((location) => (
+      <Style.DropdownMenuItem
+        key={location["시/도"][0]}
+        value={location["시/도"][1]}
+        selected={locationFirst === location["시/도"][1]}
+        onClick={handleLocationFirstChange}
+      >
+        {location["시/도"][1]}
+      </Style.DropdownMenuItem>
+    ));
+  }, [locationFirst]);
+
   // 모달내부: 시/군/구 드롭다운 함수&컴포넌트
   const handleLocationSecondChange = (event) => {
     const selectedCity = event.target.value;
     setLocationSecond(selectedCity);
   };
-  const locationSecondOptions = locationData.map((location) => {
-    if (location["시/도"][1] === locationFirst) {
-      return location["시/군/구"].map((city) => (
-        <Style.DropdownMenuItem
-          key={city}
-          value={city}
-          selected={locationSecond === city}
-          onClick={handleLocationSecondChange}
-        >
-          {city}
-        </Style.DropdownMenuItem>
-      ));
-    } else {
-      return null;
-    }
-  });
+  const locationSecondOptions = useMemo(() => {
+    return locationData.map((location) => {
+      if (location["시/도"][1] === locationFirst) {
+        return location["시/군/구"].map((city) => (
+          <Style.DropdownMenuItem
+            key={city}
+            value={city}
+            selected={locationSecond === city}
+            onClick={handleLocationSecondChange}
+          >
+            {city}
+          </Style.DropdownMenuItem>
+        ));
+      } else {
+        return null;
+      }
+    });
+  }, [locationFirst, locationSecond]);
   //------------알람 모달창 관련
   const [isAlarmModalOpen, setIsAlarmModalOpen] = useState(false);
   const openAlarmModal = () => {

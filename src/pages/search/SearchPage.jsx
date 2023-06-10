@@ -1,20 +1,18 @@
 import * as Style from "./styles/SearchPageStyle";
 
 //아이콘
-import { IconSearch, IconUp, IconDown, IconAlarm } from "../../assets/index";
+import { IconDown } from "../../assets/index";
 
 // 공통 컴포넌트
-import { NavigationBar, SearchBar } from "../../components/index";
+import { Header, NavigationBar, SearchBar } from "../../components/index";
 
 //import문
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useQuery } from "react-query";
 import axios from "axios";
 
 //병원리스트 - 병원카드 컴포넌트
 import { HospitalCard } from "./HospitalCard";
-import { Wrapper } from "../../components/styles/SearchBarStyle";
-import SearchHeader from "./SearchHeader";
 
 //검색 정렬 옵션
 const SORT_OPTIONS = [
@@ -28,189 +26,177 @@ const userToken =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVtYWlsQGUubWFpbCIsInN1YiI6MSwiaWF0IjoxNjg2MjM0NjUxLCJleHAiOjE3MTc3OTIyNTF9.QORp6FfVmnROH3A-OCvHzYKjzZVAXjADpKcwmCwGeAA";
 const endpoint_user = `users`;
 const endpoint_favorite = `favorite/`;
-export const SearchPage = () => {
-  //유저 id
-  const [user_id, setUser_id] = useState(null);
-  // 위치정보 depth1, depth2
-  const [depth1, setDepth1] = useState("");
-  const [depth2, setDepth2] = useState("");
-  // 위치정보만 받았을 때의 전체 병원리스트
-  const [hospitalList, setHospitalList] = useState([]);
-  // 키워드 검색어
-  const [searchKeyword, setSearchKeyword] = useState("");
-  //키워드 검색 후 필터링 된 병원 리스트
-  const [keywordFilteredHospitals, setKeywordFilteredHospitals] = useState([]);
-  //정렬 옵션
-  const [sortOption, setSortOption] = useState(
-    SORT_OPTIONS.find((item) => item.state === "byPopular")
-  );
-  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
+export const SearchPage = () => {
+  // 위치정보 depth1, depth2
+  const [depth1, setDepth1] = useState("서울특별시");
+  const [depth2, setDepth2] = useState("전체");
   const handleDepthChange = (first, second) => {
     setDepth1(first);
     setDepth2(second);
   };
 
-  const handleSearch = (keyword) => {
-    setSearchKeyword(keyword);
-  };
+  // 키워드 검색어
+  const [searchKeyword, setSearchKeyword] = useState("");
 
-  const filterHospitals = (keyword, hospitalList) => {
-    const filtered = hospitalList.filter((hospital) =>
-      hospital.dutyName.includes(keyword)
-    );
-    setKeywordFilteredHospitals(filtered);
-  };
+  //검색 필터 옵션
+  const [option, setOption] = useState(SORT_OPTIONS[0]);
 
-  const usersQuery = useQuery("users", () =>
-    axios
-      .get(`${BE_URL}${endpoint_user}`, {
+  // 옵션창 펼쳐졌는지
+  const [isOpenOption, setIsOpenOption] = useState(false);
+
+  // 유저 정보
+  const { data: userQuery, userIsLoading } = useQuery(["user"], async () => {
+    try {
+      const response = await axios.get(`${BE_URL}${endpoint_user}`, {
         headers: {
           Authorization: `Bearer ${userToken}`,
         },
-      })
-      .then((response) => response.data)
+      });
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  });
+  // 병원리스트 받아오기
+  const { data: hospitalsQuery, hospitalListIsLoading } = useQuery(
+    ["hospitals", depth1, depth2],
+    async () => {
+      try {
+        const response = await axios.get(
+          // depth2가 전체면 depth1만 넣어서 요청보냄
+          depth2 === "전체"
+            ? `${BE_URL}hospital?depth1=${depth1}&size=10&page=0`
+            : `${BE_URL}hospital?depth1=${depth1}&depth2=${depth2}&size=10&page=0`
+        );
+        return response.data;
+      } catch (error) {
+        console.log(error);
+        throw error;
+      }
+    }
+  );
+  // 즐겨찾기 리스트 받아오기
+  const { data: favoritesQuery, favoriteListIsLoading } = useQuery(
+    ["favorites"],
+    async () => {
+      try {
+        const response = axios
+          .get(`${BE_URL}${endpoint_favorite}user`, {
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+            },
+          })
+          .then((response) => response.data);
+        return response.data;
+      } catch (error) {
+        console.log(error);
+        throw error;
+      }
+    }
   );
 
-  const hospitalsQuery = useQuery("hospitals", () =>
-    axios
-      .get(
-        depth2 === "전체" //depth2가 전체일 경우 depth1만 url 요청
-          ? `${BE_URL}hospital?depth1=${depth1}&size=10&page=0`
-          : `${BE_URL}hospital?depth1=${depth1}&depth2=${depth2}&size=10&page=0`
-      )
-      .then((response) => response.data)
-  );
-
-  const favoritesQuery = useQuery("favorites", () =>
-    axios
-      .get(`${BE_URL}${endpoint_favorite}user`, {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      })
-      .then((response) => response.data)
-  );
-  //user_id 불러오는 함수
-  useEffect(() => {
-    if (usersQuery.isSuccess) {
-      const fetchedUser_id = usersQuery.data.data.id;
-      setUser_id(fetchedUser_id);
-    }
-  }, [usersQuery]);
-
-  // user_id가 불러와졌다면, 즐겨찾기 목록 가져오기
-  useEffect(() => {
-    if (user_id !== null && favoritesQuery.isSuccess) {
-      favoritesQuery.refetch();
-    }
-  }, [favoritesQuery, user_id]);
-
-  //병원리스트 가져오기
-  useEffect(() => {
-    if (hospitalsQuery.isSuccess) {
-      const hospitalList = hospitalsQuery.data.data;
-      setHospitalList(hospitalList);
-    }
-  }, [hospitalsQuery.isSuccess]);
-  //검색 키워드에 대한 결과를 병원리스트에서 추출하기
-  useEffect(() => {
-    if (searchKeyword) {
-      filterHospitals(searchKeyword, hospitals);
-    } else {
-      setKeywordFilteredHospitals(hospitalList);
-    }
-  }, [searchKeyword, hospitalList]);
-
-  if (
-    usersQuery.isLoading ||
-    hospitalsQuery.isLoading ||
-    favoritesQuery.isLoading
-  ) {
-    return <div>Loading...</div>;
+  //로딩중일 경우 null값 반환
+  if (userIsLoading || hospitalListIsLoading || favoriteListIsLoading) {
+    return null;
   }
-  if (usersQuery.isError) {
-    return <div>Error loading users: {usersQuery.error.message}</div>;
-  }
-  if (hospitalsQuery.isError) {
-    return <div>Error loading hospitals: {hospitalsQuery.error.message}</div>;
-  }
-  if (favoritesQuery.isError) {
-    return <div>Error loading favorites: {favoritesQuery.error.message}</div>;
-  }
-  const users = usersQuery.data;
-  const hospitals = hospitalsQuery.data;
-  const favorites = favoritesQuery.data || []; // favoritesQuery.data가 없을 경우 빈 배열로 초기화
 
-  //오늘 요일에 따라 다른 dutyTime 가져오기
+  //유저정보
+  const userData = userQuery?.data ?? [];
+  const user_id = userData.id;
+
+  //병원리스트
+  const hospitalList = hospitalsQuery?.data ?? [];
+
+  //즐겨찾기 리스트
+  const favoritesList = favoritesQuery?.data ?? [];
+
+  //오늘 날짜(요일) 저장
   let now = new Date();
   const today = now.getDay();
 
-  const handleFavorite = (hpid) => {
-    // 즐겨찾기 추가 또는 제거 로직 구현
-    // hpid를 기반으로 즐겨찾기 상태를 변경할 수 있습니다.
-    console.log("handleFavorite 실행, hpid:", hpid);
+  // 검색 옵션버튼 클릭 시
+  const handleOptionClick = () => {
+    setIsOpenOption(!isOpenOption);
   };
 
-  //-----------검색 정렬 함수
-  const handleSortDropdownClick = () => {
-    setIsSortDropdownOpen(!isSortDropdownOpen);
-  };
-
-  const handleSortOptionChange = (e) => {
+  // 검색 옵션(SORT OPTION) 변경 시
+  const handleOptionChange = (e) => {
     const selectedOptionState = e.target.value;
     const selectedOption = SORT_OPTIONS.find(
-      (item) => item.state === selectedOptionState
+      (option) => option.state === selectedOptionState
     );
 
     if (selectedOption) {
-      setSortOption(selectedOption);
-      setIsSortDropdownOpen(false);
+      setOption(selectedOption);
+      setIsOpenOption(false);
     }
   };
+
   return (
     <>
-      <Wrapper>
+      <Header label={"병원 찾기"} />
+      <Style.Wrapper>
         <SearchBar
-          onSearch={handleSearch}
+          onSearch={() => {}}
           depth1={depth1}
           depth2={depth2}
           onLocationChange={handleDepthChange}
         />
-        <SearchHeader
-          total={keywordFilteredHospitals.length}
-          sortOption={"byPopular"}
-          onOptionChange={handleSortOptionChange}
-        ></SearchHeader>
-        {keywordFilteredHospitals.map((hospital) => {
-          const dutyTimeStart = hospital[`dutyTime${today}s`]; // 오늘 요일에 해당하는 dutyTime 시작 시간
-          const dutyTimeClose = hospital[`dutyTime${today}c`]; // 오늘 요일에 해당하는 dutyTime 종료 시간
+        <Style.SearchHeader>
+          <span>총 {hospitalList.length} 개</span>
+          <Style.DropdownContainer>
+            <button onClick={handleOptionClick}>
+              {option.name}
+              <img alt="icon-down" src={IconDown}></img>
+            </button>
+            {isOpenOption && (
+              <div>
+                {SORT_OPTIONS.map((option) => (
+                  <option
+                    key={option.state}
+                    value={option.state}
+                    onClick={handleOptionChange}
+                  >
+                    {option.name}
+                  </option>
+                ))}
+              </div>
+            )}
+          </Style.DropdownContainer>
+        </Style.SearchHeader>
+        {hospitalList.length > 0 ? (
+          hospitalList.map((hospital) => {
+            const dutyTimeStart = hospital[`dutyTime${today}s`]; // 오늘 요일에 해당하는 dutyTime 시작 시간
+            const dutyTimeClose = hospital[`dutyTime${today}c`]; // 오늘 요일에 해당하는 dutyTime 종료 시간
 
-          //즐겨찾기 해당여부 체크
-          const favorite = favorites.data.some(
-            (favoriteItem) =>
-              favoriteItem.user_id === user_id &&
-              favoriteItem.hpid === hospital.id
-          );
-          return (
-            <HospitalCard
-              key={hospital.id}
-              hpid={hospital.id}
-              hospitalName={hospital.dutyName}
-              hospitalAddress={`${hospital.dutyAddr1Depth} ${hospital.dutyAddr2Depth} ${hospital.dutyAddr3Depth}`}
-              today={today}
-              dutyTimeStart={dutyTimeStart}
-              dutyTimeClose={dutyTimeClose}
-              favorite={favorite}
-              handleFavorite={handleFavorite}
-            />
-          );
-        })}
-        {/* </div> */}
-      </Wrapper>
+            //즐겨찾기 해당여부 체크
+            const favorite = favoritesList.some(
+              (favoriteItem) =>
+                favoriteItem.user_id === user_id &&
+                favoriteItem.hpid === hospital.id
+            );
+
+            return (
+              <HospitalCard
+                key={hospital.id}
+                hpid={hospital.id}
+                hospitalName={hospital.dutyName}
+                hospitalAddress={`${hospital.dutyAddr1Depth} ${hospital.dutyAddr2Depth} ${hospital.dutyAddr3Depth}`}
+                today={today}
+                dutyTimeStart={dutyTimeStart}
+                dutyTimeClose={dutyTimeClose}
+                favorite={favorite}
+                handleFavorite={() => {}}
+              />
+            );
+          })
+        ) : (
+          <div>검색 결과가 없습니다.</div>
+        )}
+      </Style.Wrapper>
       <NavigationBar />
     </>
   );
 };
-
-export default SearchPage;
