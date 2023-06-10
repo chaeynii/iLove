@@ -1,13 +1,18 @@
 import React from "react";
 import styled from "styled-components";
 import IconLeft from "../assets/iconLeft.svg";
+import { useNavigate } from "react-router-dom";
 
 // eslint-disable-next-line react/prop-types
-export const Header = ({ label, onClick }) => {
+export const Header = ({ label }) => {
+  const navigate = useNavigate(); //변수 할당시켜서 사용
+  const onClickBtn = () => {
+    navigate(-1);
+  };
   return (
     <>
       <HeaderWrap>
-        <BtnBack onClick={onClick}>
+        <BtnBack onClick={onClickBtn}>
           <img alt="icon-left" src={IconLeft}></img>
         </BtnBack>
         <h2>{label}</h2>

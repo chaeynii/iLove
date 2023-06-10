@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 // 공통 컴포넌트 연결해서 테스트함
@@ -147,6 +147,7 @@ function MyPage() {
   }, []);
 
   // 클릭시 ChildPage로 이동
+
   const handleClick = () => {
     navigate("./ChildPage");
   };

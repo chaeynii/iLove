@@ -1,20 +1,26 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useQuery, useQueryClient } from "react-query";
-import { fetchList } from "../../server/Fetcher";
+
 import { Button } from "../../components/Button";
 import colors from "../../constants/colors";
-import { check } from "prettier";
+
+import { deleteinstance, instance } from "../../server/Fetcher";
 
 export const PersonalClient = () => {
   const [currentPage, setCurrentPage] = useState(0); // 페이지 숫자 상태
 
   const maxPostPage = 10;
 
-  // useQuery 이용한 통신
   const queryClient = useQueryClient();
-  const { isLoading, data: list } = useQuery("list", () => fetchList());
 
+  // 인스턴스 사용하는 함수
+  const listQuery = useQuery("list", async () => {
+    const response = await instance.get("/"); // "/"는 baseURL에 추가된 경로입니다
+    return response.data;
+  });
+
+  const list = listQuery.data;
   const [checkValue, setCheckValue] = useState(""); // 검색창 인풋
   const [submitted, setSubmitted] = useState(false); // 검색창 submit 상태
   const [checkList, setCheckList] = useState([]); // 체크박스
@@ -23,11 +29,13 @@ export const PersonalClient = () => {
     setSubmitted(false);
   };
 
+  //검색창 폼 제출
   const onSubmit = (e) => {
     e.preventDefault();
     setSubmitted(true);
   };
 
+  // 체크박스 확인하는 함수
   const handleSingleCheck = (checked, id) => {
     if (checked) {
       setCheckList((prev) => [...prev, id]);
@@ -39,14 +47,7 @@ export const PersonalClient = () => {
     // 페이지네이션 데이터의 id와 체크된 열의 id 값 필터
 
     console.log("삭제할 id:", item);
-    await fetch(`/admin/delete/${item.id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjFAMS4xIiwic3ViIjoxLCJpYXQiOjE2ODYxMDg4MzksImV4cCI6MTcxNzY2NjQzOX0.KoXifXgRmenLuMXmJ_RP1ZJnjinLlyhjD-HN1GAXc5A",
-      },
-    });
-    //React Query에서 'invalidateQueries' 기능 사용해서 업데이트 된 목록 다시
+    await deleteinstance.delete(`/${item.id}`); //React Query에서 'invalidateQueries' 기능 사용해서 업데이트 된 목록 다시
     queryClient.invalidateQueries("list");
   };
 
@@ -54,15 +55,14 @@ export const PersonalClient = () => {
   useEffect(() => {
     if (currentPage <= maxPostPage - 1) {
       const nextPage = currentPage + 1;
-      queryClient.prefetchQuery(["posts", nextPage], () => fetchList());
+      queryClient.prefetchQuery(["posts", nextPage], () => listQuery.data);
     }
   }, [currentPage, queryClient]);
 
-  if (isLoading) {
+  if (listQuery.isLoading) {
     return <h1>로딩중입니다..</h1>;
   }
 
-  // 검색창 value와 데이터의 이메일 값 비교해서 같으면 데이터 재구성
   const filteredList = list.data?.filter(
     (item) => !submitted || item.email === checkValue
   );

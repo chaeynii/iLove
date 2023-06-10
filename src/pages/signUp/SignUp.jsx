@@ -1,7 +1,13 @@
 /* eslint-disable */
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useLocation,
+} from "react-router-dom";
 import axios from "axios";
 
 // 알림창 라이브러리
@@ -27,19 +33,22 @@ import {
 import colors from "../../constants/colors";
 import fontSize from "../../constants/fontSize";
 
+// tab을 true/false로 하는 것 보다 하나의 state로 관리하는게 좀 더 가독성이 나을 것 같아서 리팩토링.
 export const SignUp = () => {
-  const [isUserView, setIsUserView] = useState(true); // 일반회원 뷰 여부 상태
-  const [isHospitalView, setIsHospitalView] = useState(false); // 병원 뷰 여부 상태
+  const location = useLocation();
+  //  searchParams를 쉽게 파싱해주는 URLSearchParams를 이용
+  //  https://blog.jeongwoo.in/javascript-url%EC%9D%98-%ED%8C%8C%EB%9D%BC%EB%AF%B8%ED%84%B0-%EA%B0%92%EC%9D%84-%ED%99%95%EC%9D%B8%ED%95%98%EA%B3%A0-%EC%8B%B6%EC%9D%84%EB%95%8C-urlsearchparams-28b44c2036fa
+  const searchParams = new URLSearchParams(location.search);
 
-  const handleUserButtonClick = () => {
-    setIsUserView(true); // 일반회원 뷰 표시
-    setIsHospitalView(false); // 병원 뷰 숨김
+  // searchParams.get("tab") 값이 null이면('병원 관리자 등록 버튼'으로 온게 아닐 경우) "user"로 초기화
+  // https://ko.javascript.info/nullish-coalescing-operator
+  const initailTabValue = searchParams.get("tab") ?? "user";
+  const [tabView, setTabView] = useState(initailTabValue); // "hospital" or "user"
+
+  const handleChangeTab = (tabValue) => {
+    setTabView(tabValue);
   };
 
-  const handleHospitalButtonClick = () => {
-    setIsUserView(false); // 일반회원 뷰 숨김
-    setIsHospitalView(true); // 병원 뷰 표시
-  };
   return (
     <>
       <div>
@@ -50,20 +59,19 @@ export const SignUp = () => {
         <SignUpFormDiv>
           <ChangeButtonDiv>
             <ButtonUser
-              className={isUserView ? "" : "active"}
-              onClick={handleUserButtonClick}
+              className={tabView === "user" ? "" : "active"}
+              onClick={() => handleChangeTab("user")}
             >
               일반 회원
             </ButtonUser>
             <ButtonHospital
-              className={isHospitalView ? "active" : ""}
-              onClick={handleHospitalButtonClick}
+              className={tabView === "hospital" ? "active" : ""}
+              onClick={() => handleChangeTab("hospital")}
             >
               병원 클라이언트
             </ButtonHospital>
           </ChangeButtonDiv>
-          {isUserView && <UserView />}
-          {isHospitalView && <HospitalView />}
+          {tabView === "hospital" ? <HospitalView /> : <UserView />}
         </SignUpFormDiv>
       </div>
       <NavigationBar />
@@ -346,7 +354,7 @@ const HospitalView = () => {
   const register = () => {
     // axios를 사용하여 POST 요청 만들기
     axios
-      .post("/users/managersignup", {
+      .post("http://34.64.69.226:3000/users/managersignup", {
         hospitalId: name,
         name: name,
         email: email,
@@ -392,7 +400,7 @@ const HospitalView = () => {
             type="text"
           ></SignUpInput>
           <P>
-            *찾으시는 병원이 없으실 경우 하단에 신규병원 등록신청하기를
+            *찾으시는 병원이 없으실 경우 하단에 신규 병원 등록 신청하기를
             눌러주세요.
           </P>
         </SignUpInputDiv>
@@ -464,10 +472,19 @@ const HospitalView = () => {
             }}
           />
         </SignUpBtn>
+
+        <Link to="/register">
+          <ButP>신규 병원 등록 신청하기</ButP>
+        </Link>
       </SignUpForm>
     </>
   );
 };
+
+const ButP = styled.p`
+  margin-top: 4%;
+  font-size: 20px;
+`;
 
 const ButtonHospital = styled.button`
   /* 일반 버튼 스타일 */

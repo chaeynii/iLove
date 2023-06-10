@@ -18,8 +18,8 @@ import colors from "../../constants/colors";
 
 import MyPage from "./MyPage";
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
 const Space = styled.div`
   margin-bottom: 20px;
@@ -66,12 +66,16 @@ function ChildPage() {
 
   const handleClick = () => {
     const newBoxId = Date.now();
-    const newBoxCreator = () => <ChildBox key={newBoxId} id={newBoxId} onRemove={handleRemove} />;
+    const newBoxCreator = () => (
+      <ChildBox key={newBoxId} id={newBoxId} onRemove={handleRemove} />
+    );
     setBoxCreators((prevCreators) => [newBoxCreator, ...prevCreators]);
   };
 
   const handleRemove = (id) => {
-    setBoxCreators((prevCreators) => prevCreators.filter(creator => creator().props.id !== id));
+    setBoxCreators((prevCreators) =>
+      prevCreators.filter((creator) => creator().props.id !== id)
+    );
   };
 
   return (
@@ -83,13 +87,15 @@ function ChildPage() {
         }}
       />
       <Space />
-      {boxCreators.map(createBox => createBox())}
+      {boxCreators.map((createBox) => createBox())}
       <CardBox>
         <div>
           <MyButton onClick={handleClick}>추가하기</MyButton>
         </div>
       </CardBox>
-      <BackButton as={Link} to="/MyPage">돌아가기</BackButton>
+      <BackButton as={Link} to="/MyPage">
+        돌아가기
+      </BackButton>
       <Space />
       <NavigationBar />
     </Container>

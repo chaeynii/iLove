@@ -1,7 +1,6 @@
 import React, { useState, Suspense } from "react";
 import styled from "styled-components";
-import { fetchList } from "../../server/Fetcher";
-fetchList();
+
 // 필요할 때마다 동적 로딩을 위한 react.lazy 함수 사용 코드
 // 각 컴포넌트를 로딩하기 위한 코드
 // 아래 Suspense 는 지연 시 보여주는 화면 설정
