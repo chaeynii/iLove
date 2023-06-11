@@ -1,7 +1,18 @@
 /* eslint-disable */
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useNavigate,
+} from "react-router-dom";
+import axios from "axios";
+
+// 알림창 라이브러리
+import "react-toastify/dist/ReactToastify.css";
+import { toast, ToastContainer } from "react-toastify";
 
 // 이미지 링크
 import mainLogo from "../../assets/mainLogo.svg";
@@ -10,10 +21,17 @@ import iconPeople from "../../assets/iconPeople.svg";
 import arrowRight from "../../assets/arrowRight.svg";
 
 // 공통 컴포넌트 연결 링크
-import { NavigationBar } from "../../components/NavigationBar";
-import { Container } from "../../components/Container";
-import { Footer } from "../../components/Footer";
-import { SearchBar } from "../../components/SearchBar";
+import {
+  Button,
+  CardBox,
+  Header,
+  NavigationBar,
+  Container,
+  Footer,
+  SearchBar,
+} from "../../components/index";
+
+import { AutoplayYouTubeVideo } from "./Youtube";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import colors from "../../constants/colors";
@@ -24,13 +42,89 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-// 더미 데이터
-import { dataHome } from "./data";
+export const Home = () => {
+  const handleLogout = () => {
+    // 토큰 가져오기
+    const token = window.localStorage.getItem("token");
 
-export const Home = ({ LinkTo }) => {
+    if (token) {
+      // 토큰이 존재하므로 삭제 진행
+      window.localStorage.removeItem("token");
+      toast("로그아웃 성공");
+    } else {
+      // 오류 알림표시
+      toast("오류로 인해 로그아웃하지 못했습니다.");
+    }
+  };
+
+  // 위치정보 depth1, depth2
+  const [depth1, setDepth1] = useState("");
+  const [depth2, setDepth2] = useState("");
+  // 위치정보만 받았을 때의 전체 병원리스트
+  const [hospitalList, setHospitalList] = useState([]);
+  // 키워드 검색어
+  const [searchKeyword, setSearchKeyword] = useState("");
+  //키워드 검색 후 필터링 된 병원 리스트
+  const [keywordFilteredHospitals, setKeywordFilteredHospitals] = useState([]);
+
+  // 검색바
+  const handleDepthChange = (first, second) => {
+    setDepth1(first);
+    setDepth2(second);
+  };
+
+  const handleSearch = (keyword) => {
+    setSearchKeyword(keyword);
+  };
+
+  // 사용자의 현재 위치 찾기 Geolocation API & OpenStreetMap Nominatim API
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+  const [address, setAddress] = useState(null);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          setLatitude(position.coords.latitude);
+          setLongitude(position.coords.longitude);
+
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`
+            );
+            const data = await response.json();
+
+            const { suburb, city_district, city, province, quarter } =
+              data.address;
+            const formattedAddress = `${province} ${
+              suburb || city_district || city || ""
+            } ${quarter}`;
+
+            setAddress(formattedAddress);
+          } catch (error) {
+            console.error(error);
+          }
+        },
+        (error) => {
+          console.error(error);
+        }
+      );
+    } else {
+      console.error("현재 브라우저는 위치를 지원하지 않습니다.");
+    }
+  }, []);
+
   return (
     <>
       <Container>
+        <ToastContainer
+          position="top-center"
+          limit={1}
+          closeButton={false}
+          autoClose={4000}
+          hideProgressBar
+        />
         <MainLogoImg src={mainLogo} alt="mainLogo"></MainLogoImg>
 
         <TopMenuBar>
@@ -40,26 +134,35 @@ export const Home = ({ LinkTo }) => {
           <FlexGrow></FlexGrow>
 
           <MenuSeb>
-            <Link to={LinkTo}>
+            <Link to="/login">
               <SebP>로그인</SebP>
             </Link>
           </MenuSeb>
 
           <MenuSeb>
-            <Link to={LinkTo}>
+            <LogoutBut onClick={handleLogout}>로그아웃</LogoutBut>
+          </MenuSeb>
+
+          <MenuSeb>
+            <Link to="SignUp">
               <SebP>회원가입</SebP>
             </Link>
           </MenuSeb>
         </TopMenuBar>
 
-        <SearchBar />
+        <SearchBar
+          onSearch={handleSearch}
+          depth1={depth1}
+          depth2={depth2}
+          onLocationChange={handleDepthChange}
+        />
 
         <Banner>
           <Img src={MainBanner} alt="star"></Img>
         </Banner>
 
         <BannerSeb>
-          <Link to={LinkTo}>
+          <Link to="/SignUp?tab=hospital">
             <BanContainer>
               <BannerSebDiv1>
                 <BannerSebIcon
@@ -84,8 +187,20 @@ export const Home = ({ LinkTo }) => {
         </BannerSeb>
 
         <SiliderMargin>
+          <MainSub>
+            {address ? (
+              <H2>현재 내 위치 : {address}</H2>
+            ) : (
+              <H2>위치찾는중...</H2>
+            )}
+            <H1>내 주변 소아과</H1>
+            {/* 백엔드 요청으로 반경 몇 Km내의 병원을 볼건지 선택할 수 있는 기능 추가 예정 */}
+            <H2>반경 km</H2>
+          </MainSub>
           <SimpleSlider />
         </SiliderMargin>
+
+        <AutoplayYouTubeVideo videoId={"Os_heh8vPfs"} />
 
         <Footer />
         <NavigationBar />
@@ -94,6 +209,30 @@ export const Home = ({ LinkTo }) => {
   );
 };
 export default Home;
+
+const H1 = styled.p`
+  font-size: 30px;
+  font-weight: 900;
+  color: #121212;
+  padding: 1%;
+  margin-bottom: 3%;
+  width: 33.33%;
+`;
+
+const H2 = styled.p`
+  font-size: 18px;
+  font-weight: 600;
+  color: #121212;
+  padding: 1%;
+  margin-bottom: 3%;
+  width: 33.33%;
+`;
+
+const MainSub = styled.div`
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+`;
 
 const SiliderMargin = styled.div`
   margin: 5% 0 8% 0;
@@ -124,6 +263,8 @@ const MenuSeb = styled.div`
 
 const SebP = styled.p``;
 
+const LogoutBut = styled.p``;
+
 const LogoP = styled.p`
   color: ${colors.primary};
   font-weight: 700;
@@ -151,13 +292,10 @@ const BannerSeb = styled.div`
 `;
 
 const BanContainer = styled.div`
-display: flex;
-border: 1px solid ${colors.primary};
-border-radius: 10px;
-padding: 3%;
-
-
-}
+  display: flex;
+  border: 1px solid ${colors.primary};
+  border-radius: 10px;
+  padding: 3%;
 `;
 
 const BannerSebDiv1 = styled.div`
@@ -229,18 +367,51 @@ const SimpleSlider = () => {
     ],
   };
 
+  // 병원 데이터 get
+  const [hospitalData, setHospitalData] = useState([]);
+
+  // 코치님 80번째줄에서 사용자의 현재 위치를 위도와 경도로 받고 있는데 그 정보를 380번째줄에 있는 params에 넣는 방법이 있을까요?ㅠㅠ
+  const hospitalApi = async () => {
+    try {
+      const response = await axios.get(
+        "http://34.64.69.226:3000/hospital/near",
+        {
+          params: {
+            userLat: 37.5007795003494,
+            userLon: 127.1107520613008,
+          },
+        }
+      );
+      const responseData = response.data.data;
+      setHospitalData(responseData);
+      console.log("데이터 성공", responseData);
+    } catch (error) {
+      console.error("병원 데이터를 가져오는 중에 오류가 발생했습니다.:", error);
+    }
+  };
+
+  useEffect(() => {
+    hospitalApi();
+  }, []);
+
   return (
     <>
       <Slider {...settings}>
-        {dataHome.map((item) => (
-          <Card>
-            <CardTop>
-              <CardImg src={item.linkImg} alt={item.linkImg}></CardImg>
-            </CardTop>
-            <CardBottom>
-              <CardTitle>{item.hospitalName}</CardTitle>
-              <CardAddress>{item.address}</CardAddress>
-            </CardBottom>
+        {hospitalData.map((data) => (
+          <Card key={data.id}>
+            <Link to={`/detail/${data.id}`}>
+              <CardTop>
+                {data.images[0] !== null ? (
+                  <CardImg src={data.images} alt={data.images} />
+                ) : (
+                  <CardImgBak></CardImgBak>
+                )}
+              </CardTop>
+              <CardBottom>
+                <CardTitle>{data.dutyName}</CardTitle>
+                <CardAddress>{data.dutyAddr}</CardAddress>
+              </CardBottom>
+            </Link>
           </Card>
         ))}
       </Slider>
@@ -255,18 +426,37 @@ const Card = styled.div`
 const CardTop = styled.div`
   margin: 0 2% 0 2%;
 `;
+
 const CardBottom = styled.div`
   position: absolute;
+  width: 80%;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
   z-index: 1;
-  color: #ffffff;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  &:hover {
+    &::after {
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+    opacity: 1;
+  }
 `;
 
 const CardTitle = styled.p`
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
+  margin-bottom: 8%;
 `;
 
 const CardAddress = styled.p`
@@ -276,7 +466,15 @@ const CardAddress = styled.p`
 
 const CardImg = styled.img`
   width: 100%;
-  hieght: 100%;
+  height: 100%;
   object-fit: cover;
   border-radius: 20px;
+`;
+
+const CardImgBak = styled.div`
+  width: 266px;
+  height: 266px;
+  border-radius: 20px;
+  background: rgba(0, 131, 60, 0.2);
+  //
 `;

@@ -3,17 +3,17 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
-export const CardBox = ({ children, linkTo }) => {
+export const CardBox = ({ children, linkTo, bxShadow}) => {
   return (
-    <CardBoxStyle>
+    <CardBoxStyle 
+      bxShadow={bxShadow}
+    >
       <Link to={linkTo}>{children}</Link>
     </CardBoxStyle>
   );
 };
 
-export default CardBox;
-
-const CardBoxStyle = styled.div`
+export const CardBoxStyle = styled.div`
   position: relative;
   width: 100%;
   background-color: #ffffff;
@@ -22,4 +22,5 @@ const CardBoxStyle = styled.div`
   box-sizing: border-box;
   padding: 2%;
   margin: 1% 0;
+  box-shadow: ${(props) => props.bxShadow};
 `;

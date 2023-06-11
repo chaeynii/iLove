@@ -1,28 +1,102 @@
 // /* eslint-disable */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import axios from "axios";
+
+// 알림창 라이브러리
+import "react-toastify/dist/ReactToastify.css";
+import { toast, ToastContainer } from "react-toastify";
 
 // 이미지 링크
 import mainLogo from "../../assets/mainLogo.svg";
-import MainBanner from "../../assets/mainBanner.png";
-import iconPeople from "../../assets/iconPeople.svg";
-import arrowRight from "../../assets/arrowRight.svg";
 
 // 공통 컴포넌트 연결 링크
-import { Button } from "../../components/button";
-import { Container } from "../../components/Container";
-import { Footer } from "../../components/Footer";
+import { Button, Container, NavigationBar } from "../../components/index";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import colors from "../../constants/colors";
 import fontSize from "../../constants/fontSize";
 
+const UserData = {
+  email: "test@naver.com",
+  pw: "123456789",
+};
+
 export const Login = () => {
+  const [email, setEmail] = useState("");
+  const [pw, setPw] = useState("");
+  const [emailValid, setEmailValid] = useState(false);
+  const [pwValid, setPwValid] = useState(false);
+  // 버튼 활성화 비활성화 여부
+  const [notAllow, setNotAllow] = useState(true);
+
+  // 이메일 유효성 검사
+  const handleEmail = (e) => {
+    setEmail(e.target.value);
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (regex.test(email)) {
+      setEmailValid(true);
+    } else {
+      setEmailValid(false);
+    }
+  };
+
+  // 비밀번호 유효성 검사
+  const handlePassword = (e) => {
+    setPw(e.target.value);
+    if (e.target.value.length >= 8) {
+      setPwValid(true);
+    } else {
+      setPwValid(false);
+    }
+  };
+
+  useEffect(() => {
+    if (emailValid && pwValid) {
+      setNotAllow(false);
+      return;
+    }
+    setNotAllow(true);
+  }, [emailValid, pwValid]);
+
+  // 로그인 폼 전송
+  const getUserLoginInfo = async () => {
+    // axios를 사용하여 post 요청
+    axios
+      .post("/users/login", {
+        email: email,
+        password: pw,
+      })
+      .then((response) => {
+        // 로그인 성공
+        // 홈으로 이동
+        window.location.href = "/";
+        console.log("로그인 성공", response.data);
+
+        // 토큰 저장
+        const token = response.data.data.token;
+        // 토큰 local storage에 저장
+        localStorage.setItem("token", token);
+      })
+      .catch((error) => {
+        // 오류처리
+        toast("이메일 또는 비밀번호가 잘못되었습니다..");
+        console.log("로그인 실패", error);
+      });
+  };
+
   return (
     <>
       <Container>
+        <ToastContainer
+          position="top-center"
+          limit={1}
+          closeButton={false}
+          autoClose={4000}
+          hideProgressBar
+        />
         <MainLogoDiv>
           <MainLogoImg src={mainLogo}></MainLogoImg>
           <H1>환영합니다!</H1>
@@ -30,11 +104,24 @@ export const Login = () => {
 
         <LoginFormDiv>
           <LoginForm>
-            <LoginInput placeholder="test@naver.com" type="text"></LoginInput>
+            <LoginInput
+              placeholder="test123@test.com"
+              type="email"
+              value={email}
+              onChange={handleEmail}
+            ></LoginInput>
+            {!emailValid && email.length > 0 && (
+              <ErrorMaessage>올바른 이메일을 입력해주세요.</ErrorMaessage>
+            )}
             <LoginInput
               placeholder="8자리 이상 입력해주세요"
               type="password"
+              value={pw}
+              onChange={handlePassword}
             ></LoginInput>
+            {!pwValid && pw.length > 0 && (
+              <ErrorMaessage>8자리 이상 입력해주세요.</ErrorMaessage>
+            )}
 
             <LoginBtn>
               <Button
@@ -45,6 +132,8 @@ export const Login = () => {
                 borderOutLine={colors.BtnborderOut}
                 width={"90%"}
                 height={"70px"}
+                disabled={notAllow}
+                onClick={getUserLoginInfo}
               />
             </LoginBtn>
           </LoginForm>
@@ -52,18 +141,29 @@ export const Login = () => {
 
         <Div>
           <LoginUl>
-            <LoginLi>아이디찾기</LoginLi>
+            {/* <Link to="/">
+              <LoginLi>아이디찾기</LoginLi>
+            </Link>
             <LoginLi> | </LoginLi>
-            <LoginLi>비밀번호찾기</LoginLi>
-            <LoginLi> | </LoginLi>
-            <LoginLi>회원가입</LoginLi>
+            <Link to="/">
+              <LoginLi>비밀번호찾기</LoginLi>
+            </Link>
+            <LoginLi> | </LoginLi> */}
+            <Link to="/signUp">
+              <LoginLi>회원가입</LoginLi>
+            </Link>
           </LoginUl>
         </Div>
+        <NavigationBar />
       </Container>
     </>
   );
 };
 export default Login;
+
+const ErrorMaessage = styled.p`
+  color: #c20000;
+`;
 
 const MainLogoDiv = styled.div`
   margin-top: 4%;
@@ -114,6 +214,6 @@ padding: 1%;
 }`;
 
 const LoginLi = styled.div`
-  padding: 0.5%;
+  // padding: 0.5%;
   color: #b2b2b2;
 `;

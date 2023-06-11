@@ -1,60 +1,182 @@
-import React, { useState } from "react";
-import moment from "moment";
-import Calendar from "react-calendar";
-import CardBox from "../../components/CardBox";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+// 공통 컴포넌트
+import { CardBox } from "../../components/index";
+// 아이콘
 import IconLeft from "../../assets/iconLeftGreen.svg";
 import IconRight from "../../assets/iconRightGreen.svg";
-import "react-calendar/dist/Calendar.css";
+import MiniChk from "../../assets/miniLogo4.svg";
+
+import dayjs from "dayjs";
+import Calendar from "react-calendar";
+import { ReDetail } from "./reDetail";
+// css
 import styled from "styled-components";
 
 export const MyCalendar = () => {
   const curDate = new Date(); // 현재 날짜
   const [value, onChange] = useState(curDate); // 클릭한 날짜 - 초기값 현재 날짜
-  const activeDate = moment(value).format("YY.MM.DD"); // 클릭한 날짜 (년-월-일)
-  // const monthOfActiveDate = moment(value).format("MM월");
-  // const [activeMonth, setActiveMonth] = useState(monthOfActiveDate);
+  const activeDate = dayjs(value); // 클릭한 날짜 (dayjs 객체로 변경)
+  const activeDateString = activeDate.format("YY.MM.DD"); // 클릭한 날짜 (년-월-일)
+  const activeMonth = dayjs(value).get("month") + 1 + "월";
 
-  // const getActiveMonth = (activeStartDate: moment.MomentInput) => {
-  //   const newActiveMonth = moment(activeStartDate).format('MM월');
-  //   setActiveMonth(newActiveMonth);
-  // };
+  const [datesOnly, setDatesOnly] = useState([]); //날짜만 추출
+  const [extractedData, setExtractedData] = useState([]); //예약 정보만 추출
+
+  const BE_URL = `http://34.64.69.226:3000/`;
+  const userToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVtYWlsQGUubWFpbCIsInN1YiI6MSwiaWF0IjoxNjg2MjM0NjUxLCJleHAiOjE3MTc3OTIyNTF9.QORp6FfVmnROH3A-OCvHzYKjzZVAXjADpKcwmCwGeAA";
+  const endpoint_reserve = `reservation/user`;
+
+  useEffect(() => {
+    axios
+      .get(`${BE_URL}${endpoint_reserve}`, {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      })
+      .then((res) => {
+        console.log(res.data);
+
+        // 추출된 정보들을 저장할 배열
+        const resData = res.data.data;
+        // createdAt의 날짜, hospital의 dutyName, reservedTime, memo만 추출한 배열
+        const extractedData = resData.map((item) => ({
+          date: item.createdAt.split("T")[0], // createdAt에서 날짜만 추출
+          dutyName: item.hospital.dutyName,
+          reservedTime: item.reservedTime,
+          memo: item.memo,
+        }));
+
+        console.log(extractedData);
+
+        // 날짜를 기준으로 배열 정렬
+        extractedData.sort((a, b) => (a.date > b.date ? 1 : -1));
+
+        // 날짜만 추출
+        const datesOnly = extractedData.map((item) => item.date);
+        setDatesOnly(datesOnly); // 날짜만 추출된 배열 설정
+        setExtractedData(extractedData); // 추출된 예약 정보 배열 설정
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, []);
+
+  // 예약 있는 날에 표시 추가
+  const addContent = ({ date }) => {
+    if (datesOnly.includes(dayjs(date).format("YYYY-MM-DD"))) {
+      return (
+        <>
+          <img
+            alt="reservation-chk"
+            src={MiniChk}
+            className="reservation-icon"
+          />{" "}
+          {/* 이미지 표시 */}
+        </>
+      );
+    }
+    return null; // 예약 없는 경우는 아무 내용도 반환하지 않음
+  };
+
+  // 예약된 날짜에 해당하는 타일에 클래스 이름 추가
+  const tileClassName = ({ date }) => {
+    if (datesOnly.includes(dayjs(date).format("YYYY-MM-DD"))) {
+      return "reserved-date"; // 예약된 날짜에 해당하는 클래스 이름
+    }
+    return null; // 예약 없는 경우는 클래스 이름 없음
+  };
+
+  const ReDate = ({ date }) => {
+    const formattedDate = dayjs(date).format("MM월DD일");
+    return (
+      <div>
+        <h2>{formattedDate}</h2>
+      </div>
+    );
+  };
+
+  const ReHour = ({ time }) => {
+    return (
+      <div>
+        <h3>{time}</h3>
+      </div>
+    );
+  };
+  // 디데이 계산하는 코드
+  const calculateDday = (activeDate, targetDate) => {
+    const diffInDays = dayjs(targetDate).diff(dayjs(activeDate), "day");
+
+    if (diffInDays !== 0) {
+      if (diffInDays < 0) {
+        return `D+${Math.abs(diffInDays)}`;
+      } else {
+        return `D-${diffInDays}`;
+      }
+    } else {
+      return "Today";
+    }
+  };
 
   return (
     <>
-      <CardBox linkTo={"#"}>
+      <CardBox linkTo={"#"} bxShadow="0px 4px 4px rgba(0, 0, 0, 0.25)">
         <ShowDate>
-          <h1>{activeDate}</h1>
+          <h1>{activeDateString}</h1>
         </ShowDate>
       </CardBox>
-      <CardBox linkTo={"#"}>
+      <CardBox linkTo={"#"} bxShadow={"0px 4px 4px rgba(0, 0, 0, 0.25)"}>
         <ShowCalendar>
-          <Calendar
+          <ReCalendar
             locale="ko"
             onChange={onChange}
             value={value}
-            nextLabel=<img alt="icon-right" src={IconRight}></img>
-            prevLabel=<img alt="icon-left" src={IconLeft}></img>
+            nextLabel={<img alt="icon-right" src={IconRight}></img>}
+            prevLabel={<img alt="icon-left" src={IconLeft}></img>}
             next2Label={null}
             prev2Label={null}
             showNeighboringMonth={false} // 앞뒤달에 이어지는 날짜
-            /* { onActiveStartDateChange={({ activeStartDate }) =>
-              getActiveMonth(activeStartDate)
-            } } */
+            tileContent={addContent}
+            tileClassName={tileClassName}
           />
         </ShowCalendar>
       </CardBox>
-      <CardBox>
+      <CardBox
+        linkTo={"#"}
+        bxShadow={"0px 4px 4px rgba(0, 0, 0, 0.25)"}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          background: "linear-gradient(#00ad5c, #00ad5c)",
+          backgroundSize: "100% 100px",
+        }}
+      >
         <DiaryHeader>
-          <div>
-            <span>5월</span>
-            <hr />
-          </div>
+          <h2>{activeMonth}</h2>
         </DiaryHeader>
+        <DiaryMain>
+          {extractedData.map((item, index) => (
+            <DiaryItemWrapper key={index}>
+              <DiaryItem>
+                <ReTime>
+                  <ReDate date={item.date} />
+                  <ReHour time={item.reservedTime} />
+                </ReTime>
+                <ReDetail hospitalName={item.dutyName} memo={item.memo} />
+                <DueDate>
+                  <h2>{calculateDday(activeDate, item.date)}</h2>
+                </DueDate>
+              </DiaryItem>
+            </DiaryItemWrapper>
+          ))}
+        </DiaryMain>
       </CardBox>
     </>
   );
 };
 
+// 날짜 표시
 const ShowDate = styled.div`
   width: 100%;
   display: flex;
@@ -69,27 +191,191 @@ const ShowDate = styled.div`
   }
 `;
 
+// 달력 부분
 const ShowCalendar = styled.div`
-  width: 100%;
   display: flex;
-  text-align: center;
   justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+`;
+
+const ReCalendar = styled(Calendar)`
+  .react-calendar {
+    width: 100%;
+    max-width: 832px;
+    background-color: #fff;
+    border: 1px solid #a0a096;
+    font-family: Arial, Helvetica
+  }
+
+  /* 상단 네비게이션 바 */
+  .react-calendar__navigation {
+    display: flex;
+    width: 100%;
+    height: 80px;
+    margin-bottom: 10px;
+
+    .react-calendar__navigation__label {
+      font-weight: bold;
+      font-size: 20px;
+      background: none;
+      border:none;
+    }
+
+    .react-calendar__navigation__arrow {
+      flex-grow: 0.333;
+      background: none;
+      border:none;
+    }
+
+    .react-calendar__navigation__label > span {
+      font-size: 25px;
+      font-weight: bold;
+      color: #121212;
+    }
+  }
+
+  /* 요일 표시 */
+  .react-calendar__month-view__weekdays {
+    background-color: rgba(0,173,92,0.5);
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 10px;
+    abbr { /*월,화,수... 글자 부분*/
+      color: #121212};
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+  }
+
+  /* day 타일 모양 */
+  .react-calendar__tile {
+    position: relative; /* 상대적 위치 설정 */
+    background: none;
+    text-align: center;
+    border: 5px solid white;
+    line-height: 80px;
+    font-size: 18px;
+    color: #121212;
+    border-radius: 100%;
+
+    width: 100%;
+    height: 100%;
+    padding-top: 15px;
+    padding-bottom: 5px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .react-calendar__tile img {
+    position: absolute; /* 절대적 위치 설정 */
+    bottom: 5px; /* 이미지를 아래쪽으로 20px 내리기 */
+    left: 50%; /* 이미지를 가운데로 정렬하기 위해 왼쪽 위치 설정 */
+    transform: translateX(-50%); /* 이미지의 가로 중앙 정렬 */
+    width: 20px;
+    height: 20px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: white;
+  }
+  }
+  /*hover, focus, 선택됐을 시 */
+  .react-calendar__tile:enabled:hover,
+  .react-calendar__tile:enabled:focus,
+  .react-calendar__tile--active {
+    background: #00ad5c;
+    border-radius: 100%;
+    color: white;
+    font-weight: bold;
+    border: 5px solid #00ad5c;
+  }
+
+  /* 오늘 표시 */
+  .react-calendar__tile--now {
+    border: 5px solid #00ad5c;
+    color: #121212;
+    font-weight: bold;
+  }
+  .react-calendar__tile--now:enabled:hover,
+  .react-calendar__tile--now:enabled:focus {
+    background-color: #00ad5c;
+    color: white;
+  }
+
+  /* 주말일때 일 표시 */
+  .react-calendar__month-view__days__day--weekend {
+    color: #a9a9a9;
+  }
 `;
 
 const DiaryHeader = styled.div`
   display: flex;
   justify-content: left;
-  align-items: center;
+  margin: 10px;
+  border-bottom: 1px solid #b2b2b2;
 
-  & > div:nth-child(2) {
-    color: #00ad5c;
-    font-weight: 600;
-    padding: 2%;
-    margin: 2%;
-    border-bottom: 2px solid;
+  & > h2 {
+    width: 100%;
+    font-size: 20px;
+    font-weight: bold;
+    color: #121212;
+    margin-bottom: 10px;
+  }
+`;
+
+const DiaryMain = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  margin: 10px;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  & > div:nth-child(1) {
+    flex-grow: 1;
   }
 
-  & > span {
+  & > div:nth-child(2) {
+    flex-grow: 2;
+  }
+
+  & > div:nth-child(3) {
+    flex-grow: 0.5;
+  }
+`;
+
+const DiaryItemWrapper = styled.div`
+  width: 100%;
+`;
+
+const DiaryItem = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 5px 10px 10px 10px;
+`;
+
+const ReTime = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 30%;
+  margin-right: 20px;
+`;
+
+const DueDate = styled.div`
+  float: left
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20%;
+
+  & > h2 {
     width: 100%;
+    font-size: 20px;
+    font-weight: bold;
+    color: #121212;
+    margin-bottom: 10px;
   }
 `;

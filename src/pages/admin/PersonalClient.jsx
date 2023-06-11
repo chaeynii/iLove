@@ -1,55 +1,96 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useQuery, useQueryClient } from "react-query";
-import { fetchList } from "../../server/Fetcher";
-import { Button } from "../../components/button";
+
+import { Button } from "../../components/Button";
+import colors from "../../constants/colors";
+
+import { deleteinstance, instance } from "../../server/Fetcher";
 
 export const PersonalClient = () => {
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0); // 페이지 숫자 상태
+  const [maxPostPage, setMaxPostPage] = useState(currentPage + 1);
+  const [checkArray, setCheckArray] = useState([]);
+  const [isAllChecked, setIsAllChecked] = useState(false);
 
-  const maxPostPage = 10;
   const queryClient = useQueryClient();
 
-  const token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZpcnN0QHRlc3QuZ29vZCIsInN1YiI6IjY0NzdlOTk2YTkwZTQwOWYxYTQ4NzIyMSIsInJvbGUiOiJjbGllbnQiLCJpYXQiOjE2ODU1ODA0MTQsImV4cCI6MTcxNzEzODAxNH0.cWYJrF8kSJrmC4csSlR2x5B4v_ASZhinvKl5NFoShGc";
-  const { isLoading, data: list } = useQuery("list", () => fetchList(token));
+  // 인스턴스 사용하는 함수
+  const listQuery = useQuery("list", async () => {
+    const response = await instance.get("/admin/get/generelclient"); // "/"는 baseURL에 추가된 경로입니다
+    return response.data;
+  });
 
-  const [checkValue, setCheckValue] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [checkList, setCheckList] = useState([]);
+  const list = listQuery.data;
+  const [searchInput, setsearchInput] = useState(""); // 검색창 인풋
+  const [submitted, setSubmitted] = useState(false); // 검색창 submit 상태
+  const [checkList, setCheckList] = useState([]); // 체크박스
   const onChange = (e) => {
-    setCheckValue(e.target.value);
+    setsearchInput(e.target.value);
     setSubmitted(false);
-    console.log(checkValue);
   };
 
+  //검색창 폼 제출
   const onSubmit = (e) => {
     e.preventDefault();
     setSubmitted(true);
   };
-  /* 아직삭제가 안됩니다*/
+
+  const allCheck = () => {
+    setIsAllChecked(!isAllChecked);
+    if (!isAllChecked) {
+      const ids = paginatedList.map((item) => item.id);
+      setCheckList(ids);
+    } else {
+      setCheckList([]);
+    }
+  };
+  // 체크박스 확인하는 함수
   const handleSingleCheck = (checked, id) => {
     if (checked) {
       setCheckList((prev) => [...prev, id]);
     } else {
       setCheckList((prev) => prev.filter((el) => el !== id));
     }
+
+    const copy = [...checkList];
+    copy.push(Number(id));
+    setCheckArray(copy);
   };
+
+  const arrayDelete = async () => {
+    console.log("idArray", checkArray);
+    await deleteinstance.delete("/admin/deleteall", {
+      data: {
+        userIds: checkArray,
+      },
+    });
+    queryClient.invalidateQueries("list");
+  };
+  // 페이지네이션 데이터의 id와 체크된 열의 id 값 필터
+  const handleDelete = async (item) => {
+    console.log("삭제할 id:", item);
+    await deleteinstance.delete(`admin/delete/${item.id}`); //React Query에서 'invalidateQueries' 기능 사용해서 업데이트 된 목록 다시
+    queryClient.invalidateQueries("list");
+  };
+
+  //페이지네이션 로직
   useEffect(() => {
-    if (currentPage <= maxPostPage - 2) {
+    if (currentPage <= maxPostPage - 1) {
       const nextPage = currentPage + 1;
-      queryClient.prefetchQuery(["posts", nextPage], () => fetchList(nextPage));
+      queryClient.prefetchQuery(["posts", nextPage], () => listQuery.data);
     }
   }, [currentPage, queryClient]);
 
-  if (isLoading) {
+  if (listQuery.isLoading) {
     return <h1>로딩중입니다..</h1>;
   }
 
-  const filteredList = list?.filter(
-    (item) => !submitted || item.email === checkValue
+  const filteredList = list.data?.filter(
+    (item) => !submitted || item.email === searchInput
   );
 
+  //페이지네이션 로직
   const startIndex = currentPage * 10;
   const endIndex = startIndex + 10;
   const paginatedList = filteredList.slice(startIndex, endIndex);
@@ -59,14 +100,18 @@ export const PersonalClient = () => {
       <PersonalTitle>개인 클라이언트 관리</PersonalTitle>
       <SearchBox>
         <form onSubmit={onSubmit}>
-          <InputContent type="text" value={checkValue} onChange={onChange} />
+          <InputContent type="text" value={searchInput} onChange={onChange} />
         </form>
       </SearchBox>
       <Table>
         <thead>
           <tr>
             <TableHeader>
-              <Checkbox type="checkbox" />
+              <Checkbox
+                type="checkbox"
+                checked={isAllChecked}
+                onChange={allCheck}
+              />
             </TableHeader>
             <TableHeader>가입날짜</TableHeader>
             <TableHeader>이름</TableHeader>
@@ -77,40 +122,64 @@ export const PersonalClient = () => {
         </thead>
         <tbody>
           {paginatedList.map((item) => (
-            <tr key={item._id.$oid}>
+            <TableRow key={item.id}>
               <TableData>
                 <Checkbox
-                  onChange={(e) =>
-                    handleSingleCheck(e.target.checked, item._id.$oid)
-                  }
-                  checked={checkList.includes(item._id.$oid)}
+                  checked={checkList.includes(item.id)}
+                  onChange={(e) => handleSingleCheck(e.target.checked, item.id)}
                 />
               </TableData>
-              <TableData>{item.createdAt.$date.slice(0, 10)}</TableData>
+              <TableData>{item.createdAt.slice(0, 10)}</TableData>
               <TableData>{item.name}</TableData>
               <TableData>{item.email}</TableData>
               <TableData>{item.phoneNumber}</TableData>
               <TableData>
-                <Button width={"100px"} height={"50px"} label={"삭제"} />
+                <Button
+                  width={"80px"}
+                  height={"30px"}
+                  label={"삭제"}
+                  bgcolor={colors.primary}
+                  btnColor={"white"}
+                  onClick={() => handleDelete(item)}
+                />
               </TableData>
-            </tr>
+            </TableRow>
           ))}
         </tbody>
+        <tbody>
+          <Button
+            width={"80px"}
+            height={"30px"}
+            label={"선택삭제"}
+            bgcolor={colors.primary}
+            btnColor={"white"}
+            onClick={arrayDelete}
+          />
+        </tbody>
       </Table>
+
       <ButtonBox>
-        <button
-          disabled={currentPage <= 0}
+        <Button
+          width={"80px"}
+          height={"30px"}
+          label={"이전페이지"}
+          bgcolor={colors.primary}
+          btnColor={"white"}
+          disabled={currentPage > maxPostPage}
           onClick={() => setCurrentPage((prev) => prev - 1)}
-        >
-          이전 페이지
-        </button>
+        ></Button>
         <span>Page {currentPage + 1}</span>
-        <button
-          disabled={currentPage >= maxPostPage - 1}
+        <Button
+          width={"80px"}
+          height={"30px"}
+          label={"다음페이지"}
+          bgcolor={colors.primary}
+          btnColor={"white"}
+          disabled={currentPage >= maxPostPage}
           onClick={() => setCurrentPage((prev) => prev + 1)}
         >
           다음 페이지
-        </button>
+        </Button>
       </ButtonBox>
     </>
   );
@@ -149,8 +218,13 @@ const TableData = styled.td`
   font-weight: 600;
   font-size: 24px;
   padding: 10px;
+  height: 5%;
+  padding-top: 2%;
 `;
 
+const TableRow = styled.tr`
+  height: 70px;
+`;
 const Checkbox = styled.input.attrs({ type: "checkbox" })`
   width: 100%;
   cursor: pointer;
@@ -171,19 +245,23 @@ const InputContent = styled.input`
   height: 100%;
   outline: none;
   border: none;
-  border-radius: 5px;
-
   font-family: "Inter";
   font-style: normal;
   font-weight: 400;
-  font-size: 20px;
-  line-height: 15px;
+  font-size: 18px;
+  line-height: 24px;
 `;
 
 const ButtonBox = styled.div`
-  width: 40%;
   display: flex;
-  justify-content: space-between;
+
   align-items: center;
   margin-top: 2%;
+
+  span {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 600;
+    font-size: 24px;
+  }
 `;
