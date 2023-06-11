@@ -13,9 +13,8 @@ import { Header } from "../../components/Header";
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import styled from "styled-components";
 import colors from "../../constants/colors";
-
 const userToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imp1bkBlbWFpbC5jb20iLCJzdWIiOjE4LCJpYXQiOjE2ODYzNzY1NDYsImV4cCI6MTcxNzkzNDE0Nn0.nDZfyySUgGh3_eHKfw4hoh8LYXsv2u5ljcB1NdyEGcM";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imp1bkBlbWFpbC5jb20iLCJzdWIiOjIwLCJpYXQiOjE2ODY0NTkwNTUsImV4cCI6MTcxODAxNjY1NX0.IqsJIcLYwGZB8sheLdMiBIK1odVAlJsGNJ2NYaNok1E";
 const endpoint_user = "users";
 
 //주소, 번호, 이메일 칸 앞에 로고넣기 위해 사용

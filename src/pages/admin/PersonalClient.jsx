@@ -165,7 +165,7 @@ export const PersonalClient = () => {
           label={"이전페이지"}
           bgcolor={colors.primary}
           btnColor={"white"}
-          disabled={currentPage >= maxPostPage}
+          disabled={currentPage > maxPostPage}
           onClick={() => setCurrentPage((prev) => prev - 1)}
         ></Button>
         <span>Page {currentPage + 1}</span>

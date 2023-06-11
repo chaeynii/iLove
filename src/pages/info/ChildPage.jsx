@@ -23,7 +23,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
 const userToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imp1bkBlbWFpbC5jb20iLCJzdWIiOjE4LCJpYXQiOjE2ODYzNzY1NDYsImV4cCI6MTcxNzkzNDE0Nn0.nDZfyySUgGh3_eHKfw4hoh8LYXsv2u5ljcB1NdyEGcM";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imp1bkBlbWFpbC5jb20iLCJzdWIiOjIwLCJpYXQiOjE2ODY0NTkwNTUsImV4cCI6MTcxODAxNjY1NX0.IqsJIcLYwGZB8sheLdMiBIK1odVAlJsGNJ2NYaNok1E";
 
 const Space = styled.div`
   margin-bottom: 20px;
@@ -68,49 +68,64 @@ const BackButton = styled(Button)`
 function ChildPage() {
   const [boxCreators, setBoxCreators] = useState([]);
 
-  useEffect(()=>{
-    const getKids = async()=>{
-      const axiosGet = await axios.get('/kid/get', {
+  useEffect(() => {
+    const getKids = async () => {
+      const axiosGet = await axios.get("/kid/get", {
         headers: {
-          Authorization: `Bearer ${userToken}`
-        }
-      })
-      const axiosGetResponse = axiosGet.data.data
-      axiosGetResponse.map(objects=>{
-        const originBoxCreator = ()=> <ChildBox
-          key={objects.id}
-          id={objects.id}
-          name={objects.name}
-          gender={objects.gender}
-          birth={objects.birth}
-          memo={objects.memo}
-          image={objects.image}
-          onRemove={handleRemove} />
-        setBoxCreators((prevCreators)=>[originBoxCreator, ...prevCreators])
-      })
-    }
-    getKids()
-  },[])
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      const axiosGetResponse = axiosGet.data.data;
+      axiosGetResponse.map((objects) => {
+        const originBoxCreator = () => (
+          <ChildBox
+            key={objects.id}
+            id={objects.id}
+            name={objects.name}
+            gender={objects.gender}
+            birth={objects.birth}
+            memo={objects.memo}
+            image={objects.image}
+            onRemove={handleRemove}
+          />
+        );
+        setBoxCreators((prevCreators) => [originBoxCreator, ...prevCreators]);
+      });
+    };
+    getKids();
+  }, []);
 
-  const handleClick = async() => {
-    const axiosPost = await axios.post('/kid/regist', {}, {
-      headers: {
-        Authorization: `Bearer ${userToken}`
+  const handleClick = async () => {
+    const axiosPost = await axios.post(
+      "/kid/regist",
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
       }
-    })
-    const axiosPostResponse = axiosPost.data.data
-    console.log(axiosPostResponse)
-    const newBoxCreator = () => <ChildBox key={axiosPostResponse.id} id={axiosPostResponse.id} onRemove={handleRemove} />;
+    );
+    const axiosPostResponse = axiosPost.data.data;
+    console.log(axiosPostResponse);
+    const newBoxCreator = () => (
+      <ChildBox
+        key={axiosPostResponse.id}
+        id={axiosPostResponse.id}
+        onRemove={handleRemove}
+      />
+    );
     setBoxCreators((prevCreators) => [newBoxCreator, ...prevCreators]);
   };
 
-  const handleRemove = async(id) => {
-    await axios.delete(`/kid/${id}`,{
-        headers: {
-          Authorization: `Bearer ${userToken}`
-        }
-    })
-    setBoxCreators((prevCreators) => prevCreators.filter(creator => creator().props.id !== id));
+  const handleRemove = async (id) => {
+    await axios.delete(`/kid/${id}`, {
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    });
+    setBoxCreators((prevCreators) =>
+      prevCreators.filter((creator) => creator().props.id !== id)
+    );
   };
 
   return (
