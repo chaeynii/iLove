@@ -16,19 +16,23 @@ import styled from "styled-components";
 export const MyCalendar = () => {
   const curDate = new Date(); // 현재 날짜
   const [value, onChange] = useState(curDate); // 클릭한 날짜 - 초기값 현재 날짜
-  const activeDate = dayjs(value).format("YY.MM.DD"); // 클릭한 날짜 (년-월-일)
+  const activeDate = dayjs(value); // 클릭한 날짜 (dayjs 객체로 변경)
+  const activeDateString = activeDate.format("YY.MM.DD"); // 클릭한 날짜 (년-월-일)
   const activeMonth = dayjs(value).get("month") + 1 + "월";
 
   const [datesOnly, setDatesOnly] = useState([]); //날짜만 추출
   const [extractedData, setExtractedData] = useState([]); //예약 정보만 추출
 
+  const BE_URL = `http://34.64.69.226:3000/`;
+  const userToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVtYWlsQGUubWFpbCIsInN1YiI6MSwiaWF0IjoxNjg2MjM0NjUxLCJleHAiOjE3MTc3OTIyNTF9.QORp6FfVmnROH3A-OCvHzYKjzZVAXjADpKcwmCwGeAA";
+  const endpoint_reserve = `reservation/user`;
+
   useEffect(() => {
     axios
-      .get("./reservation/user", {
+      .get(`${BE_URL}${endpoint_reserve}`, {
         headers: {
-          Accept: "application/json",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVtYWlsQGUubWFpbCIsInN1YiI6MSwiaWF0IjoxNjg2MjM0NjUxLCJleHAiOjE3MTc3OTIyNTF9.QORp6FfVmnROH3A-OCvHzYKjzZVAXjADpKcwmCwGeAA",
+          Authorization: `Bearer ${userToken}`,
         },
       })
       .then((res) => {
@@ -45,6 +49,9 @@ export const MyCalendar = () => {
         }));
 
         console.log(extractedData);
+
+        // 날짜를 기준으로 배열 정렬
+        extractedData.sort((a, b) => (a.date > b.date ? 1 : -1));
 
         // 날짜만 추출
         const datesOnly = extractedData.map((item) => item.date);
@@ -82,9 +89,10 @@ export const MyCalendar = () => {
   };
 
   const ReDate = ({ date }) => {
+    const formattedDate = dayjs(date).format("MM월DD일");
     return (
       <div>
-        <h3>{date}</h3>
+        <h2>{formattedDate}</h2>
       </div>
     );
   };
@@ -96,12 +104,26 @@ export const MyCalendar = () => {
       </div>
     );
   };
+  // 디데이 계산하는 코드
+  const calculateDday = (activeDate, targetDate) => {
+    const diffInDays = dayjs(targetDate).diff(dayjs(activeDate), "day");
+
+    if (diffInDays !== 0) {
+      if (diffInDays < 0) {
+        return `D+${Math.abs(diffInDays)}`;
+      } else {
+        return `D-${diffInDays}`;
+      }
+    } else {
+      return "Today";
+    }
+  };
 
   return (
     <>
       <CardBox linkTo={"#"} bxShadow="0px 4px 4px rgba(0, 0, 0, 0.25)">
         <ShowDate>
-          <h1>{activeDate}</h1>
+          <h1>{activeDateString}</h1>
         </ShowDate>
       </CardBox>
       <CardBox linkTo={"#"} bxShadow={"0px 4px 4px rgba(0, 0, 0, 0.25)"}>
@@ -123,28 +145,31 @@ export const MyCalendar = () => {
       <CardBox
         linkTo={"#"}
         bxShadow={"0px 4px 4px rgba(0, 0, 0, 0.25)"}
-        style={{ display: "flex", flexDirection: "column" }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          background: "linear-gradient(#00ad5c, #00ad5c)",
+          backgroundSize: "100% 100px",
+        }}
       >
         <DiaryHeader>
           <h2>{activeMonth}</h2>
         </DiaryHeader>
         <DiaryMain>
           {extractedData.map((item, index) => (
-            <React.Fragment key={index}>
-              <ReTime>
-                <ReDate date={item.date} />
-                <ReHour time={item.reservedTime} />
-              </ReTime>
-              <ReDetail
-                hospitalName={item.dutyName}
-                memo={item.memo}
-                contentWidth={100 - 33} // ReDate와 ReTime이 차지하는 너비를 제외한 나머지 너비
-              />
-            </React.Fragment>
+            <DiaryItemWrapper key={index}>
+              <DiaryItem>
+                <ReTime>
+                  <ReDate date={item.date} />
+                  <ReHour time={item.reservedTime} />
+                </ReTime>
+                <ReDetail hospitalName={item.dutyName} memo={item.memo} />
+                <DueDate>
+                  <h2>{calculateDday(activeDate, item.date)}</h2>
+                </DueDate>
+              </DiaryItem>
+            </DiaryItemWrapper>
           ))}
-          <DueDate>
-            <h2>D-day</h2>
-          </DueDate>
         </DiaryMain>
       </CardBox>
     </>
@@ -204,7 +229,7 @@ const ReCalendar = styled(Calendar)`
     }
 
     .react-calendar__navigation__label > span {
-      font-size: 20px;
+      font-size: 25px;
       font-weight: bold;
       color: #121212;
     }
@@ -212,7 +237,10 @@ const ReCalendar = styled(Calendar)`
 
   /* 요일 표시 */
   .react-calendar__month-view__weekdays {
-    background: none;
+    background-color: rgba(0,173,92,0.5);
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 10px;
     abbr { /*월,화,수... 글자 부분*/
       color: #121212};
       font-size: 18px;
@@ -306,27 +334,42 @@ const DiaryMain = styled.div`
   justify-content: space-between;
 
   & > div:nth-child(1) {
-    width: 33%;
+    flex-grow: 1;
   }
 
   & > div:nth-child(2) {
-    width: 67%;
+    flex-grow: 2;
+  }
+
+  & > div:nth-child(3) {
+    flex-grow: 0.5;
   }
 `;
 
-const ReTime = styled.div`
-  width: 33%;
+const DiaryItemWrapper = styled.div`
+  width: 100%;
+`;
+
+const DiaryItem = styled.div`
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;s
+  margin: 5px 10px 10px 10px;
+`;
+
+const ReTime = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 30%;
+  margin-right: 20px;
 `;
 
 const DueDate = styled.div`
-  width: 15%;
+  float: left
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 20%;
 
   & > h2 {
     width: 100%;
