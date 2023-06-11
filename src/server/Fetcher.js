@@ -7,7 +7,7 @@ const userToken =
 // baseURL 은 변수에 공통으로 사용할 경로 설정후 :id 이런식으로 추가하고
 // 사용할 때는 ${변수} 이런 방법 예상
 export const instance = axios.create({
-  baseURL: "http://34.64.69.226:3000/admin/get/generelclient",
+  baseURL: "http://34.64.69.226:3000/",
   timeout: 1000,
   headers: {
     Authorization: `Bearer ${userToken}`,
@@ -15,7 +15,7 @@ export const instance = axios.create({
 });
 
 export const deleteinstance = axios.create({
-  baseURL: "http://34.64.69.226:3000/admin/delete/",
+  baseURL: "http://34.64.69.226:3000/",
   timeout: 1000,
   headers: {
     Authorization: `Bearer ${userToken}`,
