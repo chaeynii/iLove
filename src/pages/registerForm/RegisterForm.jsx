@@ -16,10 +16,17 @@ export const RegisterForm = () => {
   const [closeTime, setCloseTime] = useState([]); //마감시간
   const [info, setInfo] = useState(""); // 병원 정보
   const [notice, setNotice] = useState(""); // 주의사항
+  const [lat, setLat] = useState(0);
+  const [lng, setLng] = useState(0);
+  const [fullAddress, setFullAddress] = useState("");
+
   // 함수형 태로 자식 props를 보내서 Post의  주소 데이터를 받아온다
-  const getAddrData = (addr1, addr2) => {
+  const getAddrData = (addr1, addr2, lat, lng, fullAddress) => {
     setAddr1(addr1);
     setAddr2(addr2);
+    setLat(lat);
+    setLng(lng);
+    setFullAddress(fullAddress);
   };
 
   // 마찬가지로 SelectBox 에서 오픈시간 데이터를 받아온다.
@@ -101,14 +108,16 @@ export const RegisterForm = () => {
     ] = closeDutyTimes;
 
     axios.post("/hospital", {
+      dutyAddr: fullAddress,
       dutyAddr1Depth: addr1,
       dutyAddr2Depth: addr2,
+      dutyAddr3Depth: addr2,
       dutyEtc: info,
-      dutyNotice: notice,
+      notice: notice,
       dutyName: dutyName,
       dutyTel1: phone,
-      startLunch: dutyTime9s,
-      endLunch: dutyTime9c,
+      dutyTime9s: dutyTime9s,
+      dutyTime9c: dutyTime9c,
       dutyTime1c: dutyTime1c,
       dutyTime1s: dutyTime1s,
       dutyTime2c: dutyTime2c,
@@ -125,6 +134,8 @@ export const RegisterForm = () => {
       dutyTime7s: dutyTime7s,
       dutyTime8c: dutyTime8c,
       dutyTime8s: dutyTime8s,
+      wgs84Lat: lat,
+      wgs84Lon: lng,
     });
   };
 
