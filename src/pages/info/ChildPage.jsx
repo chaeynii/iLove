@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 // 공통 컴포넌트 연결해서 테스트함
 import { Button } from "../../components/Button";
@@ -10,7 +11,7 @@ import { Container } from "../../components/Container";
 import { Footer } from "../../components/Footer";
 import { CardBox } from "../../components/CardBox";
 import { Header } from "../../components/Header";
-import { ChildBox } from "../../components/ChildBox";
+import { ChildBox } from "./ChildBox";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import styled from "styled-components";
@@ -20,6 +21,9 @@ import MyPage from "./MyPage";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
+
+const userToken =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imp1bkBlbWFpbC5jb20iLCJzdWIiOjE4LCJpYXQiOjE2ODYzNzY1NDYsImV4cCI6MTcxNzkzNDE0Nn0.nDZfyySUgGh3_eHKfw4hoh8LYXsv2u5ljcB1NdyEGcM";
 
 const Space = styled.div`
   margin-bottom: 20px;
@@ -64,18 +68,49 @@ const BackButton = styled(Button)`
 function ChildPage() {
   const [boxCreators, setBoxCreators] = useState([]);
 
-  const handleClick = () => {
-    const newBoxId = Date.now();
-    const newBoxCreator = () => (
-      <ChildBox key={newBoxId} id={newBoxId} onRemove={handleRemove} />
-    );
+  useEffect(()=>{
+    const getKids = async()=>{
+      const axiosGet = await axios.get('/kid/get', {
+        headers: {
+          Authorization: `Bearer ${userToken}`
+        }
+      })
+      const axiosGetResponse = axiosGet.data.data
+      axiosGetResponse.map(objects=>{
+        const originBoxCreator = ()=> <ChildBox
+          key={objects.id}
+          id={objects.id}
+          name={objects.name}
+          gender={objects.gender}
+          birth={objects.birth}
+          memo={objects.memo}
+          image={objects.image}
+          onRemove={handleRemove} />
+        setBoxCreators((prevCreators)=>[originBoxCreator, ...prevCreators])
+      })
+    }
+    getKids()
+  },[])
+
+  const handleClick = async() => {
+    const axiosPost = await axios.post('/kid/regist', {}, {
+      headers: {
+        Authorization: `Bearer ${userToken}`
+      }
+    })
+    const axiosPostResponse = axiosPost.data.data
+    console.log(axiosPostResponse)
+    const newBoxCreator = () => <ChildBox key={axiosPostResponse.id} id={axiosPostResponse.id} onRemove={handleRemove} />;
     setBoxCreators((prevCreators) => [newBoxCreator, ...prevCreators]);
   };
 
-  const handleRemove = (id) => {
-    setBoxCreators((prevCreators) =>
-      prevCreators.filter((creator) => creator().props.id !== id)
-    );
+  const handleRemove = async(id) => {
+    await axios.delete(`/kid/${id}`,{
+        headers: {
+          Authorization: `Bearer ${userToken}`
+        }
+    })
+    setBoxCreators((prevCreators) => prevCreators.filter(creator => creator().props.id !== id));
   };
 
   return (

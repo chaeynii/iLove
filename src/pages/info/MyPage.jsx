@@ -14,10 +14,8 @@ import { Header } from "../../components/Header";
 import styled from "styled-components";
 import colors from "../../constants/colors";
 
-import ChildPage from "./ChildPage";
-
 const userToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imp1bkBlbWFpbC5jb20iLCJzdWIiOjQsImlhdCI6MTY4NjI0MTEzOCwiZXhwIjoxNzE3Nzk4NzM4fQ.KasXkCCr9xevwacUP2lA54x5Y4AElLhtTftH8Mj3jho";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imp1bkBlbWFpbC5jb20iLCJzdWIiOjE4LCJpYXQiOjE2ODYzNzY1NDYsImV4cCI6MTcxNzkzNDE0Nn0.nDZfyySUgGh3_eHKfw4hoh8LYXsv2u5ljcB1NdyEGcM";
 const endpoint_user = "users";
 
 //주소, 번호, 이메일 칸 앞에 로고넣기 위해 사용
@@ -124,8 +122,12 @@ function MyPage() {
     phoneNumber: "",
   });
 
+  const [originData, setOriginData] = useState({
+    ...editData,
+  });
+
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUserData = async () => {
       try {
         const res1 = await axios.get("/users/get", {
           headers: {
@@ -143,7 +145,7 @@ function MyPage() {
         console.error(err);
       }
     };
-    fetchData();
+    fetchUserData();
   }, []);
 
   // 클릭시 ChildPage로 이동
@@ -152,25 +154,35 @@ function MyPage() {
     navigate("./ChildPage");
   };
 
+  const handleCancleClick = () => {
+    setEditData({ ...originData });
+  };
+
   const handleEditClick = async () => {
     setIsEditing(!isEditing);
-
     if (isEditing) {
-      try {
-        const response = await axios.patch("/users/update", editData, {
+      await updateUser();
+    }
+  };
+
+  const updateUser = async () => {
+    try {
+      const response = await axios.patch(
+        "/users/update",
+        {
+          name: editData.name,
+          phoneNumber: editData.phoneNumber,
+          address: editData.address,
+        },
+        {
           headers: {
             Authorization: `Bearer ${userToken}`,
           },
-        });
-
-        if (response.data.success) {
-          setUser(response.data.data);
-        } else {
-          // handle error
         }
-      } catch (error) {
-        console.error(error);
-      }
+      );
+      console.log(editData);
+    } catch (error) {
+      console.error(error);
     }
   };
 
