@@ -19,7 +19,7 @@ export const SearchBar = ({ onSearch, depth1, depth2, onLocationChange }) => {
   const onChange = (e) => {
     setSearch(e.target.value);
   };
-  // 폼 전송 처리 함수 - 검색어를 SearchPage로 보내줍니다
+  // 폼 전송 처리 함수
   const handleSubmit = (e) => {
     e.preventDefault();
     onSearch(search);
@@ -129,35 +129,43 @@ export const SearchBar = ({ onSearch, depth1, depth2, onLocationChange }) => {
           </button>
           <span>{selectedLocationFirst + " " + selectedLocationSecond}</span>
           {/* ModalOpen이 true일 경우에 Modal 컴포넌트 렌더링 실행 */}
-          <Modal
-            title="위치선택"
-            onClose={closeModal}
-            isOpen={isModalOpen}
-            onSaved={onSaved}
-          >
-            <Style.ModalContent>
-              <div>
-                <Style.BtnSelected>{locationFirst}</Style.BtnSelected>
-                <Style.BtnSelected>{locationSecond}</Style.BtnSelected>
-              </div>
-              <div>
-                <Style.DropdownMenu>{locationFirstOptions}</Style.DropdownMenu>
-                <Style.DropdownMenu>{locationSecondOptions}</Style.DropdownMenu>
-              </div>
-            </Style.ModalContent>
-          </Modal>
+          {isModalOpen && (
+            <Modal
+              title="위치선택"
+              onClose={closeModal}
+              isOpen="true"
+              onSaved={onSaved}
+            >
+              <Style.ModalContent>
+                <div>
+                  <Style.BtnSelected>{locationFirst}</Style.BtnSelected>
+                  <Style.BtnSelected>{locationSecond}</Style.BtnSelected>
+                </div>
+                <div>
+                  <Style.DropdownMenu>
+                    {locationFirstOptions}
+                  </Style.DropdownMenu>
+                  <Style.DropdownMenu>
+                    {locationSecondOptions}
+                  </Style.DropdownMenu>
+                </div>
+              </Style.ModalContent>
+            </Modal>
+          )}
         </Style.Location>
         <button onClick={openAlarmModal}>
           <img alt="icon-alarm" src={IconAlarm} />
         </button>
-        <Modal
-          title="알람"
-          onClose={closeAlarmModal}
-          isOpen={isAlarmModalOpen}
-          onSaved={onSavedAlarmModal}
-        >
-          <div>등록된 알림이 없습니다.</div>
-        </Modal>
+        {isAlarmModalOpen && (
+          <Modal
+            title="알람"
+            onClose={closeAlarmModal}
+            isOpen="true"
+            onSaved={onSavedAlarmModal}
+          >
+            <div>등록된 알림이 없습니다.</div>
+          </Modal>
+        )}
       </div>
       <Style.InputBox>
         <form onSubmit={handleSubmit}>
