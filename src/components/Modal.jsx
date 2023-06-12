@@ -4,6 +4,16 @@ import * as Style from "./styles/ModalStyle";
 import colors from "../constants/colors";
 import fontSize from "../constants/fontSize";
 
+// 모달 버튼 props
+const ModalBtnProps = {
+  btnFontSize: `${fontSize.h2}`,
+  bgcolor: `${colors.primary} !important`,
+  borderOutLine: `${colors.BtnborderOut} !important`,
+  width: "fit-content",
+  height: "fit-content",
+  color: "white",
+};
+
 export const Modal = ({
   title = "모달제목",
   isOpen,
@@ -16,23 +26,14 @@ export const Modal = ({
     onClose(); // onClose 함수 호출
   };
 
-  const ModalBtnProps = {
-    btnFontSize: `${fontSize.h2}`,
-    bgcolor: `${colors.primary} !important`,
-    borderOutLine: `${colors.BtnborderOut} !important`,
-    width: "fit-content",
-    height: "fit-content",
-    color: "white",
-  };
-
   const closeModalHandler = () => {
     onClose(); // onClose 함수 호출
   };
 
   return (
     <>
-      <Style.ModalContainer>
-        {isOpen && (
+      {isOpen && (
+        <Style.ModalContainer>
           <Style.ModalBackdrop onClick={closeModalHandler}>
             <Style.ModalView onClick={(e) => e.stopPropagation()}>
               <Style.ModalTitle>
@@ -57,8 +58,8 @@ export const Modal = ({
               </div>
             </Style.ModalView>
           </Style.ModalBackdrop>
-        )}
-      </Style.ModalContainer>
+        </Style.ModalContainer>
+      )}
     </>
   );
 };
