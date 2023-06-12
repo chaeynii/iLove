@@ -7,11 +7,9 @@ import {
   Route,
   Link,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 import axios from "axios";
-
-// 검색창 라이브러리
-import Select from "react-select";
 
 // 알림창 라이브러리
 import "react-toastify/dist/ReactToastify.css";
@@ -31,6 +29,8 @@ import {
   Footer,
   SearchBar,
 } from "../../components/index";
+
+import { MyComponent } from "./MyComponent";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import colors from "../../constants/colors";
@@ -121,7 +121,6 @@ const UserView = () => {
     } else {
       setPwValid(false);
     }
-    console.log(e.target.value);
   };
 
   // 비밀번호 확인 검사
@@ -132,7 +131,6 @@ const UserView = () => {
     } else {
       setPwCheckValid(false);
     }
-    console.log(e.target.value);
   };
 
   // 핸드폰 유효성 검사
@@ -165,7 +163,7 @@ const UserView = () => {
   const register = () => {
     // axios를 사용하여 POST 요청 만들기
     axios
-      .post("/users/clientsignup", {
+      .post("http://34.64.69.226:3000/users/clientsignup", {
         name: name,
         email: email,
         password: pw,
@@ -174,7 +172,8 @@ const UserView = () => {
       .then((response) => {
         // 회원가입 성공
         // 홈으로 이동
-        window.location.href = "/";
+        useNavigate("/");
+        // window.location.href = "/";
         console.log("등록 성공", response.data);
       })
       .catch((error) => {
@@ -298,6 +297,9 @@ const HospitalView = () => {
   //버튼 활성화
   const [notAllow, setNotAllow] = useState(true);
 
+  // 병원 이름
+  const [hospitalNameInput, sethospitalNameInput] = useState("");
+
   // 이메일 유효성 검사
   const handleEmail = (e) => {
     setEmail(e.target.value);
@@ -313,7 +315,6 @@ const HospitalView = () => {
     } else {
       setPwValid(false);
     }
-    console.log(e.target.value);
   };
 
   // 비밀번호 확인 검사
@@ -324,7 +325,6 @@ const HospitalView = () => {
     } else {
       setPwCheckValid(false);
     }
-    console.log(e.target.value);
   };
 
   // 핸드폰 유효성 검사
@@ -357,8 +357,8 @@ const HospitalView = () => {
   const register = () => {
     // axios를 사용하여 POST 요청 만들기
     axios
-      .post("http://34.64.69.226:3000/users/managersignup", {
-        hospitalId: name,
+      .post("/users/managersignup", {
+        hospitalId: selectedOption.key,
         name: name,
         email: email,
         password: pw,
@@ -366,7 +366,8 @@ const HospitalView = () => {
       })
       .then((response) => {
         // 성공적인 응답 처리
-        window.location.href = "/";
+        useNavigate("/");
+        // window.location.href = "/";
         console.log("등록 성공", response.data);
       })
       .catch((error) => {
@@ -374,13 +375,6 @@ const HospitalView = () => {
         console.error("등록 에러", error);
         toast("이미 가입된 사용자입니다.");
       });
-  };
-
-  const [hospitalNameInput, setHospitalNameInput] = useState("");
-
-  // hospital name Get event handler
-  const handleHospitalName = (e) => {
-    setHospitalNameInput(e.target.value);
   };
 
   return (
@@ -405,12 +399,8 @@ const HospitalView = () => {
 
         <SignUpInputDiv>
           <InputTitle>병원명</InputTitle>
-          <MyComponent
-            placeholder="Search hospital name"
-            type="text"
-            value={hospitalNameInput}
-            onChange={handleHospitalName}
-          />
+          <MyComponent />
+
           <P>
             *찾으시는 병원이 없으실 경우 하단에 신규 병원 등록 신청하기를
             눌러주세요.
@@ -608,47 +598,3 @@ const P = styled.p`
 const ErrorMaessage = styled.p`
   color: #c20000;
 `;
-
-// 병원 검색창
-const MyComponent = ({ value, onChange }) => {
-  const [hospitalData, setHospitalData] = useState([]);
-  const [filteredOptions, setFilteredOptions] = useState([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`/hospital/hospitalName/소아과`);
-        console.log("success", response.data.data);
-        setHospitalData(response.data.data);
-      } catch (error) {
-        console.error("Error:", error);
-      }
-    };
-
-    fetchData();
-  }, [value]);
-
-  useEffect(() => {
-    const filtered = hospitalData.filter((data) =>
-      data.name.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredOptions(filtered);
-  }, [value, hospitalData]);
-
-  // if (hospitalData.length === 0) {
-  //   return null; // or render a loading indicator
-  // }
-
-  return (
-    <>
-      <Select
-        options={filteredOptions.map((data) => ({
-          value: data.name,
-          label: data.name,
-        }))}
-        value={value}
-        onChange={onChange}
-      />
-    </>
-  );
-};
