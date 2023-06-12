@@ -68,8 +68,8 @@ export const SearchPage = () => {
         const response = await axios.get(
           // depth2가 전체면 depth1만 넣어서 요청보냄
           depth2 === "전체"
-            ? `${BE_URL}hospital?depth1=${depth1}&size=10&page=0&sort=${option.state}`
-            : `${BE_URL}hospital?depth1=${depth1}&depth2=${depth2}&size=10&page=0&sort=${option.state}`
+            ? `${BE_URL}hospital?depth1=${depth1}&size=10&page=1&sort=${option.state}`
+            : `${BE_URL}hospital?depth1=${depth1}&depth2=${depth2}&size=10&page=1&sort=${option.state}`
         );
         return response.data;
       } catch (error) {
@@ -84,7 +84,7 @@ export const SearchPage = () => {
     async () => {
       try {
         const response = axios
-          .get(`${BE_URL}${endpoint_favorite}user`, {
+          .get(`${BE_URL}${endpoint_favorite}`, {
             headers: {
               Authorization: `Bearer ${userToken}`,
             },

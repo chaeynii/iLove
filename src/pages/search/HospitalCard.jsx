@@ -10,6 +10,8 @@ import {
   IconStarFilled,
 } from "../../assets/index";
 
+//utils
+import { formatTime } from "../../utils.js";
 //요일 정보 지정을 위한 상수
 //일~월 : 0~6
 const WEEK = ["일", "월", "화", "수", "목", "금", "토"];
@@ -25,16 +27,6 @@ export const HospitalCard = ({
 }) => {
   //요일 정보 변환
   const todayText = WEEK[today];
-
-  // 시간 형식을 변환하는 함수
-  const formatTime = (time) => {
-    if (!time) {
-      return null;
-    }
-    const hours = time?.slice(0, 2);
-    const minutes = time?.slice(2);
-    return `${hours}:${minutes}`;
-  };
 
   // InfoCard에 넣어줄 요소
   const INFO_PROPS = [
