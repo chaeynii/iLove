@@ -56,17 +56,17 @@ const NewHeader = ({ label, onClick }) => {
 };
 
 // 백엔드 주소
-const BEdata = "http://34.64.69.226:3000";
+const BEdata = "http://34.64.69.226:5000/api";
 
 const Detail = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const hospitalID = "A1100401";
-  // searchParams.get("id") 위의 아이디 대체
-  const token = localStorage.getItem("token")
-    ? localStorage.getItem("token")
-    : "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1vb250ZXN0QHRlc3QudGVzdCIsInN1YiI6MywiaWF0IjoxNjg2MjM2NTQzLCJleHAiOjE3MTc3OTQxNDN9.ToJBCRSygcxpdmMC-B0DyayfbdR7f6E4FEYhhEu5RhA";
-  // localStorage.getItem("token"); 위의 뒷부분 테스트토큰을 false로
+  const hospitalID = searchParams.get("id") 
+  // const token = localStorage.getItem("token") ? localStorage.getItem("token") : false;
+
+  // const hospitalID = "A1100401"; // 임시 하드코딩 아이디
+  const token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1vb250ZXN0QHRlc3QudGVzdCIsInN1YiI6MywiaWF0IjoxNjg2MjM2NTQzLCJleHAiOjE3MTc3OTQxNDN9.ToJBCRSygcxpdmMC-B0DyayfbdR7f6E4FEYhhEu5RhA"
+  // 임시 하드코딩 토큰
 
   const [hospitalData, setHospitalData] = useState({});
   const [hospitalImg, setHospitalImg] = useState("");
@@ -181,11 +181,11 @@ const Detail = () => {
             borderOutLine={"#ffffff"}
             btnColor={"white"}
             btnFontSize={"16px"}
-            linkTo={"/map"}
+            linkTo={`/detail/map?id=${hospitalID}`}
           ></Button>
           <UnderLine />
         </TopContentContainer>
-        <QueryMapBtn Link={"/map"}>
+        <QueryMapBtn Link={`detail/map?id=${hospitalID}`}>
           <div>
             <img src={locationWhite} alt="" />
             <span>지도</span>
@@ -303,7 +303,9 @@ const Detail = () => {
             />
           </ReserveContainer>
         </BottomContentContainer>
+        <NavigationBar></NavigationBar>
       </Container>
+      
     </>
   );
 };
