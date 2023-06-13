@@ -20,6 +20,7 @@ export const SearchHeader = styled.div`
   & > span {
     font-size: 20px;
     margin-left: 2%;
+    padding: 2%;
   }
 `;
 

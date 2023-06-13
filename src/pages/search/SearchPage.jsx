@@ -11,6 +11,9 @@ import React, { useState } from "react";
 import { useQuery } from "react-query";
 import axios from "axios";
 
+//utils
+import { BE_URL, endpoint_user, endpoint_favorite } from "../../utils.js";
+
 //병원리스트 - 병원카드 컴포넌트
 import { HospitalCard } from "./HospitalCard";
 
@@ -19,13 +22,6 @@ const SORT_OPTIONS = [
   { name: "인기순", state: "review" },
   { name: "이름순", state: "name" },
 ];
-
-//URL
-const BE_URL = `http://34.64.69.226:3000/`;
-const userToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVtYWlsQGUubWFpbCIsInN1YiI6MSwiaWF0IjoxNjg2MjM0NjUxLCJleHAiOjE3MTc3OTIyNTF9.QORp6FfVmnROH3A-OCvHzYKjzZVAXjADpKcwmCwGeAA";
-const endpoint_user = `users`;
-const endpoint_favorite = `favorite/`;
 
 export const SearchPage = () => {
   // 위치정보 depth1, depth2
@@ -46,6 +42,7 @@ export const SearchPage = () => {
   const [isOpenOption, setIsOpenOption] = useState(false);
 
   // 유저 정보
+  const userToken = localStorage.getItem("token");
   const { data: userQuery, userIsLoading } = useQuery(["user"], async () => {
     try {
       const response = await axios.get(`${BE_URL}${endpoint_user}`, {
@@ -59,17 +56,21 @@ export const SearchPage = () => {
       throw error;
     }
   });
+
+  //유저정보
+  const userData = userQuery?.data ?? [];
+  const user_id = userData.id;
+
   // 병원리스트 받아오기 - 키 값: 위치정보/정렬옵션/키워드 변경 시 자동렌더링
-  // 백엔드에 키워드 Parameters 추가요청한 상태입니다!
   const { data: hospitalsQuery, hospitalListIsLoading } = useQuery(
-    ["hospitals", depth1, depth2, option],
+    ["hospitals", depth1, depth2, option, searchKeyword],
     async () => {
       try {
         const response = await axios.get(
           // depth2가 전체면 depth1만 넣어서 요청보냄
           depth2 === "전체"
-            ? `${BE_URL}hospital?depth1=${depth1}&size=10&page=1&sort=${option.state}`
-            : `${BE_URL}hospital?depth1=${depth1}&depth2=${depth2}&size=10&page=1&sort=${option.state}`
+            ? `${BE_URL}hospital?depth1=${depth1}&size=10&page=1&sort=${option.state}&dutyName=${searchKeyword}`
+            : `${BE_URL}hospital?depth1=${depth1}&depth2=${depth2}&size=10&page=1&sort=${option.state}&dutyName=${searchKeyword}`
         );
         return response.data;
       } catch (error) {
@@ -79,33 +80,31 @@ export const SearchPage = () => {
     }
   );
   // 즐겨찾기 리스트 받아오기
-  const { data: favoritesQuery, favoriteListIsLoading } = useQuery(
+  const { data: favoritesQuery, favoriteIsLoading } = useQuery(
     ["favorites"],
-    async () => {
-      try {
-        const response = axios
-          .get(`${BE_URL}${endpoint_favorite}`, {
-            headers: {
-              Authorization: `Bearer ${userToken}`,
-            },
-          })
-          .then((response) => response.data);
+    // instance를 사용해 중복되는 옵션 제거
+    () =>
+      axios.get(`${BE_URL}${endpoint_favorite}`, {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      }),
+    {
+      //백엔드에서 주는 데이터를 내가 원하는 가공해서 받을 수 있습니다.
+      select: (response) => {
         return response.data;
-      } catch (error) {
+      },
+      // 에러 핸들링
+      onError: (error) => {
         console.log(error);
-        throw error;
-      }
+      },
     }
   );
 
   //로딩중일 경우 null값 반환
-  if (userIsLoading || hospitalListIsLoading || favoriteListIsLoading) {
+  if (userIsLoading || hospitalListIsLoading || favoriteIsLoading) {
     return null;
   }
-
-  //유저정보
-  const userData = userQuery?.data ?? [];
-  const user_id = userData.id;
 
   //병원리스트
   const hospitalList = hospitalsQuery?.data ?? [];
@@ -135,14 +134,17 @@ export const SearchPage = () => {
     }
   };
 
+  // 키워드 검색 요청 시
+  const handleSearch = (search) => {
+    setSearchKeyword(search);
+  };
+
   return (
     <>
       <Header label={"병원 찾기"} />
       <Style.Wrapper>
         <SearchBar
-          onSearch={(search) => {
-            console.log("키워드:", search);
-          }}
+          onSearch={(search) => handleSearch(search)}
           depth1={depth1}
           depth2={depth2}
           onLocationChange={handleDepthChange}
@@ -180,8 +182,8 @@ export const SearchPage = () => {
             //즐겨찾기 해당여부 체크
             const favorite = favoritesList.some(
               (favoriteItem) =>
-                favoriteItem.user_id === user_id &&
-                favoriteItem.hpid === hospital.id
+                favoriteItem.userId === user_id &&
+                favoriteItem.hospitalId === hospital.id
             );
 
             return (
