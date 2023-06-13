@@ -10,6 +10,8 @@ import {
 } from "react-router-dom";
 import axios from "axios";
 
+import Select from "react-select";
+
 // 알림창 라이브러리
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
@@ -95,12 +97,13 @@ export const Home = () => {
             );
             const data = await response.json();
 
-            const { suburb, city_district, city, province, quarter } =
+            const { suburb, city_district, city, province, quarter, borough } =
               data.address;
-            const formattedAddress = `${province} ${
+            const formattedAddress = `${
               suburb || city_district || city || ""
-            } ${quarter}`;
+            } ${borough}  ${quarter}`;
 
+            console.log(data.address);
             setAddress(formattedAddress);
           } catch (error) {
             console.error(error);
@@ -195,12 +198,14 @@ export const Home = () => {
             )}
             <H1>내 주변 소아과</H1>
             {/* 백엔드 요청으로 반경 몇 Km내의 병원을 볼건지 선택할 수 있는 기능 추가 예정 */}
-            <H2>반경 km</H2>
+            <DistanceDiv>
+              <Distance />
+            </DistanceDiv>
           </MainSub>
-          <SimpleSlider />
+          <SimpleSlider latitude={latitude} longitude={longitude} />
         </SiliderMargin>
 
-        <AutoplayYouTubeVideo videoId={"Os_heh8vPfs"} />
+        <AutoplayYouTubeVideo videoId={"efzr12y8vUc"} />
 
         <Footer />
         <NavigationBar />
@@ -209,6 +214,30 @@ export const Home = () => {
   );
 };
 export default Home;
+
+const options = [
+  { value: "1", label: "1" },
+  { value: "3", label: "3" },
+  { value: "5", label: "5" },
+  { value: "8", label: "8" },
+  { value: "10", label: "10" },
+];
+
+const Distance = () => {
+  const updatedOptions = options.map((option) => ({
+    ...option,
+    label: `${option.label} km`,
+  }));
+
+  return <Select options={updatedOptions} styles={customStyles} />;
+};
+
+const customStyles = {
+  control: (provided) => ({
+    ...provided,
+    width: "100%",
+  }),
+};
 
 const H1 = styled.p`
   font-size: 30px;
@@ -220,6 +249,15 @@ const H1 = styled.p`
 `;
 
 const H2 = styled.p`
+  font-size: 18px;
+  font-weight: 600;
+  color: #121212;
+  padding: 1%;
+  margin-bottom: 3%;
+  width: 33.33%;
+`;
+
+const DistanceDiv = styled.div`
   font-size: 18px;
   font-weight: 600;
   color: #121212;
@@ -331,7 +369,7 @@ const BannerSebH1 = styled.p`
 `;
 
 // 캐러셀 라이브러리
-const SimpleSlider = () => {
+const SimpleSlider = ({ latitude, longitude }) => {
   const settings = {
     dots: true,
     infinite: true,
@@ -373,15 +411,13 @@ const SimpleSlider = () => {
   // 코치님 80번째줄에서 사용자의 현재 위치를 위도와 경도로 받고 있는데 그 정보를 380번째줄에 있는 params에 넣는 방법이 있을까요?ㅠㅠ
   const hospitalApi = async () => {
     try {
-      const response = await axios.get(
-        "http://34.64.69.226:3000/hospital/near",
-        {
-          params: {
-            userLat: 37.5007795003494,
-            userLon: 127.1107520613008,
-          },
-        }
-      );
+      const response = await axios.get("/hospital/near", {
+        params: {
+          userLat: latitude,
+          userLon: longitude,
+          r: 10,
+        },
+      });
       const responseData = response.data.data;
       setHospitalData(responseData);
       console.log("데이터 성공", responseData);
@@ -394,26 +430,32 @@ const SimpleSlider = () => {
     hospitalApi();
   }, []);
 
+  console.log("Hospital Data:", hospitalData);
+
   return (
     <>
       <Slider {...settings}>
-        {hospitalData.map((data) => (
-          <Card key={data.id}>
-            <Link to={`/detail/${data.id}`}>
-              <CardTop>
-                {data.images[0] !== null ? (
-                  <CardImg src={data.images} alt={data.images} />
-                ) : (
-                  <CardImgBak></CardImgBak>
-                )}
-              </CardTop>
-              <CardBottom>
-                <CardTitle>{data.dutyName}</CardTitle>
-                <CardAddress>{data.dutyAddr}</CardAddress>
-              </CardBottom>
-            </Link>
-          </Card>
-        ))}
+        {hospitalData.length > 0 ? (
+          hospitalData.map((data) => (
+            <Card key={data.id}>
+              <Link to={`/detail/${data.id}`}>
+                <CardTop>
+                  {data.image !== null ? (
+                    <CardImg key={data.id} src={data.image} alt={data.image} />
+                  ) : (
+                    <CardImgBak></CardImgBak>
+                  )}
+                </CardTop>
+                <CardBottom>
+                  <CardTitle>{data.dutyName}</CardTitle>
+                  <CardAddress>{data.dutyAddr}</CardAddress>
+                </CardBottom>
+              </Link>
+            </Card>
+          ))
+        ) : (
+          <div>사용 가능한 병원 데이터가 없습니다</div>
+        )}
       </Slider>
     </>
   );

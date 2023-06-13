@@ -7,6 +7,7 @@ import {
   Route,
   Link,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 import axios from "axios";
 
@@ -28,6 +29,8 @@ import {
   Footer,
   SearchBar,
 } from "../../components/index";
+
+import { MyComponent } from "./MyComponent";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import colors from "../../constants/colors";
@@ -118,7 +121,6 @@ const UserView = () => {
     } else {
       setPwValid(false);
     }
-    console.log(e.target.value);
   };
 
   // 비밀번호 확인 검사
@@ -129,7 +131,6 @@ const UserView = () => {
     } else {
       setPwCheckValid(false);
     }
-    console.log(e.target.value);
   };
 
   // 핸드폰 유효성 검사
@@ -171,6 +172,7 @@ const UserView = () => {
       .then((response) => {
         // 회원가입 성공
         // 홈으로 이동
+        // useNavigate("/");
         window.location.href = "/";
         console.log("등록 성공", response.data);
       })
@@ -295,6 +297,9 @@ const HospitalView = () => {
   //버튼 활성화
   const [notAllow, setNotAllow] = useState(true);
 
+  // 병원 이름
+  const [hospitalNameInput, sethospitalNameInput] = useState("");
+
   // 이메일 유효성 검사
   const handleEmail = (e) => {
     setEmail(e.target.value);
@@ -310,7 +315,6 @@ const HospitalView = () => {
     } else {
       setPwValid(false);
     }
-    console.log(e.target.value);
   };
 
   // 비밀번호 확인 검사
@@ -321,7 +325,6 @@ const HospitalView = () => {
     } else {
       setPwCheckValid(false);
     }
-    console.log(e.target.value);
   };
 
   // 핸드폰 유효성 검사
@@ -354,7 +357,7 @@ const HospitalView = () => {
   const register = () => {
     // axios를 사용하여 POST 요청 만들기
     axios
-      .post("http://34.64.69.226:3000/users/managersignup", {
+      .post("/users/managersignup", {
         hospitalId: name,
         name: name,
         email: email,
@@ -363,7 +366,8 @@ const HospitalView = () => {
       })
       .then((response) => {
         // 성공적인 응답 처리
-        window.location.href = "/";
+        // useNavigate("/");
+        // window.location.href = "/";
         console.log("등록 성공", response.data);
       })
       .catch((error) => {
@@ -395,10 +399,8 @@ const HospitalView = () => {
 
         <SignUpInputDiv>
           <InputTitle>병원명</InputTitle>
-          <SignUpInput
-            placeholder="병원명을 검색해주세요"
-            type="text"
-          ></SignUpInput>
+          <MyComponent />
+
           <P>
             *찾으시는 병원이 없으실 경우 하단에 신규 병원 등록 신청하기를
             눌러주세요.

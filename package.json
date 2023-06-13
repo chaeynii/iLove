@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "@fortawesome/free-solid-svg-icons": "^6.4.0",
+    "@fortawesome/react-fontawesome": "^0.2.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -65,5 +67,5 @@
     "eslint-plugin-react": "^7.32.2",
     "prettier": "^2.8.8"
   },
-  "proxy": "http://34.64.69.226:3000/"
+  "proxy": "http://34.64.69.226:5000/"
 }
