@@ -15,8 +15,6 @@ export const ReDetail = ({ hospitalName, memo }) => {
     setModalOpen(false);
   };
 
-  // 메모 입력을 위해 input을 클릭하면 모달이 꺼지는데 어떻게 해결할지 모르겠습니다
-  //
   const handleMemoChange = (event) => {
     setMemoValue(event.target.value);
   };
@@ -35,7 +33,6 @@ export const ReDetail = ({ hospitalName, memo }) => {
               placeholder="메모를 추가해보세요"
               value={memo ? memo : memoValue}
               onChange={handleMemoChange}
-              // style={{ color: "#d9d9d9" }}
             />
             <ButtonWrapper onClick={openModal}>
               <img alt="icon-pen" src={IconPen} />
