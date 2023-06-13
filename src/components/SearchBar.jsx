@@ -167,7 +167,7 @@ export const SearchBar = ({ onSearch, depth1, depth2, onLocationChange }) => {
             onChange={onChange}
             placeholder="병원 이름을 검색해보세요"
           />
-          <button type="submit">
+          <button type="submit" style={{ cursor: "pointer" }}>
             <img alt="search-button" src={IconSearch} />
           </button>
         </form>

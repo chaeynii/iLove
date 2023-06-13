@@ -5,10 +5,10 @@ import { IconDown } from "../../assets/index";
 
 // 공통 컴포넌트
 import {
-  Container,
   Header,
   NavigationBar,
   SearchBar,
+  Container,
 } from "../../components/index";
 
 //import문

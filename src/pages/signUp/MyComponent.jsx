@@ -18,7 +18,7 @@ export const MyComponent = () => {
         }));
 
         setOptions(updatedOptions);
-        // console.log("데이터", data);
+        console.log("병원 데이터 전송중");
       } catch (error) {
         console.log(error);
       }

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import {
@@ -61,11 +62,12 @@ const BEdata = "http://34.64.69.226:5000/api";
 const Detail = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const hospitalID = searchParams.get("id") 
+  const hospitalID = searchParams.get("id");
   // const token = localStorage.getItem("token") ? localStorage.getItem("token") : false;
 
   // const hospitalID = "A1100401"; // 임시 하드코딩 아이디
-  const token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1vb250ZXN0QHRlc3QudGVzdCIsInN1YiI6MywiaWF0IjoxNjg2MjM2NTQzLCJleHAiOjE3MTc3OTQxNDN9.ToJBCRSygcxpdmMC-B0DyayfbdR7f6E4FEYhhEu5RhA"
+  const token =
+    "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1vb250ZXN0QHRlc3QudGVzdCIsInN1YiI6MywiaWF0IjoxNjg2MjM2NTQzLCJleHAiOjE3MTc3OTQxNDN9.ToJBCRSygcxpdmMC-B0DyayfbdR7f6E4FEYhhEu5RhA";
   // 임시 하드코딩 토큰
 
   const [hospitalData, setHospitalData] = useState({});
@@ -305,7 +307,6 @@ const Detail = () => {
         </BottomContentContainer>
         <NavigationBar></NavigationBar>
       </Container>
-      
     </>
   );
 };

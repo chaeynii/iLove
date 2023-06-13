@@ -54,30 +54,32 @@ export const SignUp = () => {
 
   return (
     <>
-      <div>
-        <SignUpDiv>
-          <SignUpImg src={mainLogo}></SignUpImg>
-          <H1>회원가입</H1>
-        </SignUpDiv>
-        <SignUpFormDiv>
-          <ChangeButtonDiv>
-            <ButtonUser
-              className={tabView === "user" ? "" : "active"}
-              onClick={() => handleChangeTab("user")}
-            >
-              일반 회원
-            </ButtonUser>
-            <ButtonHospital
-              className={tabView === "hospital" ? "active" : ""}
-              onClick={() => handleChangeTab("hospital")}
-            >
-              병원 클라이언트
-            </ButtonHospital>
-          </ChangeButtonDiv>
-          {tabView === "hospital" ? <HospitalView /> : <UserView />}
-        </SignUpFormDiv>
-      </div>
-      <NavigationBar />
+      <Container>
+        <div>
+          <SignUpDiv>
+            <SignUpImg src={mainLogo}></SignUpImg>
+            <H1>회원가입</H1>
+          </SignUpDiv>
+          <SignUpFormDiv>
+            <ChangeButtonDiv>
+              <ButtonUser
+                className={tabView === "user" ? "" : "active"}
+                onClick={() => handleChangeTab("user")}
+              >
+                일반 회원
+              </ButtonUser>
+              <ButtonHospital
+                className={tabView === "hospital" ? "active" : ""}
+                onClick={() => handleChangeTab("hospital")}
+              >
+                병원 클라이언트
+              </ButtonHospital>
+            </ChangeButtonDiv>
+            {tabView === "hospital" ? <HospitalView /> : <UserView />}
+          </SignUpFormDiv>
+        </div>
+        <NavigationBar />
+      </Container>
     </>
   );
 };
@@ -565,6 +567,7 @@ const SignUpForm = styled.form`
   border-radius: 5px;
   padding: 10%;
   text-align: center;
+  margin-bottom: 13%;
   box-shadow: 0px 4px 5px 0px rgba(0, 0, 0, 0.1);
 `;
 const SignUpInput = styled.input`
@@ -583,6 +586,8 @@ const SignUpInputDiv = styled.div``;
 
 const InputTitle = styled.p`
   font-size: 18px;
+  text-align: left;
+  padding-left: 5%;
 `;
 
 const ChangeButtonDiv = styled.div`

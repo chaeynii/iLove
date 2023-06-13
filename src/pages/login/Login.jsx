@@ -25,11 +25,6 @@ import { Button, Container, NavigationBar } from "../../components/index";
 import colors from "../../constants/colors";
 import fontSize from "../../constants/fontSize";
 
-const UserData = {
-  email: "test@naver.com",
-  pw: "123456789",
-};
-
 export const Login = () => {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
@@ -117,7 +112,7 @@ export const Login = () => {
         <LoginFormDiv>
           <LoginForm>
             <LoginInput
-              placeholder="test123@test.com"
+              placeholder="이메일"
               type="email"
               value={email}
               onChange={handleEmail}
@@ -126,7 +121,7 @@ export const Login = () => {
               <ErrorMaessage>올바른 이메일을 입력해주세요.</ErrorMaessage>
             )}
             <LoginInput
-              placeholder="8자리 이상 입력해주세요"
+              placeholder="비밀번호"
               type="password"
               value={pw}
               onChange={handlePassword}
@@ -161,8 +156,10 @@ export const Login = () => {
               <LoginLi>비밀번호찾기</LoginLi>
             </Link>
             <LoginLi> | </LoginLi> */}
+            <LoginSeb>아직 아이사랑 회원이 아니신가요?</LoginSeb>
+
             <Link to="/signUp">
-              <LoginLi>회원가입</LoginLi>
+              <LoginLi>회원가입 &gt; </LoginLi>
             </Link>
           </LoginUl>
         </Div>
@@ -227,5 +224,13 @@ padding: 1%;
 
 const LoginLi = styled.div`
   // padding: 0.5%;
-  color: #b2b2b2;
+  font-size: 18px;
+  color: #00ad5c;
+  font-weight: 700;
+`;
+
+const LoginSeb = styled.div`
+  font-size: 18px;
+  color: #7d7d7d;
+  margin-right: 1%;
 `;
