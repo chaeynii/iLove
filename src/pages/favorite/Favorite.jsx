@@ -14,12 +14,6 @@ import { BE_URL, endpoint_hospital, endpoint_favorite } from "../../utils.js";
 //병원리스트 - 병원카드 컴포넌트
 import { HospitalCard } from "../search/HospitalCard";
 
-//검색 정렬 옵션
-const SORT_OPTIONS = [
-  { name: "인기순", state: "byPopular" },
-  { name: "이름순", state: "byName" },
-];
-
 export const Favorite = () => {
   // 유저 정보
   const userToken = localStorage.getItem("token");
@@ -69,7 +63,7 @@ export const Favorite = () => {
     }
   }, [favoriteList]);
 
-  const input = () => {
+  const renderHospitalCard = () => {
     if (hosData.length !== 0) {
       const hospitalCards = hosData.map((hospital) => {
         //today가 0일 경우(일요일) 7번째 dutyTime값을 가져오도록 함
@@ -88,7 +82,6 @@ export const Favorite = () => {
             dutyTimeStart={dutyTimeStart}
             dutyTimeClose={dutyTimeClose}
             favorite={true}
-            handleFavorite={() => {}}
           />
         );
       });
@@ -115,7 +108,7 @@ export const Favorite = () => {
         <Style.SearchHeader>
           <span>총 {favoriteList.length}개</span>
         </Style.SearchHeader>
-        {input()}
+        {renderHospitalCard()}
       </Style.Wrapper>
       <NavigationBar />
     </>
