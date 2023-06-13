@@ -2,13 +2,19 @@
 
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useNavigate,
+} from "react-router-dom";
 import axios from "axios";
 
 // 알림창 라이브러리
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
-
+import { instance } from "../../server/Fetcher";
 // 이미지 링크
 import mainLogo from "../../assets/mainLogo.svg";
 
@@ -29,6 +35,7 @@ export const Login = () => {
   const [pw, setPw] = useState("");
   const [emailValid, setEmailValid] = useState(false);
   const [pwValid, setPwValid] = useState(false);
+  const [userRole, setUserRole] = useState("");
   // 버튼 활성화 비활성화 여부
   const [notAllow, setNotAllow] = useState(true);
 
@@ -60,11 +67,12 @@ export const Login = () => {
     }
     setNotAllow(true);
   }, [emailValid, pwValid]);
-
+  const navigate = useNavigate();
   // 로그인 폼 전송
+
   const getUserLoginInfo = async () => {
     // axios를 사용하여 post 요청
-    axios
+    await instance
       .post("/users/login", {
         email: email,
         password: pw,
@@ -72,18 +80,22 @@ export const Login = () => {
       .then((response) => {
         // 로그인 성공
         // 홈으로 이동
-        window.location.href = "/";
-        console.log("로그인 성공", response.data);
 
-        // 토큰 저장
-        const token = response.data.data.token;
+        const user = response.data.data;
+
+        setUserRole(user);
+        console.log(typeof userRole);
+        const token = user.token;
         // 토큰 local storage에 저장
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("role", user.role);
         localStorage.setItem("token", token);
+
+        navigate("/");
       })
       .catch((error) => {
         // 오류처리
         toast("이메일 또는 비밀번호가 잘못되었습니다..");
-        console.log("로그인 실패", error);
       });
   };
 
@@ -154,7 +166,7 @@ export const Login = () => {
             </Link>
           </LoginUl>
         </Div>
-        <NavigationBar />
+        <NavigationBar userRole={userRole} />
       </Container>
     </>
   );

@@ -25,7 +25,6 @@ import {
   Home,
   MyPage,
   Login,
-  Post,
   SearchPage,
   SignUp,
   Detail,
@@ -35,6 +34,7 @@ import {
   ReservationChk,
   ChildPage,
   Favorite,
+  ModifyForm,
 } from "./pages/index";
 
 // const queryClient = new QueryClient();
@@ -60,25 +60,24 @@ function App() {
     <Router>
       {" "}
       {/* Router 컴포넌트 추가 */}
-      <Container>
-        <Routes>
-          <Route path="/" element={<Home />}></Route>
-          <Route path="/login" element={<Login />}></Route>
-          <Route path="/SignUp" element={<SignUp />}></Route>
-          <Route path="/register" element={<RegisterForm />} />
-          <Route path="admin" element={<AdminHome />} />
-          <Route path="/reserve" element={<ReservationChk />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/detail/:hpid" element={<Detail />} />
-          <Route path="/detail/" element={<Detail />} />
-          <Route path="/detail/reserve" element={<Reserve />} />
-          <Route path="/detail/map/" element={<MapHospital />} />
-          <Route path="/mypage/map" element={<MapMyPage />} />
-          <Route path="/Mypage" element={<MyPage />} />
-          <Route path="/Mypage/ChildPage" element={<ChildPage />} />
-          <Route path="/favorite" element={<Favorite />} />
-        </Routes>
-      </Container>
+      <Routes>
+        <Route path="/" element={<Home />}></Route>
+        <Route path="/login" element={<Login />}></Route>
+        <Route path="/SignUp" element={<SignUp />}></Route>
+        <Route path="/register" element={<RegisterForm />} />
+        <Route path="admin" element={<AdminHome />} />
+        <Route path="/reserve" element={<ReservationChk />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/detail/:hpid" element={<Detail />} />
+        <Route path="/detail/" element={<Detail />} />
+        <Route path="/detail/reserve" element={<Reserve />} />
+        <Route path="/detail/map/" element={<MapHospital />} />
+        <Route path="/mypage/map" element={<MapMyPage />} />
+        <Route path="/Mypage" element={<MyPage />} />
+        <Route path="/Mypage/ChildPage" element={<ChildPage />} />
+        <Route path="/favorite" element={<Favorite />} />
+        <Route path="/modify" element={<ModifyForm />} />
+      </Routes>
     </Router>
   );
 }

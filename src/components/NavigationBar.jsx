@@ -16,6 +16,16 @@ import React from "react";
 import styled from "styled-components";
 
 export const NavigationBar = () => {
+  const userRole = localStorage.getItem("role");
+
+  let linkTo;
+
+  if (userRole === "manager") {
+    linkTo = "/modify";
+  } else {
+    linkTo = "/Mypage";
+  }
+
   return (
     <>
       <Nav>
@@ -48,7 +58,7 @@ export const NavigationBar = () => {
           </NavLi>
 
           <NavLi>
-            <NavA to="Mypage">
+            <NavA to={linkTo}>
               <NavImg src={myInfo} alt="star"></NavImg>
               <NavP>내정보</NavP>
             </NavA>

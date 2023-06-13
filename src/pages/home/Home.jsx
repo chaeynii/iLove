@@ -47,11 +47,11 @@ import "slick-carousel/slick/slick-theme.css";
 export const Home = () => {
   const handleLogout = () => {
     // 토큰 가져오기
-    const token = window.localStorage.getItem("token");
+    const token = window.localStorage.getItem("user");
 
     if (token) {
       // 토큰이 존재하므로 삭제 진행
-      window.localStorage.removeItem("token");
+      window.localStorage.removeItem("user");
       toast("로그아웃 성공");
     } else {
       // 오류 알림표시

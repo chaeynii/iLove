@@ -8,8 +8,9 @@ import { SelectBox } from "./SelectBox";
 
 import { instance } from "../../server/Fetcher";
 import { Link } from "react-router-dom";
+import { useQuery, useQueryClient } from "react-query";
 
-export const RegisterForm = () => {
+export const ModifyForm = () => {
   const [dutyName, setDutyName] = useState(""); // 병원명 인풋 관리
   const [phone, setPhone] = useState(""); // 전화번호 관리
   const [addr1, setAddr1] = useState(""); // 시,도 주소
@@ -22,8 +23,28 @@ export const RegisterForm = () => {
   const [lng, setLng] = useState(0); // 경도
   const [fullAddress, setFullAddress] = useState(""); //전체주소
   const [images, setImages] = useState([]); // 병원 이미지
-  const [notAllow, setNotAllow] = useState(true);
+  const [notAllow, setNotAllow] = useState(true); // 버튼의 활성화/비활성화
+  const [isEditing, setIsEditing] = useState(false);
+
   // 함수형 태로 자식 props를 보내서 Post의  주소 데이터를 받아온다
+  const hpid = localStorage.getItem("user");
+  const hpId = JSON.parse(hpid).hospitalId;
+
+  const [hpName, setHpName] = useState("");
+  const [hpPhone, setHpPhone] = useState("");
+  const [hpNotice, setHpNotice] = useState("");
+  const [hpInfo, setHpInfo] = useState("");
+  const [hpAddress, setAddress] = useState("");
+
+  instance.get(`/hospital/${hpId}`).then((res) => {
+    setHpName(res.data.data.dutyName);
+    setHpPhone(res.data.data.dutyTel1);
+    setHpNotice(res.data.data.notice);
+    setHpInfo(res.data.data.dutyEtc);
+    setAddress(res.data.data.dutyAddr);
+
+    console.log(res.data.data);
+  });
   const getAddrData = (addr1, addr2, lat, lng, fullAddress) => {
     setAddr1(addr1);
     setAddr2(addr2);
@@ -152,6 +173,7 @@ export const RegisterForm = () => {
     wgs84Lon: lng,
   };
 
+  // 3가지 부분의 값이 존재하면 button 활성화
   useEffect(() => {
     if (dutyName && fullAddress && images.length > 0) {
       setNotAllow(false);
@@ -159,6 +181,8 @@ export const RegisterForm = () => {
       setNotAllow(true);
     }
   }, [dutyName, fullAddress, images]);
+
+  // 사진, 데이터들을 보내기 위해서 FormData 사용
   const onClick = () => {
     const formData = new FormData();
 
@@ -174,14 +198,20 @@ export const RegisterForm = () => {
 
     console.log(formData);
     instance
-      .post("hospital", formData, {
+      .put(`hospital/A1100401`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       })
       .then((response) => {
-        window.location.href = "/signUp";
+        console.log(dutyName);
       });
+
+    setIsEditing(!isEditing);
+  };
+
+  const handleEditing = async () => {
+    setIsEditing(!isEditing);
   };
 
   return (
@@ -189,28 +219,75 @@ export const RegisterForm = () => {
       <Container>
         <MainLogoDiv>
           <MainLogoImg src={mainLogo}></MainLogoImg>
-          <H1>병원 신규 등록</H1>
+          <H1>병원 정보 수정</H1>
         </MainLogoDiv>
         <FormBox>
           <InputBox>
-            <InputName>병원명</InputName>
-            <InputContent type="text" onChange={handleNameInput} />
-            <P>필수 입력 사항입니다.</P>
-          </InputBox>
-          <InputBox>
-            <InputName>병원 대표번호</InputName>
-            <InputContent type="text" value={phone} onChange={handlePhone} />
-            {!phoneValid && phone.length > 0 && (
-              <ErrorMessage>-을 붙여서 입력해주세요</ErrorMessage>
+            {!isEditing ? (
+              <>
+                <InputName>병원명</InputName>
+                <TextBox>
+                  <p>{hpName}</p>
+                </TextBox>
+              </>
+            ) : (
+              <>
+                <InputName>병원명</InputName>
+                <InputContent type="text" onChange={handleNameInput} />
+              </>
             )}
           </InputBox>
           <InputBox>
-            <InputName>공지사항</InputName>
-            <InputContent type="text" onChange={handleNotice} />
+            {!isEditing ? (
+              <>
+                <InputName>병원 대표번호</InputName>
+                <TextBox>
+                  <p>{hpPhone}</p>
+                </TextBox>
+              </>
+            ) : (
+              <>
+                <InputName>병원 대표번호</InputName>
+                <InputContent
+                  type="text"
+                  value={phone}
+                  onChange={handlePhone}
+                />
+                {!phoneValid && phone.length > 0 && (
+                  <ErrorMessage>-을 붙여서 입력해주세요</ErrorMessage>
+                )}
+              </>
+            )}
           </InputBox>
           <InputBox>
-            <InputName>병원 설명</InputName>
-            <InputContent type="text" onChange={handleInfo} />
+            {!isEditing ? (
+              <>
+                <InputName>공지사항</InputName>
+                <TextBox>
+                  <p>{hpNotice}</p>
+                </TextBox>
+              </>
+            ) : (
+              <>
+                <InputName>공지사항</InputName>
+                <InputContent type="text" onChange={handleNotice} />
+              </>
+            )}
+          </InputBox>
+          <InputBox>
+            {!isEditing ? (
+              <>
+                <InputName>병원 설명</InputName>
+                <TextBox>
+                  <p>{hpInfo}</p>
+                </TextBox>
+              </>
+            ) : (
+              <>
+                <InputName>병원 설명</InputName>
+                <InputContent type="text" onChange={handleInfo} />
+              </>
+            )}
           </InputBox>
           <InputBox>
             <InputName>영업시간 및 점심시간</InputName>
@@ -219,8 +296,21 @@ export const RegisterForm = () => {
               getCloseTimeData={getCloseTimeData}
             />
           </InputBox>
+          {!isEditing ? (
+            <>
+              <InputBox>
+                <InputName>주소</InputName>
+                <TextBox>
+                  <p>{hpAddress}</p>
+                </TextBox>
+              </InputBox>
+            </>
+          ) : (
+            <>
+              <Post addr1={addr1} getAddrData={getAddrData} />
+            </>
+          )}
 
-          <Post addr1={addr1} getAddrData={getAddrData} />
           <InputBox>
             <ImageBox>
               <InputName>병원 사진</InputName>
@@ -267,15 +357,30 @@ export const RegisterForm = () => {
             <P>사진, 주소, 병원명을 반드시 등록해주세요</P>
           </InputBox>
 
-          <Button
-            label={"신규등록"}
-            onClick={onClick}
-            disabled={notAllow}
-            bgcolor={colors.primary}
-            btnColor={"#ffffff"}
-            width={"100px"}
-            btnFontSize={"18px"}
-          ></Button>
+          {!isEditing ? (
+            <>
+              <Button
+                label={"수정 시작"}
+                onClick={handleEditing}
+                bgcolor={colors.primary}
+                btnColor={"#ffffff"}
+                width={"100px"}
+                btnFontSize={"18px"}
+              ></Button>
+            </>
+          ) : (
+            <>
+              <Button
+                label={"수정 완료"}
+                onClick={onClick}
+                disabled={notAllow}
+                bgcolor={colors.primary}
+                btnColor={"#ffffff"}
+                width={"100px"}
+                btnFontSize={"18px"}
+              ></Button>
+            </>
+          )}
         </FormBox>
       </Container>
     </>
@@ -353,4 +458,10 @@ const P = styled.p`
   font-size: 14px;
   color: #c20000;
   margin-top: 3%;
+`;
+
+const TextBox = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
 `;
