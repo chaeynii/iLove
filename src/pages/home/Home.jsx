@@ -88,39 +88,51 @@ export const Home = () => {
   const [address, setAddress] = useState(null);
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          setLatitude(position.coords.latitude);
-          setLongitude(position.coords.longitude);
+    // Function to get the user's current location
+    const getUserLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            setLatitude(position.coords.latitude);
+            setLongitude(position.coords.longitude);
 
-          try {
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`
-            );
-            const data = await response.json();
+            try {
+              const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`
+              );
+              const data = await response.json();
 
-            const { suburb, city_district, city, province, quarter, borough } =
-              data.address;
-            const formattedAddress = `${
-              suburb || city_district || province || ""
-            } ${city}  ${quarter}`;
+              const {
+                suburb,
+                city_district,
+                city,
+                province,
+                quarter,
+                borough,
+              } = data.address;
+              const formattedAddress = `${
+                suburb || city_district || province || ""
+              } ${city}  ${quarter}`;
 
-            // console.log(data.address);
-            setAddress(formattedAddress);
-          } catch (error) {
+              // console.log(data.address);
+              setAddress(formattedAddress);
+            } catch (error) {
+              console.error(error);
+            }
+          },
+          (error) => {
             console.error(error);
           }
-        },
-        (error) => {
-          console.error(error);
-        }
-      );
-    } else {
-      console.error("현재 브라우저는 위치를 지원하지 않습니다.");
-    }
+        );
+      } else {
+        console.error("현재 브라우저는 위치를 지원하지 않습니다.");
+      }
+    };
+
+    getUserLocation();
   }, []);
-  const [distance, setDistance] = useState("10");
+
+  const [distance, setDistance] = useState(10);
 
   const handleDistanceChange = (selectedDistance) => {
     setDistance(selectedDistance);
@@ -443,27 +455,35 @@ const SimpleSlider = ({ latitude, longitude, distance }) => {
   // 로딩 화면
   const [loading, setLoading] = useState(true);
 
-  const hospitalApi = async () => {
-    try {
-      const response = await axios.get("/hospital/near", {
-        params: {
-          userLat: latitude,
-          userLon: longitude,
-          r: distance,
-        },
-      });
-      const responseData = response.data.data;
-      setHospitalData(responseData);
-      setLoading(false);
-      // console.log("데이터 성공", responseData);
-    } catch (error) {
-      console.error("병원 데이터를 가져오는 중에 오류가 발생했습니다.:", error);
-    }
-  };
-
   useEffect(() => {
-    hospitalApi();
-  }, []);
+    // Function to fetch hospital data using latitude and longitude
+    const hospitalApi = async () => {
+      try {
+        const response = await axios.get("/hospital/near", {
+          params: {
+            userLat: latitude,
+            userLon: longitude,
+            r: distance,
+          },
+        });
+        const responseData = response.data.data;
+        setHospitalData(responseData);
+        setLoading(false);
+        console.log("거리 수정:", distance, latitude, longitude);
+        console.log("데이터 성공", responseData);
+      } catch (error) {
+        console.error(
+          "병원 데이터를 가져오는 중에 오류가 발생했습니다.:",
+          error
+        );
+      }
+    };
+
+    // Only call the API if latitude and longitude have valid values
+    if (latitude !== null && longitude !== null) {
+      hospitalApi();
+    }
+  }, [latitude, longitude, distance]);
 
   console.log("Hospital Data:", hospitalData);
   // console.log("거리 수정:", distance, latitude, longitude);

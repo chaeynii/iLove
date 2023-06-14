@@ -174,8 +174,6 @@ const UserView = () => {
       .then((response) => {
         // 회원가입 성공
         // 홈으로 이동
-        // useNavigate("/");
-        window.location.href = "/";
         console.log("등록 성공", response.data);
       })
       .catch((error) => {
@@ -368,8 +366,8 @@ const HospitalView = () => {
       })
       .then((response) => {
         // 성공적인 응답 처리
-        // useNavigate("/");
-        // window.location.href = "/";
+        //홈으로 이동
+
         console.log("등록 성공", response.data);
       })
       .catch((error) => {
