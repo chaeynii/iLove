@@ -35,7 +35,7 @@ import {
   Footer,
   SearchBar,
 } from "../../components/index";
-import {formatTime, endpoint_favorite} from "../../utils"
+import { formatTime, endpoint_favorite } from "../../utils";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import colors from "../../constants/colors";
@@ -47,8 +47,10 @@ const BEdata = "http://34.64.69.226:5000/api/";
 const Detail = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const hospitalID = searchParams.get("id") 
-  const token = localStorage.getItem("token") ? localStorage.getItem("token") : false;
+  const hospitalID = searchParams.get("id");
+  const token = localStorage.getItem("token")
+    ? localStorage.getItem("token")
+    : false;
   const navigate = useNavigate();
 
   // const hospitalID = "A1100401"; // 임시 하드코딩 아이디
@@ -61,8 +63,6 @@ const Detail = () => {
   const [hospitalReviewState, setHospitalReviewState] = useState({});
   const [userReviews, setUserReviews] = useState([]);
   const [likeState, setLikeState] = useState(false);
-
-  
 
   // 병원,이미지,리뷰 정보
   useEffect(() => {
@@ -89,24 +89,23 @@ const Detail = () => {
         setHospitalReviews(reviewData.data);
       });
 
-    if(token){
-    fetch(`${BEdata}favorite`, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((res)=>{
-        res.data.forEach((like)=>{
-          if(like.hospitalId == hospitalID){
-            setLikeState(true)
-          }
-        })
-      });
-    };
-
+    if (token) {
+      fetch(`${BEdata}favorite`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          res.data.forEach((like) => {
+            if (like.hospitalId == hospitalID) {
+              setLikeState(true);
+            }
+          });
+        });
+    }
   }, []);
 
   useEffect(() => {
@@ -158,14 +157,18 @@ const Detail = () => {
     return (
       <>
         <HeaderWrap>
-          <BtnBack onClick={()=>navigate("/search")}>
+          <BtnBack onClick={() => navigate("/search")}>
             <img alt="icon-left" src={IconLeft}></img>
           </BtnBack>
           <div>
             <h2>{label}</h2>
           </div>
           <HeaderStar onClick={handleFavoriteClick}>
-            {likeState ? <img alt="like" src={yellowStar}></img> : <img alt="notlike" src={star}></img>}
+            {likeState ? (
+              <img alt="like" src={yellowStar}></img>
+            ) : (
+              <img alt="notlike" src={star}></img>
+            )}
           </HeaderStar>
         </HeaderWrap>
       </>
@@ -182,21 +185,28 @@ const Detail = () => {
       body: JSON.stringify(data),
     })
       .then((res) => res.json())
-      .then((res)=>{
-        if(res.data.id){setLikeState(true)}else{setLikeState(false)}
+      .then((res) => {
+        if (res.data.id) {
+          setLikeState(true);
+        } else {
+          setLikeState(false);
+        }
       });
-    };
+  }
 
   const handleFavoriteClick = (event) => {
     //즐겨찾기 클릭 시 Link로 넘어가는 것을 막음
     event.preventDefault();
-    if(token){
-    try {
-      handleFavorite({"hospitalId" : hospitalID});
-    } catch (error) {
-      console.error("Favorite post 요청 실패", error);
-      // 필요한 에러 처리 작업 수행
-    }} else {alert("로그인 후 즐겨찾기가 가능합니다")}
+    if (token) {
+      try {
+        handleFavorite({ hospitalId: hospitalID });
+      } catch (error) {
+        console.error("Favorite post 요청 실패", error);
+        // 필요한 에러 처리 작업 수행
+      }
+    } else {
+      alert("로그인 후 즐겨찾기가 가능합니다");
+    }
   };
 
   return (
@@ -260,37 +270,44 @@ const Detail = () => {
             <HpInfoGrid>
               {hospitalData.dutyTime1c && hospitalData.dutyTime1s && (
                 <HpInfoCard>
-                  월 {formatTime(hospitalData.dutyTime1s)}-{formatTime(hospitalData.dutyTime1c)}
+                  월 {formatTime(hospitalData.dutyTime1s)}-
+                  {formatTime(hospitalData.dutyTime1c)}
                 </HpInfoCard>
               )}
               {hospitalData.dutyTime2c && hospitalData.dutyTime2s && (
                 <HpInfoCard>
-                  화 {formatTime(hospitalData.dutyTime2s)}-{formatTime(hospitalData.dutyTime2c)}
+                  화 {formatTime(hospitalData.dutyTime2s)}-
+                  {formatTime(hospitalData.dutyTime2c)}
                 </HpInfoCard>
               )}
               {hospitalData.dutyTime3c && hospitalData.dutyTime3s && (
                 <HpInfoCard>
-                  수 {formatTime(hospitalData.dutyTime3s)}-{formatTime(hospitalData.dutyTime3c)}
+                  수 {formatTime(hospitalData.dutyTime3s)}-
+                  {formatTime(hospitalData.dutyTime3c)}
                 </HpInfoCard>
               )}
               {hospitalData.dutyTime4c && hospitalData.dutyTime4s && (
                 <HpInfoCard>
-                  목 {formatTime(hospitalData.dutyTime4s)}-{formatTime(hospitalData.dutyTime4c)}
+                  목 {formatTime(hospitalData.dutyTime4s)}-
+                  {formatTime(hospitalData.dutyTime4c)}
                 </HpInfoCard>
               )}
               {hospitalData.dutyTime5c && hospitalData.dutyTime5s && (
                 <HpInfoCard>
-                  금 {formatTime(hospitalData.dutyTime5s)}-{formatTime(hospitalData.dutyTime5c)}
+                  금 {formatTime(hospitalData.dutyTime5s)}-
+                  {formatTime(hospitalData.dutyTime5c)}
                 </HpInfoCard>
               )}
               {hospitalData.dutyTime6c && hospitalData.dutyTime6s && (
                 <HpInfoCard>
-                  토 {formatTime(hospitalData.dutyTime6s)}-{formatTime(hospitalData.dutyTime6c)}
+                  토 {formatTime(hospitalData.dutyTime6s)}-
+                  {formatTime(hospitalData.dutyTime6c)}
                 </HpInfoCard>
               )}
               {hospitalData.dutyTime7c && hospitalData.dutyTime7s && (
                 <HpInfoCard>
-                  일 {formatTime(hospitalData.dutyTime7s)}-{formatTime(hospitalData.dutyTime7c)}
+                  일 {formatTime(hospitalData.dutyTime7s)}-
+                  {formatTime(hospitalData.dutyTime7c)}
                 </HpInfoCard>
               )}
             </HpInfoGrid>
@@ -474,6 +491,12 @@ const TopContentContainer = styled.div`
     border: 1px solid #00a758;
     border-radius: 7px;
     box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.25);
+    &:hover {
+      opacity: 70%;
+    }
+  }
+  button div span {
+    margin-left: 5px;
   }
 `;
 
@@ -497,6 +520,9 @@ const QueryMapBtn = styled.button`
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.25);
   @media screen and (max-width: 800px) {
     display: inline-block;
+  }
+  &:hover {
+    opacity: 70%;
   }
 `;
 
@@ -590,6 +616,9 @@ const ReviewButton = styled.button`
     padding: 7px;
     font-size: 12px;
   }
+  &:hover {
+    opacity: 50%;
+  }
 `;
 
 const ReserveContainer = styled.div`
@@ -601,6 +630,9 @@ const ReserveContainer = styled.div`
     border: 1px solid #00a758;
     border-radius: 11px;
     box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.25);
+    &:hover {
+      opacity: 70%;
+    }
   }
 `;
 

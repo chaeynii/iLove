@@ -26,7 +26,7 @@ import {
   SearchBar,
   Modal,
 } from "../../components/index";
-import {formatTime} from "../../utils"
+import { formatTime } from "../../utils";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import colors from "../../constants/colors";
@@ -39,18 +39,26 @@ const BEdata = "http://34.64.69.226:5000/api/";
 const Reserve = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const hospitalID = searchParams.get("id")
-  const token = localStorage.getItem("token") ? localStorage.getItem("token") : false;
+  const hospitalID = searchParams.get("id");
+  const token = localStorage.getItem("token")
+    ? localStorage.getItem("token")
+    : false;
   const navigate = useNavigate();
 
   // const token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1vb250ZXN0QHRlc3QudGVzdCIsInN1YiI6MywiaWF0IjoxNjg2MjM2NTQzLCJleHAiOjE3MTc3OTQxNDN9.ToJBCRSygcxpdmMC-B0DyayfbdR7f6E4FEYhhEu5RhA";
   // 임시 토큰
 
   const [hospitalData, setHospitalData] = useState({});
-  const [reserveday, setReserveday] = useState({year:"", month:"", date:"", day:"", dayNum:0});
+  const [reserveday, setReserveday] = useState({
+    year: "",
+    month: "",
+    date: "",
+    day: "",
+    dayNum: 0,
+  });
   const [reserveModal, setReserveModal] = useState(false);
   const [dayinput, setDayinput] = useState("");
-  const [dutyTimes, setDutyTimes] = useState({}); 
+  const [dutyTimes, setDutyTimes] = useState({});
   const [reserveTimeTable, setReserveTimeTable] = useState([]); // 근무시간 오픈~종료 배열
   const [clickedBtn, setClickedBtn] = useState(null);
   const [clickedBtnTime, setClickedBtnTime] = useState(null);
@@ -79,8 +87,8 @@ const Reserve = () => {
       .then((hospitalReserve) => {
         setReservedTime(hospitalReserve.data);
       });
-  
-    if(token){
+
+    if (token) {
       fetch(`${BEdata}favorite`, {
         method: "GET",
         headers: {
@@ -89,14 +97,14 @@ const Reserve = () => {
         },
       })
         .then((res) => res.json())
-        .then((res)=>{
-          res.data.forEach((like)=>{
-            if(like.hospitalId == hospitalID){
-              setLikeState(true)
+        .then((res) => {
+          res.data.forEach((like) => {
+            if (like.hospitalId == hospitalID) {
+              setLikeState(true);
             }
-          })
+          });
         });
-      };
+    }
 
     const today = new Date();
     let nowyear = today.getFullYear(); // 년도
@@ -106,152 +114,182 @@ const Reserve = () => {
     let transDay = function (nowdayNum) {
       if (nowdayNum === 0) {
         return "일";
-      }  
+      }
       if (nowdayNum === 1) {
         return "월";
-      }  
+      }
       if (nowdayNum === 2) {
         return "화";
-      }  
+      }
       if (nowdayNum === 3) {
         return "수";
-      }  
+      }
       if (nowdayNum === 4) {
         return "목";
-      }  
+      }
       if (nowdayNum === 5) {
         return "금";
-      }  
+      }
       if (nowdayNum === 6) {
         return "토";
       }
     };
-    setReserveday({year: nowyear, month: nowmonth, date: nowdate, day: transDay(nowdayNum), dayNum: nowdayNum});
-
-  }, []);
-  
-  useEffect(()=>{
-    setDutyTimes({
-      "월" : [hospitalData.dutyTime1s,hospitalData.dutyTime1c],
-      "화" : [hospitalData.dutyTime2s,hospitalData.dutyTime2c],
-      "수" : [hospitalData.dutyTime3s,hospitalData.dutyTime3c],
-      "목" : [hospitalData.dutyTime4s,hospitalData.dutyTime4c],
-      "금" : [hospitalData.dutyTime5s,hospitalData.dutyTime5c],
-      "토" : [hospitalData.dutyTime6s,hospitalData.dutyTime6c],
-      "일" : [hospitalData.dutyTime7s,hospitalData.dutyTime7c],
+    setReserveday({
+      year: nowyear,
+      month: nowmonth,
+      date: nowdate,
+      day: transDay(nowdayNum),
+      dayNum: nowdayNum,
     });
-  },[hospitalData]);
+  }, []);
 
-  useEffect(()=>{
-    const date = new Date(reserveday.year, reserveday.month -1, reserveday.date);
+  useEffect(() => {
+    setDutyTimes({
+      월: [hospitalData.dutyTime1s, hospitalData.dutyTime1c],
+      화: [hospitalData.dutyTime2s, hospitalData.dutyTime2c],
+      수: [hospitalData.dutyTime3s, hospitalData.dutyTime3c],
+      목: [hospitalData.dutyTime4s, hospitalData.dutyTime4c],
+      금: [hospitalData.dutyTime5s, hospitalData.dutyTime5c],
+      토: [hospitalData.dutyTime6s, hospitalData.dutyTime6c],
+      일: [hospitalData.dutyTime7s, hospitalData.dutyTime7c],
+    });
+  }, [hospitalData]);
+
+  useEffect(() => {
+    const date = new Date(
+      reserveday.year,
+      reserveday.month - 1,
+      reserveday.date
+    );
     const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
     const dayOfWeek = daysOfWeek[date.getDay()];
-    
-    setReserveday((current)=>{
-      const newDay = {...current, day: dayOfWeek}
-      return newDay
-    });
-  },[reserveday.date]);
-  
-  // 모달창 컨트롤
-  const ModalReserveDays = ({year, month}) =>{
-    
-    function changeDay(e){
-      let changeValue = e.target.value;
-      let changeValueArray = changeValue.split("-")
-      
-      setDayinput(e.target.value)
 
-      setReserveday((current)=>{
-        const newreserveday = {...current}
+    setReserveday((current) => {
+      const newDay = { ...current, day: dayOfWeek };
+      return newDay;
+    });
+  }, [reserveday.date]);
+
+  // 모달창 컨트롤
+  const ModalReserveDays = ({ year, month }) => {
+    function changeDay(e) {
+      let changeValue = e.target.value;
+      let changeValueArray = changeValue.split("-");
+
+      setDayinput(e.target.value);
+
+      setReserveday((current) => {
+        const newreserveday = { ...current };
         newreserveday.year = Number(changeValueArray[0]);
         newreserveday.month = Number(changeValueArray[1]);
         newreserveday.date = Number(changeValueArray[2]);
-        return newreserveday
+        return newreserveday;
       });
     }
 
     return (
       <>
-      <ModalInput onChange={changeDay} value={dayinput} type="date" min={`${reserveday.year}-01-01`} max="2099-12-31"></ModalInput>
+        <ModalInput
+          onChange={changeDay}
+          value={dayinput}
+          type="date"
+          min={`${reserveday.year}-01-01`}
+          max="2099-12-31"
+        ></ModalInput>
       </>
     );
-    
-  }
-  
+  };
+
   function openModal() {
     return setReserveModal(true);
   }
-  function closeModal(){
-    if(dutyTimes[reserveday.day][0] !== null) {
+  function closeModal() {
+    if (dutyTimes[reserveday.day][0] !== null) {
       // 근무시간이 있는 날일시 시간 배열 생성
-      setReserveTimeTable(()=>{
+      setReserveTimeTable(() => {
         let result = [];
 
         // start = [[10],[30]]
-        const start = [Number(dutyTimes[reserveday.day][0].split("").slice(0,2).join("")),Number(dutyTimes[reserveday.day][0].split("").slice(2,4).join(""))];
-        const close = [Number(dutyTimes[reserveday.day][1].split("").slice(0,2).join("")),Number(dutyTimes[reserveday.day][1].split("").slice(2,4).join(""))];
+        const start = [
+          Number(dutyTimes[reserveday.day][0].split("").slice(0, 2).join("")),
+          Number(dutyTimes[reserveday.day][0].split("").slice(2, 4).join("")),
+        ];
+        const close = [
+          Number(dutyTimes[reserveday.day][1].split("").slice(0, 2).join("")),
+          Number(dutyTimes[reserveday.day][1].split("").slice(2, 4).join("")),
+        ];
         let minute = start[1];
 
-        for(let i = start[0]; i < close[0]; i++){
-          let time = String(i)+String(minute);
-          if(time.length < 4){time = "0"+time};
-          result.push(time)
+        for (let i = start[0]; i < close[0]; i++) {
+          let time = String(i) + String(minute);
+          if (time.length < 4) {
+            time = "0" + time;
+          }
+          result.push(time);
 
-          if(minute == 0){
-            minute = 30; 
-            time = String(i)+String(minute);
-            if(time.length < 4){time = "0"+time};
-            result.push(time)
+          if (minute == 0) {
+            minute = 30;
+            time = String(i) + String(minute);
+            if (time.length < 4) {
+              time = "0" + time;
+            }
+            result.push(time);
           }
           minute = "00";
         }
         return result;
-    });
-    return setReserveModal(false);
-  } else {alert("예약이 불가능한 날입니다")}
+      });
+      return setReserveModal(false);
+    } else {
+      alert("예약이 불가능한 날입니다");
+    }
   }
 
-  function checkReserve(time, reserveday){
-    let result = false; 
+  function checkReserve(time, reserveday) {
+    let result = false;
 
-    function checkToday(data){
+    function checkToday(data) {
       const whenYear = Number(data.reservedDate.slice(0, 4));
       const whenMonth = Number(data.reservedDate.slice(4, 6));
       const whenDay = Number(data.reservedDate.slice(6, 8));
-      return whenYear == reserveday.year && whenMonth == reserveday.month && whenDay == reserveday.date;
+      return (
+        whenYear == reserveday.year &&
+        whenMonth == reserveday.month &&
+        whenDay == reserveday.date
+      );
     }
     const todayReserve = reservedTime.filter(checkToday);
-    
-    todayReserve.forEach(day =>{
-      if(time == day.reservedTime){
-        result = true}
+
+    todayReserve.forEach((day) => {
+      if (time == day.reservedTime) {
+        result = true;
+      }
     });
 
     return result;
   }
 
-  function hadleBtn(BtnIndex){
-    setClickedBtn(BtnIndex)
+  function hadleBtn(BtnIndex) {
+    setClickedBtn(BtnIndex);
   }
 
-  function handleSubmit(time){
+  function handleSubmit(time) {
     // 제출시 로그인토큰 유무에 따른 동작 분류
     if (token) {
-      let transReserveday = {...reserveday}
-      if(String(transReserveday.month).length == 1){
-        transReserveday.month = "0" + String(transReserveday.month)
-      };
-      if(String(transReserveday.date).length == 1){
-        transReserveday.date = "0" + String(transReserveday.date)
-      };
+      let transReserveday = { ...reserveday };
+      if (String(transReserveday.month).length == 1) {
+        transReserveday.month = "0" + String(transReserveday.month);
+      }
+      if (String(transReserveday.date).length == 1) {
+        transReserveday.date = "0" + String(transReserveday.date);
+      }
 
       const data = {
-        "hospitalId": `${hospitalID}`,
-        "memo": "메모 내용입니다.",
-        "reservedTime": `${time}`,
-        "reservedDate": `${transReserveday.year}${transReserveday.month}${transReserveday.date}`
-      }
+        hospitalId: `${hospitalID}`,
+        memo: "메모 내용입니다.",
+        reservedTime: `${time}`,
+        reservedDate: `${transReserveday.year}${transReserveday.month}${transReserveday.date}`,
+      };
 
       fetch(`${BEdata}reservation`, {
         method: "POST",
@@ -263,35 +301,38 @@ const Reserve = () => {
       })
         .then((res) => res.json())
         .then((submitData) => {
-          setReservedTime((current)=>{
-            const newReservedTime = [...current]
+          setReservedTime((current) => {
+            const newReservedTime = [...current];
             newReservedTime.push(submitData.data);
             return newReservedTime;
-          })
+          });
         });
-      
+
       alert("예약되었습니다, 예약확인 페이지로 이동합니다");
       navigate("/reserve");
-
     } else {
-      alert("로그인 후 예약가능합니다")
+      alert("로그인 후 예약가능합니다");
     }
   }
 
-    // 공통 컴포넌트 수정활용 *즐겨찾기,뒤로가기 클릭 이벤트 추가해야함
+  // 공통 컴포넌트 수정활용 *즐겨찾기,뒤로가기 클릭 이벤트 추가해야함
   const NewHeader = ({ label, onClick }) => {
     return (
       <>
         <HeaderWrap>
-          <BtnBack onClick={()=>navigate(`/detail?id=${hospitalID}`)}>
+          <BtnBack onClick={() => navigate(`/detail?id=${hospitalID}`)}>
             <img alt="icon-left" src={IconLeft}></img>
           </BtnBack>
           <div>
             <h2>{label}</h2>
           </div>
           <HeaderStar onClick={handleFavoriteClick}>
-              {likeState ? <img alt="like" src={yellowStar}></img> : <img alt="notlike" src={star}></img>}
-            </HeaderStar>
+            {likeState ? (
+              <img alt="like" src={yellowStar}></img>
+            ) : (
+              <img alt="notlike" src={star}></img>
+            )}
+          </HeaderStar>
         </HeaderWrap>
       </>
     );
@@ -337,7 +378,7 @@ const Reserve = () => {
     height,
     label,
     onClick,
-    disabled
+    disabled,
   }) => {
     return (
       <>
@@ -359,7 +400,6 @@ const Reserve = () => {
     );
   };
 
-
   function handleFavorite(data) {
     fetch(`${BEdata}favorite`, {
       method: "POST",
@@ -370,132 +410,170 @@ const Reserve = () => {
       body: JSON.stringify(data),
     })
       .then((res) => res.json())
-      .then((res)=>{
-        if(res.data.id){setLikeState(true)}else{setLikeState(false)}
+      .then((res) => {
+        if (res.data.id) {
+          setLikeState(true);
+        } else {
+          setLikeState(false);
+        }
       });
-    };
+  }
 
   const handleFavoriteClick = (event) => {
     //즐겨찾기 클릭 시 Link로 넘어가는 것을 막음
     event.preventDefault();
-    if(token){
-    try {
-      handleFavorite({"hospitalId" : hospitalID});
-    } catch (error) {
-      console.error("Favorite post 요청 실패", error);
-      // 필요한 에러 처리 작업 수행
-    }} else {alert("로그인 후 즐겨찾기가 가능합니다")}
+    if (token) {
+      try {
+        handleFavorite({ hospitalId: hospitalID });
+      } catch (error) {
+        console.error("Favorite post 요청 실패", error);
+        // 필요한 에러 처리 작업 수행
+      }
+    } else {
+      alert("로그인 후 즐겨찾기가 가능합니다");
+    }
   };
 
-  return (<>
-    <Container>
-      <HeaderContainer>
-        <NewHeader label={hospitalData.dutyName} />
-      </HeaderContainer>
-      <TopContentContainer>
-        <div>{hospitalData.dutyName}</div>
-        <UnderLine />
-      </TopContentContainer>
-      <BottomContentContainer>
-        <HpInfo>
-          <img src={clockGreen} alt="" />
-          <HpInfoGrid>
-            {hospitalData.dutyTime1c && hospitalData.dutyTime1s && (
-              <HpInfoCard>
-                월 {formatTime(hospitalData.dutyTime1s)}-{formatTime(hospitalData.dutyTime1c)}
-              </HpInfoCard>
-            )}
-            {hospitalData.dutyTime2c && hospitalData.dutyTime2s && (
-              <HpInfoCard>
-                화 {formatTime(hospitalData.dutyTime2s)}-{formatTime(hospitalData.dutyTime2c)}
-              </HpInfoCard>
-            )}
-            {hospitalData.dutyTime3c && hospitalData.dutyTime3s && (
-              <HpInfoCard>
-                수 {formatTime(hospitalData.dutyTime3s)}-{formatTime(hospitalData.dutyTime3c)}
-              </HpInfoCard>
-            )}
-            {hospitalData.dutyTime4c && hospitalData.dutyTime4s && (
-              <HpInfoCard>
-                목 {formatTime(hospitalData.dutyTime4s)}-{formatTime(hospitalData.dutyTime4c)}
-              </HpInfoCard>
-            )}
-            {hospitalData.dutyTime5c && hospitalData.dutyTime5s && (
-              <HpInfoCard>
-                금 {formatTime(hospitalData.dutyTime5s)}-{formatTime(hospitalData.dutyTime5c)}
-              </HpInfoCard>
-            )}
-            {hospitalData.dutyTime6c && hospitalData.dutyTime6s && (
-              <HpInfoCard>
-                토 {formatTime(hospitalData.dutyTime6s)}-{formatTime(hospitalData.dutyTime6c)}
-              </HpInfoCard>
-            )}
-            {hospitalData.dutyTime7c && hospitalData.dutyTime7s && (
-              <HpInfoCard>
-                일 {formatTime(hospitalData.dutyTime7s)}-{formatTime(hospitalData.dutyTime7c)}
-              </HpInfoCard>
-            )}
-          </HpInfoGrid>
-        </HpInfo>
-        <NewCardBox
-          bgcolor={"#FEFEFE"}
-          width={"100%"}
-          height={"86px"}
-          label={`${reserveday.year}. ${reserveday.month}. ${reserveday.date}. (${reserveday.day})`}
-          borderRad={"16px"}
-          color={colors.primary}
-          fontSize={"25px"}
-          margin={"37px 0 45px 0"}
-          button={
-            <NewButton
-              width={"100px"}
-              height={"43px"}
-              bgcolor={colors.primary}
-              label={<span>날짜선택</span>}
-              borderOutLine={"#ffffff"}
-              btnColor={"white"}
-              btnFontSize={"16px"}
-              onClick={openModal}
-            ></NewButton>
-          }
-        ></NewCardBox>
-        <QueryReserveBtn onClick={openModal}><span>날짜선택</span></QueryReserveBtn>
-        <div>
-        <Modal
-            isOpen={reserveModal}
-            onClose={closeModal}
-            onSaved={closeModal}
-            title={hospitalData.dutyName}
-            style={{ width: "60%" }}
-          >
-          <ModalContentContainer>
-            <p>{reserveday.year}. {reserveday.month}. {reserveday.date}. ({reserveday.day})</p>
-            <ModalContent>
-              <ModalReserveDays year={reserveday.year} month={reserveday.month}>
-              </ModalReserveDays>
-            </ModalContent>
-          </ModalContentContainer>
-        </Modal>
-        <ReserveTimes>
-          {reserveTimeTable.map((time, index) => (
-              <ReserveTime key={index} clicked={index == clickedBtn} onClick={()=>{
-                if(checkReserve(time, reserveday)){return alert("이미 예약된 날짜입니다")}else{hadleBtn(index); setClickedBtnTime(time);}
-              }} when={time} disabled={checkReserve(time, reserveday)}>
-                <span>{formatTime(time)}</span>
-              </ReserveTime>
-          ))}
-        </ReserveTimes>
-        </div>
-        {reserveTimeTable.length>0 && <ReserveSubmit onClick={()=>{handleSubmit(clickedBtnTime)}}>선택완료</ReserveSubmit>}
-      </BottomContentContainer>
-      <NavigationBar></NavigationBar>
-    </Container>
+  return (
+    <>
+      <Container>
+        <HeaderContainer>
+          <NewHeader label={hospitalData.dutyName} />
+        </HeaderContainer>
+        <TopContentContainer>
+          <div>{hospitalData.dutyName}</div>
+          <UnderLine />
+        </TopContentContainer>
+        <BottomContentContainer>
+          <HpInfo>
+            <img src={clockGreen} alt="" />
+            <HpInfoGrid>
+              {hospitalData.dutyTime1c && hospitalData.dutyTime1s && (
+                <HpInfoCard>
+                  월 {formatTime(hospitalData.dutyTime1s)}-
+                  {formatTime(hospitalData.dutyTime1c)}
+                </HpInfoCard>
+              )}
+              {hospitalData.dutyTime2c && hospitalData.dutyTime2s && (
+                <HpInfoCard>
+                  화 {formatTime(hospitalData.dutyTime2s)}-
+                  {formatTime(hospitalData.dutyTime2c)}
+                </HpInfoCard>
+              )}
+              {hospitalData.dutyTime3c && hospitalData.dutyTime3s && (
+                <HpInfoCard>
+                  수 {formatTime(hospitalData.dutyTime3s)}-
+                  {formatTime(hospitalData.dutyTime3c)}
+                </HpInfoCard>
+              )}
+              {hospitalData.dutyTime4c && hospitalData.dutyTime4s && (
+                <HpInfoCard>
+                  목 {formatTime(hospitalData.dutyTime4s)}-
+                  {formatTime(hospitalData.dutyTime4c)}
+                </HpInfoCard>
+              )}
+              {hospitalData.dutyTime5c && hospitalData.dutyTime5s && (
+                <HpInfoCard>
+                  금 {formatTime(hospitalData.dutyTime5s)}-
+                  {formatTime(hospitalData.dutyTime5c)}
+                </HpInfoCard>
+              )}
+              {hospitalData.dutyTime6c && hospitalData.dutyTime6s && (
+                <HpInfoCard>
+                  토 {formatTime(hospitalData.dutyTime6s)}-
+                  {formatTime(hospitalData.dutyTime6c)}
+                </HpInfoCard>
+              )}
+              {hospitalData.dutyTime7c && hospitalData.dutyTime7s && (
+                <HpInfoCard>
+                  일 {formatTime(hospitalData.dutyTime7s)}-
+                  {formatTime(hospitalData.dutyTime7c)}
+                </HpInfoCard>
+              )}
+            </HpInfoGrid>
+          </HpInfo>
+          <NewCardBox
+            bgcolor={"#FEFEFE"}
+            width={"100%"}
+            height={"86px"}
+            label={`${reserveday.year}. ${reserveday.month}. ${reserveday.date}. (${reserveday.day})`}
+            borderRad={"16px"}
+            color={colors.primary}
+            fontSize={"25px"}
+            margin={"37px 0 45px 0"}
+            button={
+              <NewButton
+                width={"100px"}
+                height={"43px"}
+                bgcolor={colors.primary}
+                label={<span>날짜선택</span>}
+                borderOutLine={"#ffffff"}
+                btnColor={"white"}
+                btnFontSize={"16px"}
+                onClick={openModal}
+              ></NewButton>
+            }
+          ></NewCardBox>
+          <QueryReserveBtn onClick={openModal}>
+            <span>날짜선택</span>
+          </QueryReserveBtn>
+          <div>
+            <Modal
+              isOpen={reserveModal}
+              onClose={closeModal}
+              onSaved={closeModal}
+              title={hospitalData.dutyName}
+              style={{ width: "60%" }}
+            >
+              <ModalContentContainer>
+                <p>
+                  {reserveday.year}. {reserveday.month}. {reserveday.date}. (
+                  {reserveday.day})
+                </p>
+                <ModalContent>
+                  <ModalReserveDays
+                    year={reserveday.year}
+                    month={reserveday.month}
+                  ></ModalReserveDays>
+                </ModalContent>
+              </ModalContentContainer>
+            </Modal>
+            <ReserveTimes>
+              {reserveTimeTable.map((time, index) => (
+                <ReserveTime
+                  key={index}
+                  clicked={index == clickedBtn}
+                  onClick={() => {
+                    if (checkReserve(time, reserveday)) {
+                      return alert("이미 예약된 날짜입니다");
+                    } else {
+                      hadleBtn(index);
+                      setClickedBtnTime(time);
+                    }
+                  }}
+                  when={time}
+                  disabled={checkReserve(time, reserveday)}
+                >
+                  <span>{formatTime(time)}</span>
+                </ReserveTime>
+              ))}
+            </ReserveTimes>
+          </div>
+          {reserveTimeTable.length > 0 && (
+            <ReserveSubmit
+              onClick={() => {
+                handleSubmit(clickedBtnTime);
+              }}
+            >
+              선택완료
+            </ReserveSubmit>
+          )}
+        </BottomContentContainer>
+        <NavigationBar></NavigationBar>
+      </Container>
     </>
   );
 };
-
-
-
 
 //스타일 - 헤더
 const HeaderContainer = styled.div`
@@ -637,10 +715,7 @@ const NewButtonStyle = styled.button`
   border-radius: 5px;
   background-color: ${(props) => props.bgcolor};
   cursor: pointer;
-
-  padding: 1% 3.5%;
-
-  @media screen and (max-width: 800px) {
+  padding: 1% 3.5% @media screen and (max-width: 800px) {
     display: none;
   }
   &:disabled {
@@ -674,6 +749,9 @@ const NewCardBoxStyle = styled.div`
     right: 58px;
     bottom: 22px;
     padding: 0;
+    &:hover {
+      opacity: 70%;
+    }
   }
   &:disabled {
     color: white;
@@ -682,7 +760,6 @@ const NewCardBoxStyle = styled.div`
     cursor: not-allowed;
   }
 `;
-
 
 // 모달 디자인
 const ModalContentContainer = styled.div`
@@ -702,9 +779,7 @@ const ModalContentContainer = styled.div`
   }
 `;
 
-const ModalContent = styled.div`
-
-`;
+const ModalContent = styled.div``;
 
 const ModalInput = styled.input`
   width: 50%;
@@ -717,6 +792,11 @@ const ModalInput = styled.input`
   margin: 10px 0 20px 0;
   padding: 20px;
   text-align: center;
+  &:hover {
+    border: solid 1px ${colors.primary};
+    color: ${colors.primary};
+    opacity: 70%;
+  }
 `;
 
 // 모달에서 날짜를 선택하고 생성되는 시간
@@ -735,43 +815,55 @@ const ReserveTimes = styled.div`
 `;
 
 const ReserveTime = styled.button`
-  cursor: ${({disabled})=>{
-    if(disabled){
-      return "now-allowed"
-    } else {return "pointer"}
+  cursor: ${({ disabled }) => {
+    if (disabled) {
+      return "now-allowed";
+    } else {
+      return "pointer";
+    }
   }};
   width: 100%;
   height: 55px;
   background-color: ${({ clicked, disabled }) => {
-    if(disabled){ 
-      return "gray"
-    } else {return clicked ? `${colors.primary}` : "white"}
-    }};
+    if (disabled) {
+      return "gray";
+    } else {
+      return clicked ? `${colors.primary}` : "white";
+    }
+  }};
   border: solid 1px #cdcdcd;
   border-radius: 6px;
   font-size: 15px;
   color: ${({ clicked, disabled }) => {
-    if(disabled){ 
-      return "white"
-    } else {return clicked ? `white` : "#444444"}
-    }};
+    if (disabled) {
+      return "white";
+    } else {
+      return clicked ? `white` : "#444444";
+    }
+  }};
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   font-weight: 400;
   font-size: 20px;
+  &:hover {
+    opacity: 50%;
+  }
 `;
 
 const ReserveSubmit = styled.button`
   cursor: pointer;
-  background: #00AD5C;
-  border: 1px solid #00A758;
+  background: #00ad5c;
+  border: 1px solid #00a758;
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.25);
   border-radius: 11px;
   width: 237px;
   height: 69px;
   font-weight: 700;
   font-size: 30px;
-  color: #FFFFFF;
-  margin: 45px 0 100px 0;
+  color: #ffffff;
+  margin: 45px 0 130px 0;
+  &:hover {
+    opacity: 70%;
+  }
 `;
 
 const QueryReserveBtn = styled.button`
@@ -790,7 +882,7 @@ const QueryReserveBtn = styled.button`
 
   @media screen and (max-width: 800px) {
     display: inline-block;
-  };
+  }
 `;
 
 export default Reserve;
