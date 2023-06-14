@@ -1,4 +1,3 @@
-/* eslint-disable */
 import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import {
@@ -23,6 +22,7 @@ import MainBanner from "../../assets/mainBanner.png";
 import iconPeople from "../../assets/iconPeople.svg";
 import arrowRight from "../../assets/arrowRight.svg";
 import pinwheel from "../../assets/Pinwheel.gif";
+import Loding from "../../assets/ImgLoding.jpg";
 
 // 공통 컴포넌트 연결 링크
 import {
@@ -34,6 +34,8 @@ import {
   Footer,
   SearchBar,
 } from "../../components/index";
+
+import { SearchInput } from "./SearchInput";
 
 import { AutoplayYouTubeVideo } from "./Youtube";
 
@@ -76,21 +78,11 @@ export const Home = () => {
     navigate("/");
   };
 
-  // 위치정보 depth1, depth2
-  const [depth1, setDepth1] = useState("");
-  const [depth2, setDepth2] = useState("");
-  // 위치정보만 받았을 때의 전체 병원리스트
-  const [hospitalList, setHospitalList] = useState([]);
   // 키워드 검색어
-  const [searchKeyword, setSearchKeyword] = useState("");
-  //키워드 검색 후 필터링 된 병원 리스트
-  const [keywordFilteredHospitals, setKeywordFilteredHospitals] = useState([]);
+  // const [searchKeyword, setSearchKeyword] = useState("");
 
-  // 검색바
-  const handleDepthChange = (first, second) => {
-    setDepth1(first);
-    setDepth2(second);
-  };
+  //키워드 검색 후 필터링 된 병원 리스트
+  // const [keywordFilteredHospitals, setKeywordFilteredHospitals] = useState([]);
 
   const handleSearch = (keyword) => {
     setSearchKeyword(keyword);
@@ -152,6 +144,20 @@ export const Home = () => {
     setDistance(selectedDistance);
   };
 
+  // 검색창
+  // 키워드 검색어
+  const [searchKeyword, setSearchKeyword] = useState("");
+
+  const [search, setSearch] = useState("");
+  const onChange = (e) => {
+    setSearch(e.target.value);
+    console.log("검색 입력창", search);
+  };
+  // 폼 전송 처리 함수
+  const handleSubmit = (e) => {
+    e.preventDefault();
+  };
+
   return (
     <>
       <Container>
@@ -189,16 +195,44 @@ export const Home = () => {
           </MenuSeb>
         </TopMenuBar>
 
-        <SearchBar
+        <SearchInput
           onSearch={handleSearch}
-          depth1={depth1}
-          depth2={depth2}
-          onLocationChange={handleDepthChange}
+          value={search}
+          onChange={onChange}
+          onSubmit={handleSubmit}
+          linkTo={`/search?query=${encodeURIComponent(search)}`}
         />
 
         <Banner>
           <Img src={MainBanner} alt="star"></Img>
         </Banner>
+
+        <SiliderMargin>
+          <MainSub>
+            {address ? (
+              <H2>현재 내 위치 : {address}</H2>
+            ) : (
+              <H2>위치찾는중...</H2>
+            )}
+            <H1>내 주변 소아과</H1>
+            {/* 백엔드 요청으로 반경 몇 Km내의 병원을 볼건지 선택할 수 있는 기능 추가 예정 */}
+            <DistanceDiv>
+              <Distance
+                distance={distance}
+                setDistance={setDistance}
+                onChange={handleDistanceChange}
+              />
+            </DistanceDiv>
+          </MainSub>
+
+          <SimpleSlider
+            latitude={latitude}
+            longitude={longitude}
+            distance={distance}
+          />
+        </SiliderMargin>
+
+        <AutoplayYouTubeVideo videoId={"efzr12y8vUc"} />
 
         <BannerSeb>
           <Link to="/SignUp?tab=hospital">
@@ -225,32 +259,6 @@ export const Home = () => {
           </Link>
         </BannerSeb>
 
-        <SiliderMargin>
-          <MainSub>
-            {address ? (
-              <H2>현재 내 위치 : {address}</H2>
-            ) : (
-              <H2>위치찾는중...</H2>
-            )}
-            <H1>내 주변 소아과</H1>
-            {/* 백엔드 요청으로 반경 몇 Km내의 병원을 볼건지 선택할 수 있는 기능 추가 예정 */}
-            <DistanceDiv>
-              <Distance
-                distance={distance}
-                setDistance={setDistance}
-                onChange={handleDistanceChange}
-              />
-            </DistanceDiv>
-          </MainSub>
-          <SimpleSlider
-            latitude={latitude}
-            longitude={longitude}
-            distance={distance}
-          />
-        </SiliderMargin>
-
-        <AutoplayYouTubeVideo videoId={"efzr12y8vUc"} />
-
         <Footer />
         <NavigationBar />
       </Container>
@@ -259,6 +267,7 @@ export const Home = () => {
 };
 export default Home;
 
+// 거리 설정
 const options = [
   { value: "1", label: "1" },
   { value: "3", label: "3" },
@@ -375,7 +384,6 @@ const Banner = styled.div`
   width: 100%;
   border-radius: 20px;
   margin: 4% 0;
-  padding: 0 2.5%;
 `;
 
 const Img = styled.img`
@@ -387,12 +395,13 @@ const Img = styled.img`
 const BannerSeb = styled.div`
   position: relative;
   width: 100%;
-  padding: 2%;
+  margin-bottom: 5%;
 `;
 
 const BanContainer = styled.div`
   display: flex;
-  border: 1px solid ${colors.primary};
+  border: 1px solid #dbecdf;
+  // background: #eaf9ed;
   border-radius: 10px;
   padding: 3%;
 `;
@@ -466,13 +475,18 @@ const SimpleSlider = ({ latitude, longitude, distance }) => {
     ],
   };
 
+  // 랜던
+  const getRandomNumber = () => {
+    return Math.floor(Math.random() * 10);
+  };
+
   // 병원 데이터 get
   const [hospitalData, setHospitalData] = useState([]);
   // 로딩 화면
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Function to fetch hospital data using latitude and longitude
+    // 위도와 경도를 이용하여 병원 데이터를 가져오는 기능
     const hospitalApi = async () => {
       try {
         const response = await axios.get("/hospital/near", {
@@ -513,16 +527,22 @@ const SimpleSlider = ({ latitude, longitude, distance }) => {
           {hospitalData.length > 0 ? (
             hospitalData.map((data) => (
               <Card key={data.id}>
-                <Link to={`/detail/${data.id}`}>
+                <Link to={`/detail?id=${data.id}`}>
                   <CardTop>
-                    {data.image !== null ? (
+                    {data.image.length > 0 ? (
                       <CardImg
                         key={data.id}
                         src={data.image}
                         alt={data.image}
                       />
                     ) : (
-                      <CardImgBak></CardImgBak>
+                      // <CardImgBak></CardImgBak>
+                      // <CardImg
+                      //   key={data.id}
+                      //   src={`https://loremflickr.com/340/340?random=${getRandomNumber()}`}
+                      //   alt={data.image}
+                      // />
+                      <CardImg key={data.id} src={Loding} alt={data.image} />
                     )}
                   </CardTop>
                   <CardBottom>

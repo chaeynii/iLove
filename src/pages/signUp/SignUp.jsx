@@ -161,6 +161,7 @@ const UserView = () => {
     setNotAllow(true);
   }, [emailValid, pwValid, pwCheckValid, nameValid, phoneValid]);
 
+  const navigate = useNavigate();
   // 폼 전송 구현
   const register = () => {
     // axios를 사용하여 POST 요청 만들기
@@ -174,8 +175,7 @@ const UserView = () => {
       .then((response) => {
         // 회원가입 성공
         // 홈으로 이동
-        useNavigate("/");
-
+        navigate("/");
         console.log("등록 성공", response.data);
       })
       .catch((error) => {
@@ -362,6 +362,7 @@ const HospitalView = () => {
     setNotAllow(true);
   }, [emailValid, pwValid, pwCheckValid, nameValid, phoneValid]);
 
+  const navigate = useNavigate();
   // 폼 전송 구현
   const register = () => {
     // axios를 사용하여 POST 요청 만들기
@@ -375,7 +376,7 @@ const HospitalView = () => {
       })
       .then((response) => {
         // 성공적인 응답 처리
-        useNavigate("/");
+        navigate("/");
       })
       .catch((error) => {
         // 오류 처리

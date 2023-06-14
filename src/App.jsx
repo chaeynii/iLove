@@ -52,7 +52,6 @@ function App() {
         <Route path="admin" element={<AdminHome />} />
         <Route path="/reserve" element={<ReservationChk />} />
         <Route path="/search" element={<SearchPage />} />
-        <Route path="/detail/:hpid" element={<Detail />} />
         <Route path="/detail/" element={<Detail />} />
         <Route path="/detail/reserve" element={<Reserve />} />
         <Route path="/detail/map" element={<MapHospital />} />
