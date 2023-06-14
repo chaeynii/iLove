@@ -6,11 +6,14 @@ import {
   Route,
   Link,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
-import { useQuery } from "react-query";
+import { useQuery, useMutation } from "react-query";
+import axios from "axios";
 
 // 아이콘
 import star from "../../assets/star.svg";
+import yellowStar from "../../assets/yellowStar.svg";
 import locationWhite from "../../assets/iconLocationWhite.svg";
 import locationGreen from "../../assets/iconLocationGreen.svg";
 import arrowButtonRight from "../../assets/arrowbutton.png";
@@ -32,42 +35,24 @@ import {
   Footer,
   SearchBar,
 } from "../../components/index";
+import {formatTime, endpoint_favorite} from "../../utils"
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import colors from "../../constants/colors";
 import fontSize from "../../constants/fontSize";
 
-// 공통 컴포넌트 수정활용 *즐겨찾기,뒤로가기 클릭 이벤트 추가해야함
-const NewHeader = ({ label, onClick }) => {
-  return (
-    <>
-      <HeaderWrap>
-        <BtnBack onClick={onClick}>
-          <img alt="icon-left" src={IconLeft}></img>
-        </BtnBack>
-        <div>
-          <h2>{label}</h2>
-        </div>
-        <HeaderStar>
-          <img alt="star" src={star}></img>
-        </HeaderStar>
-      </HeaderWrap>
-    </>
-  );
-};
-
 // 백엔드 주소
-const BEdata = "http://34.64.69.226:5000/api";
+const BEdata = "http://34.64.69.226:5000/api/";
 
 const Detail = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const hospitalID = searchParams.get("id");
-  // const token = localStorage.getItem("token") ? localStorage.getItem("token") : false;
+  const hospitalID = searchParams.get("id") 
+  const token = localStorage.getItem("token") ? localStorage.getItem("token") : false;
+  const navigate = useNavigate();
 
   // const hospitalID = "A1100401"; // 임시 하드코딩 아이디
-  const token =
-    "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1vb250ZXN0QHRlc3QudGVzdCIsInN1YiI6MywiaWF0IjoxNjg2MjM2NTQzLCJleHAiOjE3MTc3OTQxNDN9.ToJBCRSygcxpdmMC-B0DyayfbdR7f6E4FEYhhEu5RhA";
+  // const token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1vb250ZXN0QHRlc3QudGVzdCIsInN1YiI6MywiaWF0IjoxNjg2MjM2NTQzLCJleHAiOjE3MTc3OTQxNDN9.ToJBCRSygcxpdmMC-B0DyayfbdR7f6E4FEYhhEu5RhA"
   // 임시 하드코딩 토큰
 
   const [hospitalData, setHospitalData] = useState({});
@@ -75,10 +60,13 @@ const Detail = () => {
   const [hospitalReviews, setHospitalReviews] = useState([]);
   const [hospitalReviewState, setHospitalReviewState] = useState({});
   const [userReviews, setUserReviews] = useState([]);
+  const [likeState, setLikeState] = useState(false);
+
+  
 
   // 병원,이미지,리뷰 정보
   useEffect(() => {
-    fetch(`${BEdata}/hospital/${hospitalID}`, {
+    fetch(`${BEdata}hospital/${hospitalID}`, {
       headers: {
         Accept: "application / json",
       },
@@ -89,21 +77,40 @@ const Detail = () => {
         setHospitalData(hospitalID.data);
       });
 
-    fetch(`${BEdata}/image/hospital/${hospitalID}`)
+    fetch(`${BEdata}image/hospital/${hospitalID}`)
       .then((res) => res.json())
       .then((hospitalD) => {
         setHospitalImg(hospitalD.data);
       });
 
-    fetch(`${BEdata}/reviews/${hospitalID}`)
+    fetch(`${BEdata}reviews/${hospitalID}`)
       .then((res) => res.json())
       .then((reviewData) => {
         setHospitalReviews(reviewData.data);
       });
+
+    if(token){
+    fetch(`${BEdata}favorite`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((res)=>{
+        res.data.forEach((like)=>{
+          if(like.hospitalId == hospitalID){
+            setLikeState(true)
+          }
+        })
+      });
+    };
+
   }, []);
 
   useEffect(() => {
-    fetch(`${BEdata}/reviews/${hospitalID}`)
+    fetch(`${BEdata}reviews/${hospitalID}`)
       .then((res) => res.json())
       .then((reviewData) => {
         setHospitalReviews(reviewData.data);
@@ -114,11 +121,11 @@ const Detail = () => {
   function reviewClick(label) {
     if (token) {
       const data = { vote: label };
-      fetch(`${BEdata}/reviews/${hospitalID}`, {
+      fetch(`${BEdata}reviews/${hospitalID}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(data),
       })
@@ -126,9 +133,9 @@ const Detail = () => {
         .then((reviewData) => {
           setHospitalReviewState(reviewData.data);
           if (reviewData.data.length == 1) {
-            fetch(`${BEdata}/reviews/user/${hospitalID}`, {
+            fetch(`${BEdata}reviews/user/${hospitalID}`, {
               headers: {
-                Authorization: token,
+                Authorization: `Bearer ${token}`,
               },
               method: "GET",
             })
@@ -145,6 +152,52 @@ const Detail = () => {
       alert("로그인이 필요합니다");
     }
   }
+
+  // 공통 컴포넌트 수정활용 *뒤로가기 클릭 이벤트 추가해야함
+  const NewHeader = ({ label, onClick }) => {
+    return (
+      <>
+        <HeaderWrap>
+          <BtnBack onClick={()=>navigate("/search")}>
+            <img alt="icon-left" src={IconLeft}></img>
+          </BtnBack>
+          <div>
+            <h2>{label}</h2>
+          </div>
+          <HeaderStar onClick={handleFavoriteClick}>
+            {likeState ? <img alt="like" src={yellowStar}></img> : <img alt="notlike" src={star}></img>}
+          </HeaderStar>
+        </HeaderWrap>
+      </>
+    );
+  };
+
+  function handleFavorite(data) {
+    fetch(`${BEdata}favorite`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    })
+      .then((res) => res.json())
+      .then((res)=>{
+        if(res.data.id){setLikeState(true)}else{setLikeState(false)}
+      });
+    };
+
+  const handleFavoriteClick = (event) => {
+    //즐겨찾기 클릭 시 Link로 넘어가는 것을 막음
+    event.preventDefault();
+    if(token){
+    try {
+      handleFavorite({"hospitalId" : hospitalID});
+    } catch (error) {
+      console.error("Favorite post 요청 실패", error);
+      // 필요한 에러 처리 작업 수행
+    }} else {alert("로그인 후 즐겨찾기가 가능합니다")}
+  };
 
   return (
     <>
@@ -207,37 +260,37 @@ const Detail = () => {
             <HpInfoGrid>
               {hospitalData.dutyTime1c && hospitalData.dutyTime1s && (
                 <HpInfoCard>
-                  월 {hospitalData.dutyTime1s}-{hospitalData.dutyTime1c}
+                  월 {formatTime(hospitalData.dutyTime1s)}-{formatTime(hospitalData.dutyTime1c)}
                 </HpInfoCard>
               )}
               {hospitalData.dutyTime2c && hospitalData.dutyTime2s && (
                 <HpInfoCard>
-                  화 {hospitalData.dutyTime2s}-{hospitalData.dutyTime2c}
+                  화 {formatTime(hospitalData.dutyTime2s)}-{formatTime(hospitalData.dutyTime2c)}
                 </HpInfoCard>
               )}
               {hospitalData.dutyTime3c && hospitalData.dutyTime3s && (
                 <HpInfoCard>
-                  수 {hospitalData.dutyTime3s}-{hospitalData.dutyTime3c}
+                  수 {formatTime(hospitalData.dutyTime3s)}-{formatTime(hospitalData.dutyTime3c)}
                 </HpInfoCard>
               )}
               {hospitalData.dutyTime4c && hospitalData.dutyTime4s && (
                 <HpInfoCard>
-                  목 {hospitalData.dutyTime4s}-{hospitalData.dutyTime4c}
+                  목 {formatTime(hospitalData.dutyTime4s)}-{formatTime(hospitalData.dutyTime4c)}
                 </HpInfoCard>
               )}
               {hospitalData.dutyTime5c && hospitalData.dutyTime5s && (
                 <HpInfoCard>
-                  금 {hospitalData.dutyTime5s}-{hospitalData.dutyTime5c}
+                  금 {formatTime(hospitalData.dutyTime5s)}-{formatTime(hospitalData.dutyTime5c)}
                 </HpInfoCard>
               )}
               {hospitalData.dutyTime6c && hospitalData.dutyTime6s && (
                 <HpInfoCard>
-                  토 {hospitalData.dutyTime6s}-{hospitalData.dutyTime6c}
+                  토 {formatTime(hospitalData.dutyTime6s)}-{formatTime(hospitalData.dutyTime6c)}
                 </HpInfoCard>
               )}
               {hospitalData.dutyTime7c && hospitalData.dutyTime7s && (
                 <HpInfoCard>
-                  일 {hospitalData.dutyTime7s}-{hospitalData.dutyTime7c}
+                  일 {formatTime(hospitalData.dutyTime7s)}-{formatTime(hospitalData.dutyTime7c)}
                 </HpInfoCard>
               )}
             </HpInfoGrid>
@@ -255,37 +308,37 @@ const Detail = () => {
             <h1>이런 점이 좋았어요</h1>
           </HpInfo>
           <ReviewContainer>
-            <ReviewButton onClick={() => reviewClick(1)}>
+            <ReviewButton onClick={() => reviewClick("kindDoctor")}>
               친절한 의사 선생님
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[0])}</span>
               )}
             </ReviewButton>
-            <ReviewButton onClick={() => reviewClick(2)}>
+            <ReviewButton onClick={() => reviewClick("professional")}>
               전문적인 치료
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[1])}</span>
               )}
             </ReviewButton>
-            <ReviewButton onClick={() => reviewClick(3)}>
+            <ReviewButton onClick={() => reviewClick("kindEmployee")}>
               상냥한 간호사·직원
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[2])}</span>
               )}
             </ReviewButton>
-            <ReviewButton onClick={() => reviewClick(4)}>
+            <ReviewButton onClick={() => reviewClick("goodReceipt")}>
               편리한 접수·예약
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[3])}</span>
               )}
             </ReviewButton>
-            <ReviewButton onClick={() => reviewClick(5)}>
+            <ReviewButton onClick={() => reviewClick("cleanHospital")}>
               깨끗한 시설
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[4])}</span>
               )}
             </ReviewButton>
-            <ReviewButton onClick={() => reviewClick(6)}>
+            <ReviewButton onClick={() => reviewClick("goodTraffic")}>
               편한 교통·주차
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[5])}</span>
@@ -321,6 +374,7 @@ const HeaderContainer = styled.div`
 `;
 
 const HeaderStar = styled.div`
+  cursor: pointer;
   display: flex;
   text-align: center;
   float: right;
@@ -352,6 +406,7 @@ const BtnBack = styled.button`
   background: none;
   border: none;
   float: left;
+  cursor: pointer;
 `;
 
 //스타일 - 메인컨텐츠
@@ -450,6 +505,7 @@ const BottomContentContainer = styled.div`
   text-align: left;
   padding-left: 71px;
   padding-right: 71px;
+  margin-bottom: 130px;
   @media screen and (max-width: 600px) {
     padding-left: 30px;
     padding-right: 30px;
