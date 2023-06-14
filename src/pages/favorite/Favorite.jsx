@@ -1,7 +1,7 @@
 import * as Style from "../search/styles/SearchPageStyle";
 
 // 공통 컴포넌트
-import { Header, NavigationBar } from "../../components/index";
+import { Container, Header, NavigationBar } from "../../components/index";
 
 //import문
 import React, { useState, useEffect } from "react";
@@ -31,7 +31,6 @@ export const Favorite = () => {
             },
           })
           .then((response) => setFavoriteList(response.data.data));
-        // return response.data;
       } catch (error) {
         console.log(error);
       }
@@ -102,7 +101,7 @@ export const Favorite = () => {
   const today = now.getDay();
 
   return (
-    <>
+    <Container>
       <Header label={"즐겨찾기"} />
       <Style.Wrapper>
         <Style.SearchHeader>
@@ -111,6 +110,6 @@ export const Favorite = () => {
         {renderHospitalCard()}
       </Style.Wrapper>
       <NavigationBar />
-    </>
+    </Container>
   );
 };
