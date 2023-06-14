@@ -68,15 +68,15 @@ export const HospitalCard = ({
 
     try {
       handleFavorite();
-      // 필요한 추가 작업 수행
+      // 페이지 새로고침
+      window.location.reload();
     } catch (error) {
       console.error(error);
-      // 필요한 에러 처리 작업 수행
     }
   };
   return (
     <>
-      <Link to={`/detail/${hpid}`}>
+      <Link to={`/detail?id=${hpid}`}>
         <Style.HospitalCardBox>
           <div>{hospitalName}</div>
           {INFO_PROPS.map((prop) => (
