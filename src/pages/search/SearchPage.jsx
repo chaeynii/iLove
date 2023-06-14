@@ -4,12 +4,26 @@ import * as Style from "./styles/SearchPageStyle";
 import { IconDown } from "../../assets/index";
 
 // 공통 컴포넌트
-import { Header, NavigationBar, SearchBar } from "../../components/index";
+import {
+  Header,
+  NavigationBar,
+  SearchBar,
+  Container,
+} from "../../components/index";
 
 //import문
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "react-query";
 import axios from "axios";
+import { useInView } from "react-intersection-observer";
+
+//utils
+import {
+  BE_URL,
+  endpoint_user,
+  endpoint_favorite,
+  getUserToken,
+} from "../../utils.js";
 
 //병원리스트 - 병원카드 컴포넌트
 import { HospitalCard } from "./HospitalCard";
@@ -19,13 +33,6 @@ const SORT_OPTIONS = [
   { name: "인기순", state: "review" },
   { name: "이름순", state: "name" },
 ];
-
-//URL
-const BE_URL = `http://34.64.69.226:3000/`;
-const userToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVtYWlsQGUubWFpbCIsInN1YiI6MSwiaWF0IjoxNjg2MjM0NjUxLCJleHAiOjE3MTc3OTIyNTF9.QORp6FfVmnROH3A-OCvHzYKjzZVAXjADpKcwmCwGeAA";
-const endpoint_user = `users`;
-const endpoint_favorite = `favorite/`;
 
 export const SearchPage = () => {
   // 위치정보 depth1, depth2
@@ -45,7 +52,15 @@ export const SearchPage = () => {
   // 옵션창 펼쳐졌는지
   const [isOpenOption, setIsOpenOption] = useState(false);
 
+  //무한스크롤 구현
+  const [hospitalList, setHospitalList] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+
+  const [ref, inView] = useInView();
+
   // 유저 정보
+  const userToken = getUserToken();
   const { data: userQuery, userIsLoading } = useQuery(["user"], async () => {
     try {
       const response = await axios.get(`${BE_URL}${endpoint_user}`, {
@@ -59,56 +74,63 @@ export const SearchPage = () => {
       throw error;
     }
   });
-  // 병원리스트 받아오기 - 키 값: 위치정보/정렬옵션/키워드 변경 시 자동렌더링
-  // 백엔드에 키워드 Parameters 추가요청한 상태입니다!
-  const { data: hospitalsQuery, hospitalListIsLoading } = useQuery(
-    ["hospitals", depth1, depth2, option],
-    async () => {
-      try {
-        const response = await axios.get(
-          // depth2가 전체면 depth1만 넣어서 요청보냄
-          depth2 === "전체"
-            ? `${BE_URL}hospital?depth1=${depth1}&size=10&page=0&sort=${option.state}`
-            : `${BE_URL}hospital?depth1=${depth1}&depth2=${depth2}&size=10&page=0&sort=${option.state}`
-        );
-        return response.data;
-      } catch (error) {
-        console.log(error);
-        throw error;
-      }
-    }
-  );
-  // 즐겨찾기 리스트 받아오기
-  const { data: favoritesQuery, favoriteListIsLoading } = useQuery(
-    ["favorites"],
-    async () => {
-      try {
-        const response = axios
-          .get(`${BE_URL}${endpoint_favorite}user`, {
-            headers: {
-              Authorization: `Bearer ${userToken}`,
-            },
-          })
-          .then((response) => response.data);
-        return response.data;
-      } catch (error) {
-        console.log(error);
-        throw error;
-      }
-    }
-  );
-
-  //로딩중일 경우 null값 반환
-  if (userIsLoading || hospitalListIsLoading || favoriteListIsLoading) {
-    return null;
-  }
 
   //유저정보
   const userData = userQuery?.data ?? [];
   const user_id = userData.id;
 
-  //병원리스트
-  const hospitalList = hospitalsQuery?.data ?? [];
+  //무한스크롤
+  // 서버에서 아이템을 가지고 오는 함수
+  useEffect(() => {
+    const getHospital = async () => {
+      setLoading(true);
+      await axios
+        .get(
+          // depth2가 전체면 depth1만 넣어서 요청보냄
+          depth2 === "전체"
+            ? `${BE_URL}hospital?depth1=${depth1}&size=10&page=${page}&sort=${option.state}&dutyName=${searchKeyword}`
+            : `${BE_URL}hospital?depth1=${depth1}&depth2=${depth2}&size=10&page=${page}&sort=${option.state}&dutyName=${searchKeyword}`
+        )
+        .then((res) => {
+          setHospitalList((prevState) => [...prevState, ...res.data.data]);
+        });
+      setLoading(false);
+    };
+    getHospital();
+  }, [page]);
+
+  useEffect(() => {
+    // 사용자가 마지막 요소를 보고 있고, 로딩 중이 아니라면
+    if (inView && !loading) {
+      setPage((prevState) => prevState + 1);
+    }
+  }, [inView]);
+  // 즐겨찾기 리스트 받아오기
+  const { data: favoritesQuery, favoriteIsLoading } = useQuery(
+    ["favorites"],
+    // instance를 사용해 중복되는 옵션 제거
+    () =>
+      axios.get(`${BE_URL}${endpoint_favorite}`, {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      }),
+    {
+      //백엔드에서 주는 데이터를 내가 원하는 가공해서 받을 수 있습니다.
+      select: (response) => {
+        return response.data;
+      },
+      // 에러 핸들링
+      onError: (error) => {
+        console.log(error);
+      },
+    }
+  );
+
+  //로딩중일 경우 null값 반환
+  if (userIsLoading || favoriteIsLoading) {
+    return null;
+  }
 
   //즐겨찾기 리스트
   const favoritesList = favoritesQuery?.data ?? [];
@@ -135,14 +157,43 @@ export const SearchPage = () => {
     }
   };
 
+  // 키워드 검색 요청 시
+  const handleSearch = (search) => {
+    setSearchKeyword(search);
+  };
+
+  const renderHospitalCards = (hospital) => {
+    //today가 0일 경우(일요일) 7번째 dutyTime값을 가져오도록 함
+    const dutyTimeStart =
+      today === 0 ? hospital.dutyTime7s : hospital[`dutyTime${today}s`]; // 오늘 요일에 해당하는 dutyTime 시작 시간
+    const dutyTimeClose =
+      today === 0 ? hospital.dutyTime7c : hospital[`dutyTime${today}c`]; // 오늘 요일에 해당하는 dutyTime 종료 시간
+    //즐겨찾기 해당여부 체크
+    const favorite = favoritesList.some(
+      (favoriteItem) =>
+        favoriteItem.userId === user_id &&
+        favoriteItem.hospitalId === hospital.id
+    );
+    return (
+      <HospitalCard
+        key={hospital.id}
+        hpid={hospital.id}
+        hospitalName={hospital.dutyName}
+        hospitalAddress={`${hospital.dutyAddr1Depth} ${hospital.dutyAddr2Depth} ${hospital.dutyAddr3Depth}`}
+        today={today}
+        dutyTimeStart={dutyTimeStart}
+        dutyTimeClose={dutyTimeClose}
+        favorite={favorite}
+      />
+    );
+  };
+
   return (
-    <>
+    <Container>
       <Header label={"병원 찾기"} />
       <Style.Wrapper>
         <SearchBar
-          onSearch={(search) => {
-            console.log("키워드:", search);
-          }}
+          onSearch={(search) => handleSearch(search)}
           depth1={depth1}
           depth2={depth2}
           onLocationChange={handleDepthChange}
@@ -170,39 +221,22 @@ export const SearchPage = () => {
           </Style.DropdownContainer>
         </Style.SearchHeader>
         {hospitalList.length > 0 ? (
-          hospitalList.map((hospital) => {
-            //today가 0일 경우(일요일) 7번째 dutyTime값을 가져오도록 함
-            const dutyTimeStart =
-              today === 0 ? hospital.dutyTime7s : hospital[`dutyTime${today}s`]; // 오늘 요일에 해당하는 dutyTime 시작 시간
-            const dutyTimeClose =
-              today === 0 ? hospital.dutyTime7c : hospital[`dutyTime${today}c`]; // 오늘 요일에 해당하는 dutyTime 종료 시간
-
-            //즐겨찾기 해당여부 체크
-            const favorite = favoritesList.some(
-              (favoriteItem) =>
-                favoriteItem.user_id === user_id &&
-                favoriteItem.hpid === hospital.id
-            );
-
-            return (
-              <HospitalCard
-                key={hospital.id}
-                hpid={hospital.id}
-                hospitalName={hospital.dutyName}
-                hospitalAddress={`${hospital.dutyAddr1Depth} ${hospital.dutyAddr2Depth} ${hospital.dutyAddr3Depth}`}
-                today={today}
-                dutyTimeStart={dutyTimeStart}
-                dutyTimeClose={dutyTimeClose}
-                favorite={favorite}
-                handleFavorite={() => {}}
-              />
-            );
-          })
+          hospitalList.map((hospital) => (
+            <div key={hospital.id}>
+              {hospitalList[hospitalList.length - 1].id === hospital.id ? (
+                <div className="list-item" ref={ref}>
+                  {renderHospitalCards(hospital)}
+                </div>
+              ) : (
+                <div className="list-item">{renderHospitalCards(hospital)}</div>
+              )}
+            </div>
+          ))
         ) : (
           <p>검색 결과가 없습니다.</p>
         )}
       </Style.Wrapper>
       <NavigationBar />
-    </>
+    </Container>
   );
 };
