@@ -1,21 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { useQuery } from "react-query";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 // 공통 컴포넌트 연결해서 테스트함
-import { Button } from "../../components/Button";
 import { NavigationBar } from "../../components/NavigationBar";
 import { Container } from "../../components/Container";
-import { CardBox } from "../../components/CardBox";
 import { Header } from "../../components/Header";
+import { ChildBox } from "./component/ChildBox";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import styled from "styled-components";
 import colors from "../../constants/colors";
+
 const userToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imp1bkBlbWFpbC5jb20iLCJzdWIiOjIwLCJpYXQiOjE2ODY0NTkwNTUsImV4cCI6MTcxODAxNjY1NX0.IqsJIcLYwGZB8sheLdMiBIK1odVAlJsGNJ2NYaNok1E";
-const endpoint_user = "users";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imp1bkBlbWFpbC5jb20iLCJzdWIiOjIwMDA0LCJpYXQiOjE2ODY2Mzk3MjMsImV4cCI6MTcxODE5NzMyM30.owESvX7FLjD-WjxESrMnEoR4glhF1AEBiedQ3WRo0Ok";
 
 //주소, 번호, 이메일 칸 앞에 로고넣기 위해 사용
 const Logo = styled.img`
@@ -28,6 +26,16 @@ const Space = styled.div`
 
 const MyContainer = styled.div`
   display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0;
+  margin-bottom: 20px;
+  position: relative;
+`;
+
+const KidContainer = styled.div`
+  display: flex;
+  flex-direction: column; // 추가
   justify-content: center;
   align-items: center;
   padding: 10px 0;
@@ -59,14 +67,23 @@ const TextContainer = styled.div`
   justify-content: center;
 `;
 
-const InputBox = styled.input`
+const AddressBox = styled.input`
   width: 380px;
   box-sizing: border-box;
   font-weight: bold;
   font-size: 16px;
 `;
 
-const StyledInput = styled.input`
+const NameBox = styled.input`
+  width: 90px;
+  box-sizing: border-box;
+  font-weight: bold;
+  font-size: 20px;
+  text-align: center;
+`;
+
+const PhonedBox = styled.input`
+  width: 130px;
   font-weight: bold;
   font-size: 16px;
 `;
@@ -78,11 +95,11 @@ const MyText = styled.h2`
 `;
 
 const NameText = styled(MyText)`
-  font-size: 20px;
+  font-size: 24px;
   font-weight: bold;
 `;
 
-const SpecialText = styled(MyText)`
+const KidText = styled(MyText)`
   color: #00ad5c;
   font-size: 25px;
   font-weight: bold;
@@ -111,6 +128,15 @@ const MyButton = styled.button`
   right: 0;
 `;
 
+const SaveButton = styled(MyButton)`
+  right: 50px;
+`;
+
+const CancelButton = styled(MyButton)`
+  right: 0;
+  background-color: #ff0000; // Cancel button with red color for better UI.
+`;
+
 function MyPage() {
   let navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
@@ -120,54 +146,79 @@ function MyPage() {
     address: "",
     phoneNumber: "",
   });
-
-  const [originData, setOriginData] = useState({
-    ...editData,
-  });
+  const [boxCreators, setBoxCreators] = useState([]);
+  const [savedData, setSavedData] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const res1 = await axios.get("/users/get", {
+        const res1 = await axios.get("users/get", {
           headers: {
             Authorization: `Bearer ${userToken}`,
           },
         });
         console.log(res1.data.data[0]);
         setUser(res1.data.data[0]);
-        setEditData({
+        const fetchedData = {
           name: res1.data.data[0].name,
           address: res1.data.data[0].address,
           phoneNumber: res1.data.data[0].phoneNumber,
+        };
+        setEditData(fetchedData);
+
+        const res2 = await axios.get("/kid/get", {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
         });
+        setBoxCreators(res2.data.data);
       } catch (err) {
         console.error(err);
       }
     };
     fetchUserData();
+
+    const getKids = async () => {
+      const axiosGet = await axios.get("/kid/get", {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      const kidsData = axiosGet.data.data;
+      setBoxCreators(kidsData);
+    };
+    getKids();
   }, []);
 
   // 클릭시 ChildPage로 이동
-
   const handleClick = () => {
     navigate("./ChildPage");
   };
 
-  const handleCancleClick = () => {
-    setEditData({ ...originData });
+  const handleEditClick = async () => {
+    // If we are in edit mode, then we update the user.
+    if (isEditing) {
+      // This will await the update of the user before setting isEditing to false.
+      await updateUser();
+      setIsEditing(false);
+    }
+    // If we are not in edit mode, then we set the originData to the current editData and enter edit mode.
+    else {
+      setSavedData({ ...editData }); // 수정 모드로 진입할 때 현재 데이터를 savedData에 저장
+      setIsEditing(true);
+    }
   };
 
-  const handleEditClick = async () => {
-    setIsEditing(!isEditing);
-    if (isEditing) {
-      await updateUser();
-    }
+  const handleCancleClick = () => {
+    // 취소 버튼을 누르면 savedData로 되돌리고 편집 모드를 해제
+    setEditData({ ...savedData }); // 취소 버튼을 눌렀을 때 savedData를 복구
+    setIsEditing(false);
   };
 
   const updateUser = async () => {
     try {
       const response = await axios.patch(
-        "/users/update",
+        "users/update",
         {
           name: editData.name,
           phoneNumber: editData.phoneNumber,
@@ -179,7 +230,11 @@ function MyPage() {
           },
         }
       );
-      console.log(editData);
+      if (response.status === 200) {
+        console.log("Success");
+      } else {
+        console.error("Faile");
+      }
     } catch (error) {
       console.error(error);
     }
@@ -206,7 +261,7 @@ function MyPage() {
         <MyContainer>
           {isEditing ? (
             <TextContainer>
-              <StyledInput
+              <NameBox
                 type="text"
                 name="name"
                 value={editData.name}
@@ -220,14 +275,19 @@ function MyPage() {
               <Underline />
             </TextContainer>
           )}
-          <MyButton onClick={handleEditClick}>
-            {isEditing ? "저장" : "회원정보 수정"}
-          </MyButton>
+          {isEditing ? (
+            <div>
+              <SaveButton onClick={handleEditClick}>저장</SaveButton>
+              <CancelButton onClick={handleCancleClick}>취소</CancelButton>
+            </div>
+          ) : (
+            <MyButton onClick={handleEditClick}>회원정보 수정</MyButton>
+          )}
         </MyContainer>
         <MyContainerLeftAlignWithLogo logo="address.png">
           <TextContainer>
             {isEditing ? (
-              <InputBox
+              <AddressBox
                 type="text"
                 name="address"
                 value={editData.address}
@@ -241,7 +301,7 @@ function MyPage() {
         <MyContainerLeftAlignWithLogo logo="phonenumber.png">
           <TextContainer>
             {isEditing ? (
-              <StyledInput
+              <PhonedBox
                 type="text"
                 name="phoneNumber"
                 value={editData.phoneNumber}
@@ -259,11 +319,26 @@ function MyPage() {
         </MyContainerLeftAlignWithLogo>
         <MyContainer>
           <TextContainer>
-            <SpecialText>우리 아이 관리</SpecialText>
+            <KidText>우리 아이 관리</KidText>
             <Underline />
           </TextContainer>
           <MyButton onClick={handleClick}>아이정보 관리</MyButton>
         </MyContainer>
+        <KidContainer>
+          {boxCreators.map(({ id, name, gender, birth, memo, image }) => (
+            <ChildBox
+              alwaysShowEditAndRemove={false}
+              defaultEditable={false}
+              key={id}
+              id={id}
+              name={name}
+              gender={gender}
+              birth={birth}
+              memo={memo}
+              image={image}
+            />
+          ))}
+        </KidContainer>
         <NavigationBar />
       </Container>
     </Container>
