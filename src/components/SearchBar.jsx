@@ -10,7 +10,7 @@ import {
 } from "../assets/index";
 
 // 공통 컴포넌트
-import { Modal } from "../components/index";
+import { Modal, Alarm } from "../components/index";
 
 export const SearchBar = ({ onSearch, depth1, depth2, onLocationChange }) => {
   //--------------------검색부분
@@ -163,7 +163,7 @@ export const SearchBar = ({ onSearch, depth1, depth2, onLocationChange }) => {
             isOpen="true"
             onSaved={onSavedAlarmModal}
           >
-            <div>등록된 알림이 없습니다.</div>
+            <Alarm></Alarm>
           </Modal>
         )}
       </div>
