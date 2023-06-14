@@ -135,11 +135,15 @@ export const MyCalendar = () => {
       return "Today";
     }
   };
+
   // 예약 memo 업데이트 하는 코드
-  const handleSavedMemo = (date, memo) => {
+  const handleSavedMemo = (date, reservedTime, memo) => {
     // 추출된 예약 정보 배열에서 해당 날짜와 일치하는 항목의 memo 값을 업데이트
     const updatedData = extractedData.map((item) => {
-      if (item.date === dayjs(date).format("YYYY-MM-DD")) {
+      if (
+        item.date === dayjs(date).format("YYYY-MM-DD") &&
+        item.reservedTime === reservedTime
+      ) {
         // 예약 ID를 가져와서 API 호출에 사용할 URL 생성
         const reservationId = item.id;
         const url = `${BE_URL}${endpoint_reserve}memo/${reservationId}`;
@@ -228,7 +232,9 @@ export const MyCalendar = () => {
                   <ReDetail
                     hospitalName={item.dutyName}
                     memo={item.memo}
-                    onSaved={(memo) => handleSavedMemo(item.date, memo)}
+                    onSaved={(memo) =>
+                      handleSavedMemo(item.date, item.reservedTime, memo)
+                    }
                   />{" "}
                   <DueDate
                     isToday={calculateDday(activeDate, item.date) === "Today"}
