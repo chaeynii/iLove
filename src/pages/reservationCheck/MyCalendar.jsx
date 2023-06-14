@@ -29,7 +29,7 @@ export const MyCalendar = () => {
 
   useEffect(() => {
     axios
-      .get(`${BE_URL}${endpoint_reserve}`, {
+      .get(`${BE_URL}${endpoint_reserve}user`, {
         headers: {
           Authorization: `Bearer ${userToken}`,
         },
@@ -41,6 +41,7 @@ export const MyCalendar = () => {
         const resData = res.data.data;
         // hospital의 dutyName, reservedDate, reservedTime, memo만 추출한 배열
         const extractedData = resData.map((item) => ({
+          id: item.id,
           date: dayjs(item.reservedDate, "YYYYMMDD").format("YYYY-MM-DD"),
           dutyName: item.hospital.dutyName,
           reservedTime: item.reservedTime,
@@ -97,6 +98,11 @@ export const MyCalendar = () => {
     return null; // 예약 없는 경우는 클래스 이름 없음
   };
 
+  const viewDate = ({ date }) => {
+    const formattedDate = dayjs(date).format("MM월DD일");
+    return `${formattedDate}`;
+  };
+
   const ReDate = ({ date }) => {
     const formattedDate = dayjs(date).format("MM월DD일");
     return (
@@ -128,6 +134,44 @@ export const MyCalendar = () => {
     } else {
       return "Today";
     }
+  };
+  // 예약 memo 업데이트 하는 코드
+  const handleSavedMemo = (date, memo) => {
+    // 추출된 예약 정보 배열에서 해당 날짜와 일치하는 항목의 memo 값을 업데이트
+    const updatedData = extractedData.map((item) => {
+      if (item.date === dayjs(date).format("YYYY-MM-DD")) {
+        // 예약 ID를 가져와서 API 호출에 사용할 URL 생성
+        const reservationId = item.id;
+        const url = `${BE_URL}${endpoint_reserve}memo/${reservationId}`;
+
+        // memo를 업데이트하기 위한 데이터 생성
+        const data = {
+          memo: memo,
+        };
+
+        // axios를 사용하여 PATCH 요청 전송
+        axios
+          .patch(url, data, {
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+            },
+          })
+          .then((res) => {
+            console.log(res.data);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+
+        return {
+          ...item,
+          memo: memo,
+        };
+      }
+      return item;
+    });
+
+    setExtractedData(updatedData); // 업데이트된 예약 정보 배열 설정
   };
 
   return (
@@ -176,10 +220,16 @@ export const MyCalendar = () => {
               <DiaryItemWrapper key={index}>
                 <DiaryItem>
                   <ReTime>
-                    <ReDate date={item.date} />
+                    <ReDate date={item.date}>
+                      <h2>{viewDate}</h2>
+                    </ReDate>
                     <ReHour time={item.reservedTime} />
                   </ReTime>
-                  <ReDetail hospitalName={item.dutyName} memo={item.memo} />
+                  <ReDetail
+                    hospitalName={item.dutyName}
+                    memo={item.memo}
+                    onSaved={(memo) => handleSavedMemo(item.date, memo)}
+                  />{" "}
                   <DueDate
                     isToday={calculateDday(activeDate, item.date) === "Today"}
                   >

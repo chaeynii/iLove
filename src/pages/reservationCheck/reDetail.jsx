@@ -1,14 +1,17 @@
 import React, { useState } from "react";
-import styled from "styled-components";
+// 공통컴포넌트
 import { CardBox, Modal } from "../../components/index";
+// css
+import styled from "styled-components";
 import IconPen from "../../assets/iconPen.svg";
 
-export const ReDetail = ({ hospitalName, memo }) => {
+export const ReDetail = ({ hospitalName, memo, onSaved }) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [memoValue, setMemoValue] = useState("");
+  const [memoValue, setMemoValue] = useState(memo ? memo : "");
 
   const openModal = () => {
     setModalOpen(true);
+    setMemoValue(memo);
   };
 
   const closeModal = () => {
@@ -19,8 +22,9 @@ export const ReDetail = ({ hospitalName, memo }) => {
     setMemoValue(event.target.value);
   };
 
-  const modalInputClickHandler = (e) => {
-    e.stopPropagation();
+  const handleSave = () => {
+    onSaved(memoValue);
+    closeModal();
   };
 
   return (
@@ -42,12 +46,12 @@ export const ReDetail = ({ hospitalName, memo }) => {
             isOpen={modalOpen}
             onClose={closeModal}
             title="메모"
-            style={{ width: "60%" }}
+            onSaved={handleSave}
           >
-            <ModalInputWrapper onClick={modalInputClickHandler}>
+            <ModalInputWrapper onClick={(e) => e.stopPropagation()}>
               <ModalHospitalName>{hospitalName}</ModalHospitalName>
               <ModalInput
-                placeholder="메모를 입력하세요"
+                placeholder={memo ? memo : "메모를 입력하세요"}
                 value={memoValue}
                 onChange={handleMemoChange}
               />

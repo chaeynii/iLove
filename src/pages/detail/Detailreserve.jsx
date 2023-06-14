@@ -224,10 +224,6 @@ const Reserve = () => {
     });
   }, [reserveday.date]);
 
-  useEffect(() => {
-    reservedTime;
-  }, []);
-
   // 모달창 컨트롤
   const ModalReserveDays = ({ year, month }) => {
     function changeDay(e) {
