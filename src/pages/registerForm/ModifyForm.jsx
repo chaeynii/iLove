@@ -196,7 +196,6 @@ export const ModifyForm = () => {
       formData.append("files", image);
     });
 
-    console.log(formData);
     instance
       .put(`hospital/A1100401`, formData, {
         headers: {

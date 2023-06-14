@@ -82,7 +82,7 @@ export const Login = () => {
         console.log(typeof userRole);
         const token = user.token;
         // 토큰 local storage에 저장
-        localStorage.setItem("user", JSON.stringify(user));
+
         localStorage.setItem("role", user.role);
         localStorage.setItem("token", token);
 

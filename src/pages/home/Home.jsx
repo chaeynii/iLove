@@ -47,19 +47,33 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 export const Home = () => {
+  const token = localStorage.getItem("token");
+  let showTab;
+  let hideTab;
+  if (token) {
+    showTab = "none";
+    hideTab = "";
+  } else {
+    showTab = "";
+    hideTab = "none";
+  }
+  const navigate = useNavigate();
   const handleLogout = () => {
     // 토큰 가져오기
-    const token = localStorage.getItem("user");
+
     const role = localStorage.getItem("role");
+
     if ((token, role)) {
       // 토큰이 존재하므로 삭제 진행
-      localStorage.removeItem("user");
+      localStorage.removeItem("token");
       localStorage.removeItem("role");
       toast("로그아웃 성공");
     } else {
       // 오류 알림표시
       toast("오류로 인해 로그아웃하지 못했습니다.");
     }
+
+    navigate("/");
   };
 
   // 위치정보 depth1, depth2
@@ -158,12 +172,14 @@ export const Home = () => {
 
           <MenuSeb>
             <Link to="/login">
-              <SebP>로그인</SebP>
+              <SebP style={{ display: showTab }}>로그인</SebP>
             </Link>
           </MenuSeb>
 
           <MenuSeb>
-            <LogoutBut onClick={handleLogout}>로그아웃</LogoutBut>
+            <LogoutBut style={{ display: hideTab }} onClick={handleLogout}>
+              로그아웃
+            </LogoutBut>
           </MenuSeb>
 
           <MenuSeb>

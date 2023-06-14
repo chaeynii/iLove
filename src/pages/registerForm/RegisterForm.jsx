@@ -7,7 +7,7 @@ import mainLogo from "../../assets/mainLogo.svg";
 import { SelectBox } from "./SelectBox";
 
 import { instance } from "../../server/Fetcher";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export const RegisterForm = () => {
   const [dutyName, setDutyName] = useState(""); // 병원명 인풋 관리
@@ -159,6 +159,9 @@ export const RegisterForm = () => {
       setNotAllow(true);
     }
   }, [dutyName, fullAddress, images]);
+
+  const navigate = useNavigate();
+
   const onClick = () => {
     const formData = new FormData();
 
@@ -180,7 +183,7 @@ export const RegisterForm = () => {
         },
       })
       .then((response) => {
-        window.location.href = "/signUp";
+        navigate("/signUp");
       });
   };
 

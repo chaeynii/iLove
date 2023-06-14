@@ -174,6 +174,8 @@ const UserView = () => {
       .then((response) => {
         // 회원가입 성공
         // 홈으로 이동
+        useNavigate("/");
+
         console.log("등록 성공", response.data);
       })
       .catch((error) => {
@@ -298,7 +300,10 @@ const HospitalView = () => {
   const [notAllow, setNotAllow] = useState(true);
 
   // 병원 이름
-  const [hospitalNameInput, sethospitalNameInput] = useState("");
+  const [hospitalNameInput, setHospitalNameInput] = useState("");
+
+  // 병원 ID
+  const [hpId, setHpId] = useState("");
 
   // 이메일 유효성 검사
   const handleEmail = (e) => {
@@ -344,6 +349,10 @@ const HospitalView = () => {
     }
   };
 
+  // 병원명 검색
+  const hpName = (e) => {
+    setHospitalNameInput(e.target.value);
+  };
   // 버튼 활성화
   useEffect(() => {
     if (emailValid && pwValid && pwCheckValid && nameValid && phoneValid) {
@@ -358,7 +367,7 @@ const HospitalView = () => {
     // axios를 사용하여 POST 요청 만들기
     axios
       .post("/users/managersignup", {
-        hospitalId: name,
+        hospitalId: hpId,
         name: name,
         email: email,
         password: pw,
@@ -366,9 +375,7 @@ const HospitalView = () => {
       })
       .then((response) => {
         // 성공적인 응답 처리
-        //홈으로 이동
-
-        console.log("등록 성공", response.data);
+        useNavigate("/");
       })
       .catch((error) => {
         // 오류 처리
@@ -399,8 +406,25 @@ const HospitalView = () => {
 
         <SignUpInputDiv>
           <InputTitle>병원명</InputTitle>
-          <MyComponent />
+          <SignUpInput
+            placeholder="병원명을 검색해주세요"
+            type="text"
+            value={hospitalNameInput}
+            onChange={hpName}
+          ></SignUpInput>
 
+          <MyComponent
+            hospitalNameInput={hospitalNameInput}
+            setHospitalNameInput={setHospitalNameInput}
+            hpId={hpId}
+            setHpId={setHpId}
+          />
+          <SignUpInput
+            placeholder="선택된 병원 ID"
+            type="text"
+            disabled={true}
+            value={hpId}
+          ></SignUpInput>
           <P>
             *찾으시는 병원이 없으실 경우 하단에 신규 병원 등록 신청하기를
             눌러주세요.
