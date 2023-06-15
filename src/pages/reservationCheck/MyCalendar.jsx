@@ -133,7 +133,11 @@ export const MyCalendar = () => {
         return `D-${diffInDays}`;
       }
     } else {
-      return "Today";
+      if (dayjs(activeDate).isSame(targetDate, "day")) {
+        return "Today";
+      } else {
+        return `D-1`; // targetDate가 activeDate 다음날인 경우
+      }
     }
   };
 

@@ -31,7 +31,7 @@ export const endpoint_reserve = `reservation/`;
 //토큰 get
 export const getUserToken = () => localStorage.getItem("token");
 
-//디데이계산
+// 디데이 계산하는 코드
 export const calculateDday = (activeDate, targetDate) => {
   const diffInDays = dayjs(targetDate).diff(dayjs(activeDate), "day");
 
@@ -42,6 +42,10 @@ export const calculateDday = (activeDate, targetDate) => {
       return `D-${diffInDays}`;
     }
   } else {
-    return "Today";
+    if (dayjs(activeDate).isSame(targetDate, "day")) {
+      return "Today";
+    } else {
+      return `D-1`; // targetDate가 activeDate 다음날인 경우
+    }
   }
 };
