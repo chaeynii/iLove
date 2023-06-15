@@ -153,14 +153,14 @@ export const ChildBox = ({
   //이미지 참조(selectedImage)를 null로 설정함으로써 이미지를 제거
   const removeImage = async() => {
     // 이미지가 선택되었는지 확인
-    if (!selectedImage) {
+    if (!selectedImage || !image || !image.id) {
       alert("삭제할 이미지가 선택되지 않았습니다.");
       return;
     }
     
     try {
       // 이미지 삭제 요청
-      const response = await instance.delete(`image/${id}`);
+      const response = await instance.delete(`http://34.64.69.226:5000/api/image/${image.id}`);
       console.log(response);  // check the response
   
       // 이미지 상태 업데이트
