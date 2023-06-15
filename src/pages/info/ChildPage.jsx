@@ -12,6 +12,7 @@ import { Footer } from "../../components/Footer";
 import { CardBox } from "../../components/CardBox";
 import { Header } from "../../components/Header";
 import { ChildBox } from "./component/ChildBox";
+import { ChildBox } from "./component/ChildBox";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import styled from "styled-components";
@@ -21,9 +22,12 @@ import MyPage from "./MyPage";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
-const userToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imp1bkBlbWFpbC5jb20iLCJzdWIiOjIwMDA0LCJpYXQiOjE2ODY2Mzk3MjMsImV4cCI6MTcxODE5NzMyM30.owESvX7FLjD-WjxESrMnEoR4glhF1AEBiedQ3WRo0Ok";
+const token = localStorage.getItem("token")
+  ? localStorage.getItem("token")
+  : false;
 
 const Space = styled.div`
   margin-bottom: 20px;
@@ -72,7 +76,7 @@ function ChildPage() {
     const getKids = async()=>{
       const axiosGet = await axios.get('/kid/get', {
         headers: {
-          Authorization: `Bearer ${userToken}`
+          Authorization: `Bearer ${token}`
         }
       })
       const kidsData = axiosGet.data.data;
@@ -84,7 +88,7 @@ function ChildPage() {
   const handleClick = async() => {
     const axiosPost = await axios.post('/kid/regist', {}, {
       headers: {
-        Authorization: `Bearer ${userToken}`
+        Authorization: `Bearer ${token}`
       }
     })
     const newKidData = axiosPost.data.data;
@@ -94,7 +98,7 @@ function ChildPage() {
   const handleRemove = async(id) => {
     await axios.delete(`/kid/${id}`,{
         headers: {
-          Authorization: `Bearer ${userToken}`
+          Authorization: `Bearer ${token}`
         }
     })
     setBoxCreators((prevCreators) => prevCreators.filter(creator => creator.id !== id));
@@ -123,9 +127,27 @@ function ChildPage() {
           alwaysShowEditAndRemove={true}
         />
       })}
+      {boxCreators.map(({ id, name, gender, birth, memo, image }) => {
+        console.log(image)
+        return <ChildBox 
+          key={id} 
+          id={id} 
+          name={name} 
+          gender={gender} 
+          birth={birth} 
+          memo={memo} 
+          image={image} 
+          onRemove={handleRemove} 
+          defaultEditable={true}
+          alwaysShowEditAndRemove={true}
+        />
+      })}
       <CardBox>
         <MyButton onClick={handleClick}>추가하기</MyButton>
+        <MyButton onClick={handleClick}>추가하기</MyButton>
       </CardBox>
+      <Space />
+      <BackButton as={Link} to="/MyPage">돌아가기</BackButton>
       <Space />
       <BackButton as={Link} to="/MyPage">돌아가기</BackButton>
       <Space />
