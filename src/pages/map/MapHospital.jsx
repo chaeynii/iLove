@@ -78,7 +78,6 @@ export const MapHospital = () => {
   const dutyTimeClose =
     today === 0 ? hospitalData.dutyTime7c : hospitalData[`dutyTime${today}c`]; // 오늘 요일에 해당하는 dutyTime 종료 시간
 
-  console.log("병원데이터:", hospitalData);
   return (
     <Style.Wrapper>
       <Header label={hospitalData.dutyName} />
