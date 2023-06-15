@@ -55,7 +55,6 @@ function App() {
         <Route path="/detail/" element={<Detail />} />
         <Route path="/detail/reserve" element={<Reserve />} />
         <Route path="/detail/map" element={<MapHospital />} />
-        <Route path="/mypage/map" element={<MapMyPage />} />
         <Route path="/Mypage" element={<MyPage />} />
         <Route path="/Mypage/ChildPage" element={<ChildPage />} />
         <Route path="/favorite" element={<Favorite />} />

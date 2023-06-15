@@ -12,9 +12,7 @@ import {
   IconClockMap,
   IconMapGray,
   IconTel,
-  IconMyLocationW,
   IconMapG,
-  IconMyLocationG,
 } from "../../assets/index";
 
 // 공통 컴포넌트
@@ -30,26 +28,10 @@ let now = new Date();
 const today = now.getDay();
 
 export const MapHospital = () => {
-  // const hospital_id = "A1100401";
   const [isOpen, setIsOpen] = useState(true);
 
   const handleToggle = () => {
     setIsOpen(!isOpen);
-  };
-
-  //지도 위치를 현재 위치로 이동시킴
-  const [MapState, setMapState] = useState({
-    // 지도의 초기 위치
-    center: { lat: 33.452613, lng: 126.570888 },
-    // 지도 위치 변경시 panto를 이용할지에 대해서 정의
-    isPanto: false,
-  });
-
-  const moveMaptoCurrent = () => {
-    setMapState({
-      center: { lat: 33.45058, lng: 126.574942 },
-      isPanto: true,
-    });
   };
 
   useEffect(() => {
@@ -57,59 +39,10 @@ export const MapHospital = () => {
     mapElement.style.display = "block"; // display를 block으로 변경하여 보이도록 설정
   }, []);
 
-  const [myLocation, setMyLocation] = useState({
-    center: {
-      lat: 33.450701,
-      lng: 126.570667,
-    },
-    errMsg: null,
-    isLoading: true,
-  });
-
-  useEffect(() => {
-    if (navigator.geolocation) {
-      // GeoLocation을 이용해서 접속 위치를 얻어옵니다
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setMyLocation((prev) => ({
-            ...prev,
-            center: {
-              lat: position.coords.latitude, // 위도
-              lng: position.coords.longitude, // 경도
-            },
-            isLoading: false,
-          }));
-        },
-        (err) => {
-          setMyLocation((prev) => ({
-            ...prev,
-            errMsg: err.message,
-            isLoading: false,
-          }));
-        }
-      );
-    } else {
-      // HTML5의 GeoLocation을 사용할 수 없을때 마커 표시 위치와 인포윈도우 내용을 설정합니다
-      setMyLocation((prev) => ({
-        ...prev,
-        errMsg: "geolocation을 사용할수 없어요..",
-        isLoading: false,
-      }));
-    }
-  }, []);
-
-  //url에서 id 추출
+  //url에서 병원id 추출
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const hospital_id = searchParams.get("id");
-
-  if (hospital_id) {
-    console.log("추출된 id:", hospital_id);
-    // id를 사용하여 추가 작업 수행
-  } else {
-    console.log("id를 찾을 수 없습니다.");
-    // id가 없을 경우에 대한 처리 작업 수행
-  }
   // 해당 병원 데이터 받아오기
   const { data: hospitalQuery, isLoading: hospitalIsLoading } = useQuery(
     ["hospital"],
@@ -145,6 +78,7 @@ export const MapHospital = () => {
   const dutyTimeClose =
     today === 0 ? hospitalData.dutyTime7c : hospitalData[`dutyTime${today}c`]; // 오늘 요일에 해당하는 dutyTime 종료 시간
 
+  console.log("병원데이터:", hospitalData);
   return (
     <Style.Wrapper>
       <Header label={hospitalData.dutyName} />
@@ -176,24 +110,6 @@ export const MapHospital = () => {
               },
             }}
           />
-          {!myLocation.isLoading && (
-            <MapMarker
-              position={myLocation.center}
-              image={{
-                src: IconMyLocationG,
-                size: {
-                  width: 64,
-                  height: 69,
-                }, // 마커이미지의 크기입니다
-                options: {
-                  offset: {
-                    x: 27,
-                    y: 69,
-                  }, // 마커이미지의 옵션입니다. 마커의 좌표와 일치시킬 이미지 안에서의 좌표를 설정합니다.
-                },
-              }}
-            />
-          )}
         </Map>
         <Style.CardBoxWrap isOpen={isOpen}>
           <CardBox linkTo={"#"}>
@@ -206,6 +122,10 @@ export const MapHospital = () => {
               </Style.CardBoxHeader>
               <Style.CardBoxContent>
                 <div>
+                  <img alt={"icon-location"} src={IconMapGray} />
+                  <span>{hospitalData.dutyAddr}</span>
+                </div>
+                <div>
                   <img alt={"icon-clock"} src={IconClockMap} />
                   <span>
                     {dutyTimeStart
@@ -217,10 +137,6 @@ export const MapHospital = () => {
                   </span>
                 </div>
                 <div>
-                  <img alt={"icon-location"} src={IconMapGray} />
-                  <span>{hospitalData.dutyAddr}</span>
-                </div>
-                <div>
                   <img alt={"icon-telephone"} src={IconTel} />
                   <span>{hospitalData.dutyTel1}</span>
                 </div>
@@ -228,10 +144,6 @@ export const MapHospital = () => {
             </div>
           </CardBox>
         </Style.CardBoxWrap>
-        <Style.MoveMyLocation onClick={() => {}}>
-          <img alt={"icon-here"} src={IconMyLocationW}></img>
-          <span>현위치</span>
-        </Style.MoveMyLocation>
       </Style.MapContainer>
       <NavigationBar />
     </Style.Wrapper>
