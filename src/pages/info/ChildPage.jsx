@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import { instance } from "../../server/Fetcher";
 
 // 공통 컴포넌트 연결해서 테스트함
 import { Button } from "../../components/Button";
@@ -22,9 +22,9 @@ import MyPage from "./MyPage";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
-const token = localStorage.getItem("token")
-  ? localStorage.getItem("token")
-  : false;
+// const token = localStorage.getItem("token")
+//   ? localStorage.getItem("token")
+//   : false;
 const Space = styled.div`
   margin-bottom: 20px;
 `;
@@ -70,11 +70,7 @@ function ChildPage() {
   console.log(boxCreators)
   useEffect(()=>{
     const getKids = async()=>{
-      const axiosGet = await axios.get('/kid/get', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      const axiosGet = await instance.get('/kid/get')
       const kidsData = axiosGet.data.data;
       setBoxCreators(kidsData);
     }
@@ -82,24 +78,15 @@ function ChildPage() {
   },[])
 
   const handleClick = async() => {
-    const axiosPost = await axios.post('/kid/regist', {}, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
+    const axiosPost = await instance.post('/kid/regist', {})
     const newKidData = axiosPost.data.data;
     setBoxCreators((prevCreators) => [...prevCreators, newKidData]);
   };
 
   const handleRemove = async(id) => {
-    await axios.delete(`/kid/${id}`,{
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-    })
+    await instance.delete(`/kid/${id}`)
     setBoxCreators((prevCreators) => prevCreators.filter(creator => creator.id !== id));
   };
-  /*
   return (
     <Container>
       <Header
@@ -133,7 +120,6 @@ function ChildPage() {
       <NavigationBar />
     </Container>
   );
-  */
 }
 
 export default ChildPage;

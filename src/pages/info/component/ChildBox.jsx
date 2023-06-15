@@ -7,12 +7,11 @@ import styled from "styled-components";
 import colors from "../../../constants/colors";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import axios from 'axios';
-import { instance } from 'axios';
+import { instance } from "../../../server/Fetcher";
 
-const token = localStorage.getItem("token")
-  ? localStorage.getItem("token")
-  : false;
+// const token = localStorage.getItem("token")
+//   ? localStorage.getItem("token")
+//   : false;
 // 빈공간
 const Space = styled.div`
   margin-bottom: 20px;
@@ -161,11 +160,7 @@ export const ChildBox = ({
     
     try {
       // 이미지 삭제 요청
-      const response = await axios.delete(`http://34.64.69.226:5000/api/image/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await instance.delete(`image/${id}`);
       console.log(response);  // check the response
   
       // 이미지 상태 업데이트
@@ -213,9 +208,9 @@ export const ChildBox = ({
       formData.append("kidId", id);
 
       try {
-        const response = await axios.post('image', formData, {
+        const response = await instance.post('image', formData, {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
         });
   
@@ -226,17 +221,12 @@ export const ChildBox = ({
     }
 
     const originalBirth = `${birthYear}-${birthMonth}-${birthDay}`
-    await axios.patch(
+    await instance.patch(
       `kid/${id}`, 
       {
         name: kidName,
         birth: originalBirth,
         gender: selectedGender 
-      }, 
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
       }
     );
     setIsEditable(!isEditable);
