@@ -11,6 +11,8 @@ import axios from "axios";
 
 import Select from "react-select";
 
+import { instance } from "../../server/Fetcher";
+
 // 알림창 라이브러리
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
@@ -23,6 +25,7 @@ import iconPeople from "../../assets/iconPeople.svg";
 import arrowRight from "../../assets/arrowRight.svg";
 import pinwheel from "../../assets/Pinwheel.gif";
 import Loding from "../../assets/ImgLoding.jpg";
+import newLogo from "../../assets/newLogo.jpg";
 
 // 공통 컴포넌트 연결 링크
 import {
@@ -91,54 +94,27 @@ export const Home = () => {
     setSearchKeyword(keyword);
   };
 
-  // 사용자의 현재 위치 찾기 Geolocation API & OpenStreetMap Nominatim API
+  // 사용자의 현재 위치  담기
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [address, setAddress] = useState(null);
 
+  // 유저 내정보에 있는 주소 값 가져오기
   useEffect(() => {
-    // Function to get the user's current location
-    const getUserLocation = () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            setLatitude(position.coords.latitude);
-            setLongitude(position.coords.longitude);
-
-            try {
-              const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`
-              );
-              const data = await response.json();
-
-              const {
-                suburb,
-                city_district,
-                city,
-                province,
-                quarter,
-                borough,
-              } = data.address;
-              const formattedAddress = `${
-                suburb || city_district || province || ""
-              } ${city}  ${quarter}`;
-
-              setAddress(formattedAddress);
-            } catch (error) {
-              console.error(error);
-            }
-          },
-          (error) => {
-            console.error(error);
-          }
-        );
-      } else {
-        console.error("현재 브라우저는 위치를 지원하지 않습니다.");
+    const userAddress = async () => {
+      try {
+        const response = await instance.get("users/get");
+        setLatitude(response.data.data[0].userLat);
+        setLongitude(response.data.data[0].userLon);
+        setAddress(response.data.data[0].address);
+      } catch (error) {
+        console.error("유저정보 실패: ", error);
       }
     };
 
-    getUserLocation();
+    userAddress();
   }, []);
+
   const [distance, setDistance] = useState(10);
 
   const handleDistanceChange = (selectedDistance) => {
@@ -158,6 +134,13 @@ export const Home = () => {
     e.preventDefault();
   };
 
+  // 고정값 김포 경도위도
+  const defaultLatitude = 37.64245641626587;
+  const defaultLongitude = 126.64398423537274;
+  // 고정값 광명 경도위도
+  // const defaultLatitude = 37.472215621869594;
+  // const defaultLongitude = 126.8751105269487;
+
   return (
     <>
       <Container>
@@ -168,11 +151,11 @@ export const Home = () => {
           autoClose={4000}
           hideProgressBar
         />
-        <MainLogoImg src={mainLogo} alt="mainLogo"></MainLogoImg>
+        {/* <MainLogoImg src={mainLogo} alt="mainLogo"></MainLogoImg> */}
 
         <TopMenuBar>
           <MenuLogo>
-            <LogoP>아이사랑</LogoP>
+            <NewLogoImg src={newLogo} alt="아이사랑"></NewLogoImg>
           </MenuLogo>
           <FlexGrow></FlexGrow>
 
@@ -214,12 +197,14 @@ export const Home = () => {
         <SiliderMargin>
           <MainSub>
             {address ? (
-              <H2>현재 내 위치 : {address}</H2>
+              <H2>{address}</H2>
             ) : (
-              <H2>위치찾는중...</H2>
+              <H2Seb>
+                내정보에서 주소를 등록해주세요
+                <br /> 위치 : 김포 마산동
+              </H2Seb>
             )}
             <H1>내 주변 소아과</H1>
-            {/* 백엔드 요청으로 반경 몇 Km내의 병원을 볼건지 선택할 수 있는 기능 추가 예정 */}
             <DistanceDiv>
               <Distance
                 distance={distance}
@@ -230,8 +215,8 @@ export const Home = () => {
           </MainSub>
 
           <SimpleSlider
-            latitude={latitude}
-            longitude={longitude}
+            latitude={latitude || defaultLatitude}
+            longitude={longitude || defaultLongitude}
             distance={distance}
           />
         </SiliderMargin>
@@ -273,11 +258,11 @@ export default Home;
 
 // 거리 설정
 const options = [
-  { value: "1", label: "1" },
-  { value: "3", label: "3" },
-  { value: "5", label: "5" },
-  { value: "8", label: "8" },
-  { value: "10", label: "10" },
+  { value: 1, label: 1 },
+  { value: 3, label: 3 },
+  { value: 5, label: 5 },
+  { value: 8, label: 8 },
+  { value: 10, label: 10 },
 ];
 
 const Distance = ({ distance, setDistance }) => {
@@ -325,6 +310,15 @@ const H2 = styled.p`
   width: 33.33%;
 `;
 
+const H2Seb = styled.p`
+  font-size: 16px;
+  font-weight: 600;
+  color: #b2b2b2;
+  padding: 1%;
+  margin-bottom: 3%;
+  width: 33.33%;
+`;
+
 const DistanceDiv = styled.div`
   font-size: 18px;
   font-weight: 600;
@@ -347,17 +341,17 @@ const SiliderMargin = styled.div`
 const MainLogoImg = styled.img`
   margin-top: 4%;
   margin-top: 4%;
-  transition: opacity 0.3s ease-in-out;
+  width: 30%;
+`;
 
-  &:hover {
-    opacity: 0.3;
-  }
+const NewLogoImg = styled.img`
+  width: 100%;
 `;
 
 const TopMenuBar = styled.div`
+  margin-top: 5%;
   width: 100%;
-  //   background-color: bisque;
-  border-bottom: solid 1px ${colors.InputBorderOut};
+  // border-bottom: solid 2px ${colors.primary};
   display: flex;
 `;
 
@@ -367,6 +361,7 @@ const FlexGrow = styled.div`
 
 const MenuLogo = styled.div`
   padding: 2% 0% 1% 3%;
+  width: 20%;
 `;
 
 const MenuSeb = styled.div`
@@ -380,12 +375,6 @@ const MenuSeb = styled.div`
 const SebP = styled.p``;
 
 const LogoutBut = styled.p``;
-
-const LogoP = styled.p`
-  color: ${colors.primary};
-  font-weight: 700;
-  font-size: ${fontSize.h3};
-`;
 
 const Banner = styled.div`
   position: relative;
@@ -450,7 +439,7 @@ const BannerSebH1 = styled.p`
 const SimpleSlider = ({ latitude, longitude, distance }) => {
   const settings = {
     dots: true,
-    infinite: true,
+    infinite: false,
     speed: 500,
     slidesToShow: 3,
     slidesToScroll: 4,
@@ -461,7 +450,7 @@ const SimpleSlider = ({ latitude, longitude, distance }) => {
         settings: {
           slidesToShow: 2,
           slidesToScroll: 2,
-          infinite: true,
+          infinite: false,
           dots: true,
         },
       },
@@ -470,7 +459,7 @@ const SimpleSlider = ({ latitude, longitude, distance }) => {
         settings: {
           slidesToShow: 2,
           slidesToScroll: 2,
-          initialSlide: 2,
+          initialSlide: 1,
         },
       },
       {
@@ -481,11 +470,6 @@ const SimpleSlider = ({ latitude, longitude, distance }) => {
         },
       },
     ],
-  };
-
-  // 랜덤 이미지
-  const getRandomNumber = () => {
-    return Math.floor(Math.random() * 10);
   };
 
   // 병원 데이터 get
@@ -506,6 +490,8 @@ const SimpleSlider = ({ latitude, longitude, distance }) => {
         });
         const responseData = response.data.data;
         setHospitalData(responseData);
+        console.log(latitude, longitude, distance);
+        console.log("병원 정보 수", hospitalData);
         setLoading(false);
       } catch (error) {
         console.error(
@@ -515,7 +501,7 @@ const SimpleSlider = ({ latitude, longitude, distance }) => {
       }
     };
 
-    // Only call the API if latitude and longitude have valid values
+    //위도와 경도에 유효한 값이 있는 경우에만 API를 호출합니다.
     if (latitude !== null && longitude !== null) {
       hospitalApi();
     }
@@ -539,33 +525,25 @@ const SimpleSlider = ({ latitude, longitude, distance }) => {
                         alt={data.image}
                       />
                     ) : (
-                      // <CardImgBak></CardImgBak>
-                      // <CardImg
-                      //   key={data.id}
-                      //   src={`https://loremflickr.com/340/340?random=${getRandomNumber()}`}
-                      //   alt={data.image}
-                      // />
                       <>
                         <CardTitle>{data.dutyName}</CardTitle>
                         <CardImg key={data.id} src={Loding} alt={data.image} />
                       </>
                     )}
                   </CardTop>
-                  {/* <CardBottom>
-                    <CardTitle>{data.dutyName}</CardTitle>
-                    <CardAddress>{data.dutyAddr}</CardAddress>
-                  </CardBottom> */}
                 </Link>
               </Card>
             ))
           ) : (
-            <div>사용 가능한 병원 데이터가 없습니다</div>
+            <Guide>{distance} km내에 병원이 없습니다</Guide>
           )}
         </Slider>
       )}
     </>
   );
 };
+
+// console.log("병원 정보 수", hospitalData);
 
 const Card = styled.div`
   position: relative;
@@ -617,19 +595,6 @@ const CardTitle = styled.p`
   }
 `;
 
-const CardAddress = styled.p`
-  margin-top: 40%;
-  font-size: 18px;
-  font-weight: 500;
-  transition: opacity 0.3s ease;
-  opacity: 0.3;
-
-  ${CardTop}:hover & {
-    opacity: 1;
-    color: white;
-  }
-`;
-
 const CardImg = styled.img`
   width: 100%;
   height: 100%;
@@ -637,10 +602,10 @@ const CardImg = styled.img`
   border-radius: 20px;
 `;
 
-const CardImgBak = styled.div`
-  width: 266px;
-  height: 266px;
-  border-radius: 20px;
-  background: rgba(0, 131, 60, 0.2);
-  //
+const Guide = styled.p`
+  font-size: 22px;
+  font-weight: 700;
+  margin: 10% 0 10% 0;
+  color: #b2b2b2;
+  // text-align: center;
 `;

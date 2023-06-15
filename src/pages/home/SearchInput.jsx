@@ -22,7 +22,7 @@ export const SearchInput = ({
 
   return (
     <Style.Wrapper>
-      <Style.InputBox>
+      <Style.InputBox style={{ marginTop: "0%" }}>
         <form onSubmit={onSubmit}>
           <input
             type="text"
