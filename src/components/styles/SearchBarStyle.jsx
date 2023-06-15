@@ -16,6 +16,11 @@ export const Wrapper = styled.div`
   & button {
     background: none;
     border: none;
+    cursor: pointer;
+  }
+
+  & img:hover {
+    filter: invert(30%);
   }
 `;
 
