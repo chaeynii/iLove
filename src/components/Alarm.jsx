@@ -5,12 +5,15 @@ import styled from "styled-components";
 import { calculateDday, formatDay, formatTime } from "../utils";
 import { Link } from "react-router-dom";
 
-export const Alarm = () => {
+export const Alarm = ({ onListChange }) => {
   const [list, setList] = useState([]);
 
   useEffect(() => {
-    instance.get("/reservation/alarm").then((res) => setList(res.data.data));
-  }, []);
+    instance.get("/reservation/alarm").then((res) => {
+      setList(res.data.data);
+      onListChange(res.data.data.length);
+    });
+  }, [onListChange]);
 
   const alarmGetRead = (id) => {
     instance.patch(`/reservation/read/${id}`, {

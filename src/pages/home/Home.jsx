@@ -35,9 +35,12 @@ import {
   SearchBar,
 } from "../../components/index";
 
+// 검색창
 import { SearchInput } from "./SearchInput";
-
+// 유튜브
 import { AutoplayYouTubeVideo } from "./Youtube";
+// 알림
+import { AlarmHome } from "./AlarmHome";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import colors from "../../constants/colors";
@@ -120,7 +123,6 @@ export const Home = () => {
                 suburb || city_district || province || ""
               } ${city}  ${quarter}`;
 
-              // console.log(data.address);
               setAddress(formattedAddress);
             } catch (error) {
               console.error(error);
@@ -137,7 +139,6 @@ export const Home = () => {
 
     getUserLocation();
   }, []);
-
   const [distance, setDistance] = useState(10);
 
   const handleDistanceChange = (selectedDistance) => {
@@ -151,7 +152,6 @@ export const Home = () => {
   const [search, setSearch] = useState("");
   const onChange = (e) => {
     setSearch(e.target.value);
-    console.log("검색 입력창", search);
   };
   // 폼 전송 처리 함수
   const handleSubmit = (e) => {
@@ -190,8 +190,12 @@ export const Home = () => {
 
           <MenuSeb>
             <Link to="SignUp">
-              <SebP>회원가입</SebP>
+              <SebP style={{ display: showTab }}>회원가입</SebP>
             </Link>
+          </MenuSeb>
+
+          <MenuSeb style={{ display: hideTab }}>
+            <AlarmHome />
           </MenuSeb>
         </TopMenuBar>
 
@@ -366,7 +370,11 @@ const MenuLogo = styled.div`
 `;
 
 const MenuSeb = styled.div`
-  padding: 2% 3% 1% 0%;
+  padding: 2% 2% 1% 0%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const SebP = styled.p``;
@@ -475,7 +483,7 @@ const SimpleSlider = ({ latitude, longitude, distance }) => {
     ],
   };
 
-  // 랜던
+  // 랜덤 이미지
   const getRandomNumber = () => {
     return Math.floor(Math.random() * 10);
   };
@@ -499,8 +507,6 @@ const SimpleSlider = ({ latitude, longitude, distance }) => {
         const responseData = response.data.data;
         setHospitalData(responseData);
         setLoading(false);
-        console.log("거리 수정:", distance, latitude, longitude);
-        console.log("데이터 성공", responseData);
       } catch (error) {
         console.error(
           "병원 데이터를 가져오는 중에 오류가 발생했습니다.:",
@@ -514,9 +520,6 @@ const SimpleSlider = ({ latitude, longitude, distance }) => {
       hospitalApi();
     }
   }, [latitude, longitude, distance]);
-
-  console.log("Hospital Data:", hospitalData);
-  // console.log("거리 수정:", distance, latitude, longitude);
 
   return (
     <>
@@ -542,13 +545,16 @@ const SimpleSlider = ({ latitude, longitude, distance }) => {
                       //   src={`https://loremflickr.com/340/340?random=${getRandomNumber()}`}
                       //   alt={data.image}
                       // />
-                      <CardImg key={data.id} src={Loding} alt={data.image} />
+                      <>
+                        <CardTitle>{data.dutyName}</CardTitle>
+                        <CardImg key={data.id} src={Loding} alt={data.image} />
+                      </>
                     )}
                   </CardTop>
-                  <CardBottom>
+                  {/* <CardBottom>
                     <CardTitle>{data.dutyName}</CardTitle>
                     <CardAddress>{data.dutyAddr}</CardAddress>
-                  </CardBottom>
+                  </CardBottom> */}
                 </Link>
               </Card>
             ))
@@ -567,6 +573,21 @@ const Card = styled.div`
 
 const CardTop = styled.div`
   margin: 0 2% 0 2%;
+  transition: opacity 0.3s ease;
+
+  &:hover {
+    &::after {
+      width: 97%;
+      height: 99%;
+      background: rgba(0, 0, 0, 0.5);
+      content: "";
+      position: absolute;
+      border-radius: 20px;
+      top: 0;
+      left: 5px;
+      z-index: 1;
+    }
+  }
 `;
 
 const CardBottom = styled.div`
@@ -577,33 +598,36 @@ const CardBottom = styled.div`
   z-index: 1;
   transform: translate(-50%, -50%);
   color: #fff;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-
-  &:hover {
-    &::after {
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: -1;
-    }
-    opacity: 1;
-  }
 `;
 
 const CardTitle = styled.p`
   font-size: 22px;
   font-weight: 700;
   margin-bottom: 8%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+  width: 80%;
+  transition: opacity 0.3s ease;
+
+  ${CardTop}:hover & {
+    color: white;
+    z-index: 2;
+  }
 `;
 
 const CardAddress = styled.p`
+  margin-top: 40%;
   font-size: 18px;
   font-weight: 500;
+  transition: opacity 0.3s ease;
+  opacity: 0.3;
+
+  ${CardTop}:hover & {
+    opacity: 1;
+    color: white;
+  }
 `;
 
 const CardImg = styled.img`

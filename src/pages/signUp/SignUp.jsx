@@ -198,7 +198,7 @@ const UserView = () => {
         <SignUpInputDiv>
           <InputTitle>이름</InputTitle>
           <SignUpInput
-            placeholder="아이사"
+            placeholder="이름을 입력해주세요"
             type="text"
             value={name}
             onChange={handleName}
@@ -208,7 +208,7 @@ const UserView = () => {
         <SignUpInputDiv>
           <InputTitle>이메일</InputTitle>
           <SignUpInput
-            placeholder="test123@test.com"
+            placeholder="이메일을 입력해주세요"
             type="email"
             value={email}
             onChange={handleEmail}
@@ -396,9 +396,9 @@ const HospitalView = () => {
       />
       <SignUpForm>
         <SignUpInputDiv>
-          <InputTitle>담당자 성함</InputTitle>
+          <InputTitle>담당자 이름</InputTitle>
           <SignUpInput
-            placeholder="테스트"
+            placeholder="담당자 이름을 입력해주세요"
             type="text"
             value={name}
             onChange={handleName}
@@ -448,7 +448,7 @@ const HospitalView = () => {
         <SignUpInputDiv>
           <InputTitle>담당자 이메일</InputTitle>
           <SignUpInput
-            placeholder="test@naver.com"
+            placeholder="이메일을 입력해주세요"
             type="email"
             value={email}
             onChange={handleEmail}
