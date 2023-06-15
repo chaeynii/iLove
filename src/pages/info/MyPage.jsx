@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 // 공통 컴포넌트 연결해서 테스트함
 import { NavigationBar } from "../../components/NavigationBar";
 import { Container } from "../../components/Container";
 import { Header } from "../../components/Header";
-import { ChildBox } from "./component/ChildBox";
 import { ChildBox } from "./component/ChildBox";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
@@ -185,7 +183,7 @@ function MyPage() {
     const getKids = async () => {
       const axiosGet = await axios.get("/kid/get", {
         headers: {
-          Authorization: `Bearer ${userToken}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       const kidsData = axiosGet.data.data;

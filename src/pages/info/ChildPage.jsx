@@ -12,7 +12,6 @@ import { Footer } from "../../components/Footer";
 import { CardBox } from "../../components/CardBox";
 import { Header } from "../../components/Header";
 import { ChildBox } from "./component/ChildBox";
-import { ChildBox } from "./component/ChildBox";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import styled from "styled-components";
@@ -20,8 +19,6 @@ import colors from "../../constants/colors";
 
 import MyPage from "./MyPage";
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
