@@ -11,6 +11,7 @@ import {
 
 // 공통 컴포넌트
 import { Modal, Alarm } from "../components/index";
+import { AlarmHome } from "../pages/home/AlarmHome";
 
 export const SearchBar = ({
   onSearch,
@@ -166,19 +167,7 @@ export const SearchBar = ({
             </Modal>
           )}
         </Style.Location>
-        <button onClick={openAlarmModal}>
-          <img alt="icon-alarm" src={IconAlarm} />
-        </button>
-        {isAlarmModalOpen && (
-          <Modal
-            title="알람"
-            onClose={closeAlarmModal}
-            isOpen="true"
-            onSaved={onSavedAlarmModal}
-          >
-            <Alarm></Alarm>
-          </Modal>
-        )}
+        <AlarmHome></AlarmHome>
       </div>
       <Style.InputBox>
         <form onSubmit={handleSubmit}>

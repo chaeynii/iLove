@@ -16,8 +16,10 @@ import colors from "../../constants/colors";
 
 // 공통 컴포넌트
 import { Modal, Alarm } from "../../components/index";
+import axios from "axios";
 
 export const AlarmHome = () => {
+  const testToken = localStorage.getItem("token");
   //------------알람 모달창 관련
   const [isAlarmModalOpen, setIsAlarmModalOpen] = useState(false);
   const [listLength, setListLength] = useState(0);
@@ -27,9 +29,17 @@ export const AlarmHome = () => {
   };
 
   useEffect(() => {
-    instance.get("/reservation/alarm").then((res) => {
-      setListLength(res.data.data.length);
-    });
+    if (testToken) {
+      axios
+        .get("/reservation/alarm", {
+          headers: {
+            Authorization: `Bearer ${testToken}`,
+          },
+        })
+        .then((res) => {
+          setListLength(res.data.data.length);
+        });
+    }
   }, []);
 
   const openAlarmModal = () => {

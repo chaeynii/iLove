@@ -4,19 +4,28 @@ import { useQuery } from "react-query";
 import styled from "styled-components";
 import { calculateDday, formatDay, formatTime } from "../utils";
 import { Link } from "react-router-dom";
-import dayjs from "dayjs";
+import axios from "axios";
 
 export const Alarm = ({ onListChange }) => {
+  const testToken = localStorage.getItem("token");
   // 현재 날짜
   const activeDate = new Date();
 
   const [list, setList] = useState([]);
 
   useEffect(() => {
-    instance.get("/reservation/alarm").then((res) => {
-      setList(res.data.data);
-      onListChange(res.data.data.length);
-    });
+    if (testToken) {
+      axios
+        .get("/reservation/alarm", {
+          headers: {
+            Authorization: `Bearer ${testToken}`,
+          },
+        })
+        .then((res) => {
+          setList(res.data.data);
+          onListChange(res.data.data.length);
+        });
+    }
   }, [onListChange]);
 
   const alarmGetRead = (id) => {

@@ -77,9 +77,9 @@ export const Login = () => {
         // 홈으로 이동
 
         const user = response.data.data;
-        console.log("user", user);
+
         setUserRole(user);
-        console.log(typeof userRole);
+
         const token = user.token;
         // 토큰 local storage에 저장
 
@@ -221,10 +221,10 @@ const Div = styled.div`
   padding-bottom: 3%;
 `;
 const LoginUl = styled.div`
-display: flex;
-justify-content: center; /* 좌우정렬 */
-padding: 1%;
-}`;
+  display: flex;
+  justify-content: center; /* 좌우정렬 */
+  padding: 1%;
+`;
 
 const LoginLi = styled.div`
   // padding: 0.5%;
