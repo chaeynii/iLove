@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { instance } from "../../server/Fetcher"
+import { instance } from "../../server/Fetcher";
 
 // 공통 컴포넌트 연결해서 테스트함
 import { NavigationBar } from "../../components/NavigationBar";
