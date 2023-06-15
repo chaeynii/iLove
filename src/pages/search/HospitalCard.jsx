@@ -1,8 +1,12 @@
 import * as Style from "./styles/HospitalCardStyle";
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useMutation } from "react-query";
+
+// 알림창 라이브러리
+import "react-toastify/dist/ReactToastify.css";
+import { toast, ToastContainer } from "react-toastify";
 
 //아이콘
 import {
@@ -62,20 +66,41 @@ export const HospitalCard = ({
       }
     )
   );
+
+  const handleLoginRequired = () => {
+    toast("로그인 후 이용해주세요"); // 토스트 메시지 띄우기
+    setTimeout(() => {
+      navigate("/login"); // 3초 후에 페이지 이동
+    }, 1500);
+  };
+
+  const navigate = useNavigate();
   const handleFavoriteClick = (event) => {
     //즐겨찾기 클릭 시 Link로 넘어가는 것을 막음
     event.preventDefault();
-
-    try {
-      handleFavorite();
-      // 페이지 새로고침
-      window.location.reload();
-    } catch (error) {
-      console.error(error);
+    console.log("즐찾 클릭시 유저토큰 출력:", userToken);
+    if (userToken) {
+      try {
+        handleFavorite();
+        // 페이지 새로고침
+        window.location.reload();
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      handleLoginRequired();
+      return [];
     }
   };
   return (
     <>
+      <ToastContainer
+        position="top-center"
+        limit={1}
+        closeButton={false}
+        autoClose={4000}
+        hideProgressBar
+      />
       <Link to={`/detail?id=${hpid}`}>
         <Style.HospitalCardBox>
           <div>{hospitalName}</div>

@@ -12,10 +12,16 @@ import {
 // 공통 컴포넌트
 import { Modal, Alarm } from "../components/index";
 
-export const SearchBar = ({ onSearch, depth1, depth2, onLocationChange }) => {
+export const SearchBar = ({
+  onSearch,
+  depth1,
+  depth2,
+  onLocationChange,
+  keyword,
+}) => {
   //--------------------검색부분
   //검색어
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(keyword ? keyword : "");
   const onChange = (e) => {
     setSearch(e.target.value);
   };
@@ -25,12 +31,12 @@ export const SearchBar = ({ onSearch, depth1, depth2, onLocationChange }) => {
     onSearch(search);
   };
   //--------------------위치선택&위치선택 모달창(알람모달과 구분 필요)
-  //위치선택 값(모달 내부), 초기값은 [서울/전체]
+  //위치선택 값(모달 내부), 초기값은 [전국]이며, 전국일 경우 locationSecond는 빈값
   const [locationFirst, setLocationFirst] = useState(
     locationData[0]["시/도"][1]
   );
   const [locationSecond, setLocationSecond] = useState(
-    locationData[0]["시/군/구"][0]
+    locationFirst === "전국" ? "" : locationData[0]["시/군/구"][0]
   );
   //위치선택 값(모달->페이지로 전달된 값)
   const [selectedLocationFirst, setSelectedLocationFirst] =
@@ -127,7 +133,12 @@ export const SearchBar = ({ onSearch, depth1, depth2, onLocationChange }) => {
           <button onClick={openModal}>
             <img alt="icon-down" src={IconDown} />
           </button>
-          <span>{selectedLocationFirst + " " + selectedLocationSecond}</span>
+          {/* 전국이면 depth1만 보여줌 */}
+          {selectedLocationFirst === "전국" ? (
+            <span>{selectedLocationFirst}</span>
+          ) : (
+            <span>{selectedLocationFirst + " " + selectedLocationSecond}</span>
+          )}
           {/* ModalOpen이 true일 경우에 Modal 컴포넌트 렌더링 실행 */}
           {isModalOpen && (
             <Modal
@@ -139,14 +150,16 @@ export const SearchBar = ({ onSearch, depth1, depth2, onLocationChange }) => {
               <Style.ModalContent>
                 <div>
                   <Style.BtnSelected>{locationFirst}</Style.BtnSelected>
-                  <Style.BtnSelected>{locationSecond}</Style.BtnSelected>
+                  {locationFirst === "전국" ? null : (
+                    <Style.BtnSelected>{locationSecond}</Style.BtnSelected>
+                  )}
                 </div>
                 <div>
                   <Style.DropdownMenu>
                     {locationFirstOptions}
                   </Style.DropdownMenu>
                   <Style.DropdownMenu>
-                    {locationSecondOptions}
+                    {locationFirst === "전국" ? null : locationSecondOptions}
                   </Style.DropdownMenu>
                 </div>
               </Style.ModalContent>

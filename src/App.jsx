@@ -36,6 +36,7 @@ import {
   Favorite,
   ModifyForm,
 } from "./pages/index";
+import { SearchPageTest } from "./pages/search/SearchPageTest";
 
 // const queryClient = new QueryClient();
 
@@ -51,7 +52,8 @@ function App() {
         <Route path="/register" element={<RegisterForm />} />
         <Route path="admin" element={<AdminHome />} />
         <Route path="/reserve" element={<ReservationChk />} />
-        <Route path="/search" element={<SearchPage />} />
+        {/* <Route path="/search" element={<SearchPage />} /> */}
+        <Route path="/search" element={<SearchPageTest />} />
         <Route path="/detail/" element={<Detail />} />
         <Route path="/detail/reserve" element={<Reserve />} />
         <Route path="/detail/map" element={<MapHospital />} />
