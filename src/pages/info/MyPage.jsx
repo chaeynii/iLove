@@ -157,7 +157,7 @@ function MyPage() {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log(res1)
+        console.log(res1);
         // setUser(res1.data.data[0]);
         // const fetchedData = {
         //   name: res1.data.data[0].name,
