@@ -124,27 +124,9 @@ function ChildPage() {
           alwaysShowEditAndRemove={true}
         />
       })}
-      {boxCreators.map(({ id, name, gender, birth, memo, image }) => {
-        console.log(image)
-        return <ChildBox 
-          key={id} 
-          id={id} 
-          name={name} 
-          gender={gender} 
-          birth={birth} 
-          memo={memo} 
-          image={image} 
-          onRemove={handleRemove} 
-          defaultEditable={true}
-          alwaysShowEditAndRemove={true}
-        />
-      })}
       <CardBox>
         <MyButton onClick={handleClick}>추가하기</MyButton>
-        <MyButton onClick={handleClick}>추가하기</MyButton>
       </CardBox>
-      <Space />
-      <BackButton as={Link} to="/MyPage">돌아가기</BackButton>
       <Space />
       <BackButton as={Link} to="/MyPage">돌아가기</BackButton>
       <Space />
