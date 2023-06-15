@@ -5,10 +5,10 @@ import { IconDown } from "../../assets/index";
 
 // 공통 컴포넌트
 import {
+  Container,
   Header,
   NavigationBar,
   SearchBar,
-  Container,
 } from "../../components/index";
 
 //import문
@@ -16,6 +16,7 @@ import React, { useState, useEffect } from "react";
 import { useQuery } from "react-query";
 import axios from "axios";
 import { useInView } from "react-intersection-observer";
+import { useLocation } from "react-router-dom";
 
 //utils
 import {
@@ -36,16 +37,24 @@ const SORT_OPTIONS = [
 
 export const SearchPage = () => {
   // 위치정보 depth1, depth2
-  const [depth1, setDepth1] = useState("서울특별시");
-  const [depth2, setDepth2] = useState("전체");
+  const [depth1, setDepth1] = useState("전국");
+  const [depth2, setDepth2] = useState("");
   const handleDepthChange = (first, second) => {
     setDepth1(first);
     setDepth2(second);
   };
+  //url에서 id 추출
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const queryParams = searchParams.get("query");
 
-  // 키워드 검색어
-  const [searchKeyword, setSearchKeyword] = useState("");
+  // 키워드 검색어 - url에 keyword가 넘어오면 넣고, 없으면 빈 string
+  const [searchKeyword, setSearchKeyword] = useState(
+    queryParams !== null ? queryParams : ""
+  );
 
+  //검색결과 총 데이터 개수
+  const [totalCount, setTotalCount] = useState(0);
   //검색 필터 옵션
   const [option, setOption] = useState(SORT_OPTIONS[0]);
 
@@ -62,16 +71,21 @@ export const SearchPage = () => {
   // 유저 정보
   const userToken = getUserToken();
   const { data: userQuery, userIsLoading } = useQuery(["user"], async () => {
-    try {
-      const response = await axios.get(`${BE_URL}${endpoint_user}`, {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.log(error);
-      throw error;
+    //유저 토큰이 있는 경우에만 요청
+    if (userToken) {
+      try {
+        const response = await axios.get(`${BE_URL}${endpoint_user}`, {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        });
+        return response.data;
+      } catch (error) {
+        console.log(error);
+        throw error;
+      }
+    } else {
+      return null;
     }
   });
 
@@ -95,21 +109,22 @@ export const SearchPage = () => {
   useEffect(() => {
     const getHospital = async () => {
       setLoading(true);
-      await axios
-        .get(
-          // depth2가 전체면 depth1만 넣어서 요청보냄
-          depth2 === "전체"
-            ? `${BE_URL}hospital?depth1=${depth1}&size=10&page=${page}&sort=${option.state}&dutyName=${searchKeyword}`
-            : `${BE_URL}hospital?depth1=${depth1}&depth2=${depth2}&size=10&page=${page}&sort=${option.state}&dutyName=${searchKeyword}`
-        )
-        .then((res) => {
-          // 중복 제거
-          const uniqueHospitals = removeDuplicates(
-            [...hospitalList, ...res.data.data],
-            "id"
-          );
-          setHospitalList(uniqueHospitals);
-        });
+      let url;
+      if (depth1 === "전국") {
+        url = `${BE_URL}hospital?size=10&page=${page}&sort=${option.state}&dutyName=${searchKeyword}`;
+      } else if (depth2 === "전체") {
+        url = `${BE_URL}hospital?depth1=${depth1}&size=10&page=${page}&sort=${option.state}&dutyName=${searchKeyword}`;
+      } else {
+        url = `${BE_URL}hospital?depth1=${depth1}&depth2=${depth2}&size=10&page=${page}&sort=${option.state}&dutyName=${searchKeyword}`;
+      }
+      await axios.get(url).then((res) => {
+        // 중복 제거
+        const uniqueHospitals = removeDuplicates(
+          [...hospitalList, ...res.data.data[0][0]],
+          "id"
+        );
+        setHospitalList(uniqueHospitals);
+      });
       setLoading(false);
     };
     getHospital();
@@ -121,16 +136,48 @@ export const SearchPage = () => {
       setPage((prevState) => prevState + 1);
     }
   }, [inView]);
+
+  useEffect(() => {
+    // depth1, depth2, searchKeyword가 바뀔 때는 병원 데이터를 초기화
+    const resetHospitalList = async () => {
+      setLoading(true);
+      setPage(1);
+      setHospitalList([]);
+      let url;
+      if (depth1 === "전국") {
+        url = `${BE_URL}hospital?size=10&page=${page}&sort=${option.state}&dutyName=${searchKeyword}`;
+      } else if (depth2 === "전체") {
+        url = `${BE_URL}hospital?depth1=${depth1}&size=10&page=${page}&sort=${option.state}&dutyName=${searchKeyword}`;
+      } else {
+        url = `${BE_URL}hospital?depth1=${depth1}&depth2=${depth2}&size=10&page=${page}&sort=${option.state}&dutyName=${searchKeyword}`;
+      }
+      await axios.get(url).then((res) => {
+        setHospitalList(res.data.data[0][0]);
+        setTotalCount(res.data.data[1]);
+      });
+      setLoading(false);
+    };
+
+    resetHospitalList();
+  }, [depth1, depth2, searchKeyword, option.state]);
+
   // 즐겨찾기 리스트 받아오기
   const { data: favoritesQuery, favoriteIsLoading } = useQuery(
     ["favorites"],
     // instance를 사용해 중복되는 옵션 제거
-    () =>
-      axios.get(`${BE_URL}${endpoint_favorite}`, {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      }),
+    () => {
+      // userToken이 있는 경우에만 API 호출 수행
+      if (userToken) {
+        return axios.get(`${BE_URL}${endpoint_favorite}`, {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        });
+      } else {
+        // 로그인되지 않은 경우, 빈 배열이나 기본값 반환
+        return null;
+      }
+    },
     {
       //백엔드에서 주는 데이터를 내가 원하는 가공해서 받을 수 있습니다.
       select: (response) => {
@@ -210,12 +257,13 @@ export const SearchPage = () => {
       <Style.Wrapper>
         <SearchBar
           onSearch={(search) => handleSearch(search)}
+          keyword={searchKeyword}
           depth1={depth1}
           depth2={depth2}
           onLocationChange={handleDepthChange}
         />
         <Style.SearchHeader>
-          <span>총 {hospitalList.length} 개</span>
+          <span>총 {totalCount} 개</span>
           <Style.DropdownContainer>
             <button onClick={handleOptionClick}>
               {option.name}
