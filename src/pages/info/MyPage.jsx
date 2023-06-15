@@ -9,7 +9,7 @@ import { NavigationBar } from "../../components/NavigationBar";
 import { Container } from "../../components/Container";
 import { Header } from "../../components/Header";
 import { ChildBox } from "./component/ChildBox";
-
+import { Post } from "../registerForm/Post";
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import styled from "styled-components";
 import colors from "../../constants/colors";
@@ -63,6 +63,7 @@ const MyContainerLeftAlignWithLogo = ({ logo, children }) => (
 );
 
 const TextContainer = styled.div`
+  width: 30%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -143,19 +144,24 @@ function MyPage() {
   let navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [user, setUser] = useState(null);
-  const [editData, setEditData] = useState({
-    name: "",
-    address: "",
-    phoneNumber: "",
-  });
+  const [editData, setEditData] = useState({});
   const [boxCreators, setBoxCreators] = useState([]);
   const [savedData, setSavedData] = useState(null);
+  const [fullAddress, setFullAddress] = useState("");
+  const [lat, setLat] = useState(0);
+  const [lng, setLng] = useState(0);
 
+  const getAddrData = (addr1, addr2, lat, lng, fullAddress) => {
+    setFullAddress(fullAddress);
+    setLng(lng);
+    setLat(lat);
+  };
+  console.log(editData);
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const res1 = await instance.get("users/get");
-        console.log(res1);
+
         setUser(res1.data.data[0]);
         const fetchedData = {
           name: res1.data.data[0].name,
@@ -204,16 +210,18 @@ function MyPage() {
 
   const updateUser = async () => {
     try {
-      const response = await instance.patch(
-        "users/update", 
-        {
-          name: editData.name,
-          phoneNumber: editData.phoneNumber,
-          address: editData.address,
-        }
-      );
+      console.log(lat);
+      console.log(lng);
+      const response = await instance.patch("users/update", {
+        name: editData.name,
+        phoneNumber: editData.phoneNumber,
+        address: fullAddress,
+        userLat: lat,
+        userLon: lng,
+      });
       if (response.status === 200) {
-        console.log("Success");
+        console.log("hi");
+        setEditData(response.data.data);
       } else {
         console.error("Faile");
       }
@@ -269,12 +277,7 @@ function MyPage() {
         <MyContainerLeftAlignWithLogo logo="address.png">
           <TextContainer>
             {isEditing ? (
-              <AddressBox
-                type="text"
-                name="address"
-                value={editData.address}
-                onChange={handleInputChange}
-              />
+              <Post getAddrData={getAddrData} />
             ) : (
               <MyText>{editData.address}</MyText>
             )}

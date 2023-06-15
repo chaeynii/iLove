@@ -387,6 +387,7 @@ export const ModifyForm = () => {
                 />
 
                 {existingImage.map((image, argI) => {
+                  console.log(image);
                   return (
                     <div key={argI}>
                       <ImageBox>
