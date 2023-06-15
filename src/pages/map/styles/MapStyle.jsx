@@ -53,7 +53,7 @@ export const BtnHidden = styled.button`
   border: none;
 `;
 
-export const ButtonStyle = styled.button`
+export const MoveMyLocation = styled.button`
   display: block;
   position: absolute;
   width: 20%;

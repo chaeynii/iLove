@@ -1,6 +1,8 @@
 import * as Style from "./styles/HospitalCardStyle";
 import React from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { useMutation } from "react-query";
 
 //아이콘
 import {
@@ -10,6 +12,8 @@ import {
   IconStarFilled,
 } from "../../assets/index";
 
+//utils
+import { formatTime, BE_URL, endpoint_favorite } from "../../utils.js";
 //요일 정보 지정을 위한 상수
 //일~월 : 0~6
 const WEEK = ["일", "월", "화", "수", "목", "금", "토"];
@@ -25,16 +29,6 @@ export const HospitalCard = ({
 }) => {
   //요일 정보 변환
   const todayText = WEEK[today];
-
-  // 시간 형식을 변환하는 함수
-  const formatTime = (time) => {
-    if (!time) {
-      return null;
-    }
-    const hours = time?.slice(0, 2);
-    const minutes = time?.slice(2);
-    return `${hours}:${minutes}`;
-  };
 
   // InfoCard에 넣어줄 요소
   const INFO_PROPS = [
@@ -54,13 +48,35 @@ export const HospitalCard = ({
       content: hospitalAddress,
     },
   ];
+
+  // favorite post 보내기
+  const userToken = localStorage.getItem("token");
+  const { mutate: handleFavorite } = useMutation(() =>
+    axios.post(
+      `${BE_URL}${endpoint_favorite}`,
+      { hospitalId: hpid },
+      {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      }
+    )
+  );
   const handleFavoriteClick = (event) => {
     //즐겨찾기 클릭 시 Link로 넘어가는 것을 막음
     event.preventDefault();
+
+    try {
+      handleFavorite();
+      // 페이지 새로고침
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+    }
   };
   return (
     <>
-      <Link to={`/detail/${hpid}`}>
+      <Link to={`/detail?id=${hpid}`}>
         <Style.HospitalCardBox>
           <div>{hospitalName}</div>
           {INFO_PROPS.map((prop) => (

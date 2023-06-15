@@ -12,6 +12,7 @@ import { Footer } from "../../components/Footer";
 import { CardBox } from "../../components/CardBox";
 import { Header } from "../../components/Header";
 import { ChildBox } from "./component/ChildBox";
+import { ChildBox } from "./component/ChildBox";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import styled from "styled-components";
@@ -19,6 +20,8 @@ import colors from "../../constants/colors";
 
 import MyPage from "./MyPage";
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
@@ -124,9 +127,27 @@ function ChildPage() {
           alwaysShowEditAndRemove={true}
         />
       })}
+      {boxCreators.map(({ id, name, gender, birth, memo, image }) => {
+        console.log(image)
+        return <ChildBox 
+          key={id} 
+          id={id} 
+          name={name} 
+          gender={gender} 
+          birth={birth} 
+          memo={memo} 
+          image={image} 
+          onRemove={handleRemove} 
+          defaultEditable={true}
+          alwaysShowEditAndRemove={true}
+        />
+      })}
       <CardBox>
         <MyButton onClick={handleClick}>추가하기</MyButton>
+        <MyButton onClick={handleClick}>추가하기</MyButton>
       </CardBox>
+      <Space />
+      <BackButton as={Link} to="/MyPage">돌아가기</BackButton>
       <Space />
       <BackButton as={Link} to="/MyPage">돌아가기</BackButton>
       <Space />

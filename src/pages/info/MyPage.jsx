@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 // 공통 컴포넌트 연결해서 테스트함
 import { NavigationBar } from "../../components/NavigationBar";
 import { Container } from "../../components/Container";
 import { Header } from "../../components/Header";
+import { ChildBox } from "./component/ChildBox";
 import { ChildBox } from "./component/ChildBox";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
@@ -96,6 +98,7 @@ const MyText = styled.h2`
 
 const NameText = styled(MyText)`
   font-size: 24px;
+  font-size: 24px;
   font-weight: bold;
 `;
 
@@ -172,11 +175,23 @@ function MyPage() {
           },
         });
         setBoxCreators(res2.data.data);
+        setBoxCreators(res2.data.data);
       } catch (err) {
         console.error(err);
       }
     };
     fetchUserData();
+
+    const getKids = async () => {
+      const axiosGet = await axios.get("/kid/get", {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      const kidsData = axiosGet.data.data;
+      setBoxCreators(kidsData);
+    };
+    getKids();
   }, []);
 
   // 클릭시 ChildPage로 이동
@@ -186,7 +201,9 @@ function MyPage() {
 
   const handleEditClick = async () => {
     // If we are in edit mode, then we update the user.
+    // If we are in edit mode, then we update the user.
     if (isEditing) {
+      // This will await the update of the user before setting isEditing to false.
       // This will await the update of the user before setting isEditing to false.
       await updateUser();
       setIsEditing(false);
@@ -195,6 +212,7 @@ function MyPage() {
     else {
       setSavedData({ ...editData }); // 수정 모드로 진입할 때 현재 데이터를 savedData에 저장
       setIsEditing(true);
+      setIsEditing(false);
     }
   };
 
@@ -208,6 +226,7 @@ function MyPage() {
     try {
       const response = await axios.patch(
         "users/update",
+        "users/update",
         {
           name: editData.name,
           phoneNumber: editData.phoneNumber,
@@ -219,6 +238,11 @@ function MyPage() {
           },
         }
       );
+      if (response.status === 200) {
+        console.log("Success");
+      } else {
+        console.error("Faile");
+      }
       if (response.status === 200) {
         console.log("Success");
       } else {

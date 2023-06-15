@@ -12,25 +12,24 @@ import Calendar from "react-calendar";
 import { ReDetail } from "./reDetail";
 // css
 import styled from "styled-components";
+//utils
+import { BE_URL, getUserToken, endpoint_reserve } from "../../utils.js";
 
 export const MyCalendar = () => {
   const curDate = new Date(); // 현재 날짜
   const [value, onChange] = useState(curDate); // 클릭한 날짜 - 초기값 현재 날짜
   const activeDate = dayjs(value); // 클릭한 날짜 (dayjs 객체로 변경)
   const activeDateString = activeDate.format("YY.MM.DD"); // 클릭한 날짜 (년-월-일)
-  const activeMonth = dayjs(value).get("month") + 1 + "월";
+  const activeMonth = dayjs(value).format("M월");
 
   const [datesOnly, setDatesOnly] = useState([]); //날짜만 추출
   const [extractedData, setExtractedData] = useState([]); //예약 정보만 추출
 
-  const BE_URL = `http://34.64.69.226:3000/`;
-  const userToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVtYWlsQGUubWFpbCIsInN1YiI6MSwiaWF0IjoxNjg2MjM0NjUxLCJleHAiOjE3MTc3OTIyNTF9.QORp6FfVmnROH3A-OCvHzYKjzZVAXjADpKcwmCwGeAA";
-  const endpoint_reserve = `reservation/user`;
+  const userToken = getUserToken();
 
   useEffect(() => {
     axios
-      .get(`${BE_URL}${endpoint_reserve}`, {
+      .get(`${BE_URL}${endpoint_reserve}user`, {
         headers: {
           Authorization: `Bearer ${userToken}`,
         },
@@ -40,9 +39,10 @@ export const MyCalendar = () => {
 
         // 추출된 정보들을 저장할 배열
         const resData = res.data.data;
-        // createdAt의 날짜, hospital의 dutyName, reservedTime, memo만 추출한 배열
+        // hospital의 dutyName, reservedDate, reservedTime, memo만 추출한 배열
         const extractedData = resData.map((item) => ({
-          date: item.createdAt.split("T")[0], // createdAt에서 날짜만 추출
+          id: item.id,
+          date: dayjs(item.reservedDate, "YYYYMMDD").format("YYYY-MM-DD"),
           dutyName: item.hospital.dutyName,
           reservedTime: item.reservedTime,
           memo: item.memo,
@@ -50,8 +50,18 @@ export const MyCalendar = () => {
 
         console.log(extractedData);
 
-        // 날짜를 기준으로 배열 정렬
-        extractedData.sort((a, b) => (a.date > b.date ? 1 : -1));
+        // 날짜와 시간에 따라 extractedData 배열 정렬
+        extractedData.sort((a, b) => {
+          // 날짜를 먼저 비교
+          if (a.date > b.date) return 1;
+          if (a.date < b.date) return -1;
+
+          // 날짜가 동일한 경우 시간을 비교
+          if (a.reservedTime > b.reservedTime) return 1;
+          if (a.reservedTime < b.reservedTime) return -1;
+
+          return 0;
+        });
 
         // 날짜만 추출
         const datesOnly = extractedData.map((item) => item.date);
@@ -88,6 +98,11 @@ export const MyCalendar = () => {
     return null; // 예약 없는 경우는 클래스 이름 없음
   };
 
+  const viewDate = ({ date }) => {
+    const formattedDate = dayjs(date).format("MM월DD일");
+    return `${formattedDate}`;
+  };
+
   const ReDate = ({ date }) => {
     const formattedDate = dayjs(date).format("MM월DD일");
     return (
@@ -98,12 +113,14 @@ export const MyCalendar = () => {
   };
 
   const ReHour = ({ time }) => {
+    const formattedTime = `${time.slice(0, 2)}:${time.slice(2)}`;
     return (
       <div>
-        <h3>{time}</h3>
+        <h3>{formattedTime}</h3>
       </div>
     );
   };
+
   // 디데이 계산하는 코드
   const calculateDday = (activeDate, targetDate) => {
     const diffInDays = dayjs(targetDate).diff(dayjs(activeDate), "day");
@@ -119,14 +136,56 @@ export const MyCalendar = () => {
     }
   };
 
+  // 예약 memo 업데이트 하는 코드
+  const handleSavedMemo = (date, reservedTime, memo) => {
+    // 추출된 예약 정보 배열에서 해당 날짜와 일치하는 항목의 memo 값을 업데이트
+    const updatedData = extractedData.map((item) => {
+      if (
+        item.date === dayjs(date).format("YYYY-MM-DD") &&
+        item.reservedTime === reservedTime
+      ) {
+        // 예약 ID를 가져와서 API 호출에 사용할 URL 생성
+        const reservationId = item.id;
+        const url = `${BE_URL}${endpoint_reserve}memo/${reservationId}`;
+
+        // memo를 업데이트하기 위한 데이터 생성
+        const data = {
+          memo: memo,
+        };
+
+        // axios를 사용하여 PATCH 요청 전송
+        axios
+          .patch(url, data, {
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+            },
+          })
+          .then((res) => {
+            console.log(res.data);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+
+        return {
+          ...item,
+          memo: memo,
+        };
+      }
+      return item;
+    });
+
+    setExtractedData(updatedData); // 업데이트된 예약 정보 배열 설정
+  };
+
   return (
     <>
-      <CardBox linkTo={"#"} bxShadow="0px 4px 4px rgba(0, 0, 0, 0.25)">
+      <CardBox bxShadow="0px 4px 4px rgba(0, 0, 0, 0.25)">
         <ShowDate>
           <h1>{activeDateString}</h1>
         </ShowDate>
       </CardBox>
-      <CardBox linkTo={"#"} bxShadow={"0px 4px 4px rgba(0, 0, 0, 0.25)"}>
+      <CardBox bxShadow={"0px 4px 4px rgba(0, 0, 0, 0.25)"}>
         <ShowCalendar>
           <ReCalendar
             locale="ko"
@@ -143,7 +202,6 @@ export const MyCalendar = () => {
         </ShowCalendar>
       </CardBox>
       <CardBox
-        linkTo={"#"}
         bxShadow={"0px 4px 4px rgba(0, 0, 0, 0.25)"}
         style={{
           display: "flex",
@@ -156,20 +214,36 @@ export const MyCalendar = () => {
           <h2>{activeMonth}</h2>
         </DiaryHeader>
         <DiaryMain>
-          {extractedData.map((item, index) => (
-            <DiaryItemWrapper key={index}>
-              <DiaryItem>
-                <ReTime>
-                  <ReDate date={item.date} />
-                  <ReHour time={item.reservedTime} />
-                </ReTime>
-                <ReDetail hospitalName={item.dutyName} memo={item.memo} />
-                <DueDate>
-                  <h2>{calculateDday(activeDate, item.date)}</h2>
-                </DueDate>
-              </DiaryItem>
-            </DiaryItemWrapper>
-          ))}
+          {extractedData
+            .filter(
+              (item) =>
+                dayjs(item.date).isSame(activeDate, "day") ||
+                dayjs(item.date).isAfter(activeDate, "day")
+            )
+            .map((item, index) => (
+              <DiaryItemWrapper key={index}>
+                <DiaryItem>
+                  <ReTime>
+                    <ReDate date={item.date}>
+                      <h2>{viewDate}</h2>
+                    </ReDate>
+                    <ReHour time={item.reservedTime} />
+                  </ReTime>
+                  <ReDetail
+                    hospitalName={item.dutyName}
+                    memo={item.memo}
+                    onSaved={(memo) =>
+                      handleSavedMemo(item.date, item.reservedTime, memo)
+                    }
+                  />{" "}
+                  <DueDate
+                    isToday={calculateDday(activeDate, item.date) === "Today"}
+                  >
+                    <h2>{calculateDday(activeDate, item.date)}</h2>
+                  </DueDate>
+                </DiaryItem>
+              </DiaryItemWrapper>
+            ))}
         </DiaryMain>
       </CardBox>
     </>
@@ -375,7 +449,20 @@ const DueDate = styled.div`
     width: 100%;
     font-size: 20px;
     font-weight: bold;
-    color: #121212;
     margin-bottom: 10px;
+    color: ${(props) => (props.isToday ? "#00ad5c" : "#121212")};
+    animation: ${(props) => (props.isToday ? "bounce 1s infinite" : "none")};
+  }
+
+  @keyframes bounce {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+    100% {
+      transform: translateY(0);
+    }
   }
 `;
