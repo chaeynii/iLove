@@ -5,13 +5,14 @@ import { CardBox, Modal } from "../../components/index";
 import styled from "styled-components";
 import IconPen from "../../assets/iconPen.svg";
 
-export const ReDetail = ({ hospitalName, memo, onSaved }) => {
+export const ReDetail = ({ hospitalName, memo, onSaved, onHideTooltip }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [memoValue, setMemoValue] = useState(memo ? memo : "");
 
   const openModal = () => {
     setModalOpen(true);
     setMemoValue(memo);
+    onHideTooltip(); // onHideTooltip 함수 호출
   };
 
   const closeModal = () => {
@@ -39,7 +40,7 @@ export const ReDetail = ({ hospitalName, memo, onSaved }) => {
               onChange={handleMemoChange}
             />
             <ButtonWrapper onClick={openModal}>
-              <img alt="icon-pen" src={IconPen} />
+              <img alt="icon-pen" src={IconPen} style={{ cursor: "pointer" }} />
             </ButtonWrapper>
           </InputWrapper>
           <Modal
