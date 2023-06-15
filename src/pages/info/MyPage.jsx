@@ -157,14 +157,14 @@ function MyPage() {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log(res1.data.data[0]);
-        setUser(res1.data.data[0]);
-        const fetchedData = {
-          name: res1.data.data[0].name,
-          address: res1.data.data[0].address,
-          phoneNumber: res1.data.data[0].phoneNumber,
-        };
-        setEditData(fetchedData);
+        console.log(res1)
+        // setUser(res1.data.data[0]);
+        // const fetchedData = {
+        //   name: res1.data.data[0].name,
+        //   address: res1.data.data[0].address,
+        //   phoneNumber: res1.data.data[0].phoneNumber,
+        // };
+        // setEditData(fetchedData);
       } catch (err) {
         console.error(err);
       }
@@ -317,6 +317,7 @@ function MyPage() {
           </TextContainer>
           <MyButton onClick={handleClick}>아이정보 관리</MyButton>
         </MyContainer>
+        {/*
         <KidContainer>
           {boxCreators.map(({ id, name, gender, birth, memo, image }) => (
             <ChildBox
@@ -332,6 +333,7 @@ function MyPage() {
             />
           ))}
         </KidContainer>
+        */}
         <NavigationBar />
       </Container>
     </Container>

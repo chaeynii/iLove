@@ -99,6 +99,7 @@ function ChildPage() {
     })
     setBoxCreators((prevCreators) => prevCreators.filter(creator => creator.id !== id));
   };
+  /*
   return (
     <Container>
       <Header
@@ -132,6 +133,7 @@ function ChildPage() {
       <NavigationBar />
     </Container>
   );
+  */
 }
 
 export default ChildPage;
