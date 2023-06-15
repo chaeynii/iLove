@@ -107,10 +107,11 @@ const Detail = () => {
         method: "GET",
       })
         .then((res) => res.json())
-        .then((reviewcheck) => { 
-          if(reviewcheck.data[0]){
-          setHospitalReviewState(reviewcheck.data[0].vote);
-          setUserReviews(reviewcheck.data[0].vote);}
+        .then((reviewcheck) => {
+          if (reviewcheck.data[0]) {
+            setHospitalReviewState(reviewcheck.data[0].vote);
+            setUserReviews(reviewcheck.data[0].vote);
+          }
         });
     }
   }, []);
@@ -148,7 +149,7 @@ const Detail = () => {
               .then((reviewcheck) => {
                 setUserReviews(reviewcheck.data[0].vote);
               });
-            setHospitalReviewState(reviewData.data[0].vote)
+            setHospitalReviewState(reviewData.data[0].vote);
           } else setHospitalReviewState([]);
         })
         .catch((err) => {
@@ -332,37 +333,61 @@ const Detail = () => {
             <h1>이런 점이 좋았어요</h1>
           </HpInfo>
           <ReviewContainer>
-            <ReviewButton onClick={() => reviewClick("kindDoctor")} clicked={hospitalReviewState} label={"kindDoctor"}>
+            <ReviewButton
+              onClick={() => reviewClick("kindDoctor")}
+              clicked={hospitalReviewState}
+              label={"kindDoctor"}
+            >
               친절한 의사 선생님
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[0])}</span>
               )}
             </ReviewButton>
-            <ReviewButton onClick={() => reviewClick("professional")} clicked={hospitalReviewState} label={"professional"}>
+            <ReviewButton
+              onClick={() => reviewClick("professional")}
+              clicked={hospitalReviewState}
+              label={"professional"}
+            >
               전문적인 치료
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[1])}</span>
               )}
             </ReviewButton>
-            <ReviewButton onClick={() => reviewClick("kindEmployee")} clicked={hospitalReviewState} label={"kindEmployee"}>
+            <ReviewButton
+              onClick={() => reviewClick("kindEmployee")}
+              clicked={hospitalReviewState}
+              label={"kindEmployee"}
+            >
               상냥한 간호사·직원
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[2])}</span>
               )}
             </ReviewButton>
-            <ReviewButton onClick={() => reviewClick("goodReceipt")} clicked={hospitalReviewState} label={"goodReceipt"}>
+            <ReviewButton
+              onClick={() => reviewClick("goodReceipt")}
+              clicked={hospitalReviewState}
+              label={"goodReceipt"}
+            >
               편리한 접수·예약
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[3])}</span>
               )}
             </ReviewButton>
-            <ReviewButton onClick={() => reviewClick("cleanHospital")} clicked={hospitalReviewState} label={"cleanHospital"}>
+            <ReviewButton
+              onClick={() => reviewClick("cleanHospital")}
+              clicked={hospitalReviewState}
+              label={"cleanHospital"}
+            >
               깨끗한 시설
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[4])}</span>
               )}
             </ReviewButton>
-            <ReviewButton onClick={() => reviewClick("goodTraffic")} clicked={hospitalReviewState} label={"goodTraffic"}>
+            <ReviewButton
+              onClick={() => reviewClick("goodTraffic")}
+              clicked={hospitalReviewState}
+              label={"goodTraffic"}
+            >
               편한 교통·주차
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[5])}</span>
@@ -604,15 +629,19 @@ const ReviewContainer = styled.div`
 
 const ReviewButton = styled.button`
   cursor: pointer;
-  background: ${({clicked, label})=>{ 
-    if(clicked == label){
+  background: ${({ clicked, label }) => {
+    if (clicked == label) {
       return colors.primary;
-    } else {return "#f4f4f4";}
+    } else {
+      return "#f4f4f4";
+    }
   }};
-  color : ${({clicked, label})=>{ 
-    if(clicked == label){
-      return 'white';
-    } else {return "#333333";}
+  color: ${({ clicked, label }) => {
+    if (clicked == label) {
+      return "white";
+    } else {
+      return "#333333";
+    }
   }};
   border: 1px solid #00ad5c;
   border-radius: 11px;
@@ -624,11 +653,13 @@ const ReviewButton = styled.button`
   position: relative;
   text-align: start;
   span {
-    color: ${({clicked, label})=>{ 
-      if(clicked == label){
-        return 'white';
-      } else {return "#333333";}
-    }};;
+    color: ${({ clicked, label }) => {
+      if (clicked == label) {
+        return "white";
+      } else {
+        return "#333333";
+      }
+    }};
     position: absolute;
     right: 10px;
   }
