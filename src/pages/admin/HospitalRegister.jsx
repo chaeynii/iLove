@@ -181,7 +181,7 @@ export const HospitalRegister = () => {
           label={"다음페이지"}
           bgcolor={colors.primary}
           btnColor={"white"}
-          disabled={currentPage <= maxPostPage}
+          disabled={currentPage >= maxPostPage}
           onClick={() => setCurrentPage((prev) => prev + 1)}
         >
           다음 페이지

@@ -18,12 +18,27 @@ import styled from "styled-components";
 export const NavigationBar = () => {
   const userRole = localStorage.getItem("role");
 
-  let linkTo;
+  let myPageLink;
+  let reservationLink;
+  let searchLink;
+  let favoriteLink;
+
+  if (userRole) {
+    favoriteLink = "/favorite";
+    searchLink = "/search";
+    reservationLink = "/reserve";
+  } else {
+    favoriteLink = "/login";
+    searchLink = "/login";
+    reservationLink = "/login";
+  }
 
   if (userRole === "manager") {
-    linkTo = "/modify";
+    myPageLink = "/modify";
+  } else if (userRole === "client") {
+    myPageLink = "/Mypage";
   } else {
-    linkTo = "/Mypage";
+    myPageLink = "/login";
   }
 
   return (
@@ -31,14 +46,14 @@ export const NavigationBar = () => {
       <Nav>
         <NavUl>
           <NavLi>
-            <NavA to="/reserve">
+            <NavA to={reservationLink} disabled={userRole === "manager"}>
               <NavImg src={reservation} alt="star"></NavImg>
               <NavP>예약현황</NavP>
             </NavA>
           </NavLi>
 
           <NavLi>
-            <NavA to="/search">
+            <NavA to={searchLink} disabled={userRole === "manager"}>
               <NavImg src={map} alt="star"></NavImg>
               <NavP>병원찾기</NavP>
             </NavA>
@@ -51,14 +66,14 @@ export const NavigationBar = () => {
           </NavLi>
 
           <NavLi>
-            <NavA to="/favorite">
+            <NavA to={favoriteLink} disabled={userRole === "manager"}>
               <NavImg src={star} alt="star"></NavImg>
               <NavP>즐겨찾기</NavP>
             </NavA>
           </NavLi>
 
           <NavLi>
-            <NavA to={linkTo}>
+            <NavA to={myPageLink}>
               <NavImg src={myInfo} alt="star"></NavImg>
               <NavP>내정보</NavP>
             </NavA>
@@ -92,6 +107,13 @@ const NavLi = styled.li`
 `;
 
 const NavA = styled(Link)`
+  color: ${colors.fontColor};
+  ${({ disabled }) =>
+    disabled &&
+    `
+    pointer-events: none;
+    opacity: 0.5;
+  `}
   color: ${colors.fontColor};
 `;
 

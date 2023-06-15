@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { Post } from "./Post";
-import { Button, Container } from "../../components";
+import { Button, Container, NavigationBar } from "../../components";
 import colors from "../../constants/colors";
 import mainLogo from "../../assets/mainLogo.svg";
 import { SelectBox } from "./SelectBox";
@@ -280,6 +280,7 @@ export const RegisterForm = () => {
             btnFontSize={"18px"}
           ></Button>
         </FormBox>
+        <NavigationBar />
       </Container>
     </>
   );
@@ -305,6 +306,7 @@ const FormBox = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 2%;
+  margin-bottom: 6%;
 `;
 
 export const InputBox = styled.div`

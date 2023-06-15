@@ -77,11 +77,15 @@ export const Login = () => {
         // 홈으로 이동
 
         const user = response.data.data;
-
+        console.log("user", user);
         setUserRole(user);
         console.log(typeof userRole);
         const token = user.token;
         // 토큰 local storage에 저장
+
+        if (user.hospitalId) {
+          localStorage.setItem("user", user.hospitalId);
+        }
 
         localStorage.setItem("role", user.role);
         localStorage.setItem("token", token);
