@@ -10,8 +10,9 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import { instance } from 'axios';
 
-const userToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imp1bkBlbWFpbC5jb20iLCJzdWIiOjIwMDA0LCJpYXQiOjE2ODY2Mzk3MjMsImV4cCI6MTcxODE5NzMyM30.owESvX7FLjD-WjxESrMnEoR4glhF1AEBiedQ3WRo0Ok";
+const token = localStorage.getItem("token")
+  ? localStorage.getItem("token")
+  : false;
 // 빈공간
 const Space = styled.div`
   margin-bottom: 20px;
@@ -99,21 +100,20 @@ export const ChildBox = ({
 
   useEffect(()=>{
     setIsEditable(defaultEditable);
-    if(birth === undefined){
-    } else if(birth !== null){
+    if(birth === undefined || null){
+    } else if(birth){
         const modifyBirth = birth.split('-')
         setBirthYear(modifyBirth[0])
         setBirthMonth(modifyBirth[1])
         setBirthDay(modifyBirth[2])
-    } else if(birth === null){
     }
   },[defaultEditable]);
-
-  useEffect(()=>{
-    if(image) {
-      if (image.length) {
-        setSelectedImage(image[0]);
-      }
+  
+  useEffect(() => {
+    // iamge가 없으면 백엔드에서 null로 주니까 길이를 검사할 필요가 없습니다.
+    if (image) {
+      // image 객체안에 있는 imageUrl 주소를 넣어줍니다.
+      setSelectedImage(image.imageUrl);
     }
   }, [image]);
 
@@ -152,10 +152,29 @@ export const ChildBox = ({
 
   //이미지가 선택되었을 때 그 이미지를 제거하는 역할 
   //이미지 참조(selectedImage)를 null로 설정함으로써 이미지를 제거
-  const removeImage = () => {
-    setSelectedImage(null);
+  const removeImage = async() => {
+    // 이미지가 선택되었는지 확인
+    if (!selectedImage) {
+      alert("삭제할 이미지가 선택되지 않았습니다.");
+      return;
+    }
+    
+    try {
+      // 이미지 삭제 요청
+      const response = await axios.delete(`http://34.64.69.226:5000/api/image/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      console.log(response);  // check the response
+  
+      // 이미지 상태 업데이트
+      setSelectedImage(null);
+      setSelectedImageFile(null);
+    } catch (error) {
+      console.error('Error removing image:', error);
+    }
   };
-
   //버튼이 클릭되었을 때, 현재 입력 상태를 확정 편집을 불가능하게 만드는 역할
   //isEditable 상태를 false로 설정함으로써 이를 달성, 반대도 가능
   const handleButtonClick = async() => {
@@ -194,7 +213,7 @@ export const ChildBox = ({
       formData.append("kidId", id);
 
       try {
-        const response = await axios.post('http://34.64.69.226:5000/api/image', formData, {
+        const response = await axios.post('image', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -208,7 +227,7 @@ export const ChildBox = ({
 
     const originalBirth = `${birthYear}-${birthMonth}-${birthDay}`
     await axios.patch(
-      `http://34.64.69.226:5000/api/kid/${id}`, 
+      `kid/${id}`, 
       {
         name: kidName,
         birth: originalBirth,
@@ -216,7 +235,7 @@ export const ChildBox = ({
       }, 
       {
         headers: {
-          Authorization: `Bearer ${userToken}`
+          Authorization: `Bearer ${token}`
         }
       }
     );
