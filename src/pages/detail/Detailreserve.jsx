@@ -45,9 +45,6 @@ const Reserve = () => {
     : false;
   const navigate = useNavigate();
 
-  // const token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1vb250ZXN0QHRlc3QudGVzdCIsInN1YiI6MywiaWF0IjoxNjg2MjM2NTQzLCJleHAiOjE3MTc3OTQxNDN9.ToJBCRSygcxpdmMC-B0DyayfbdR7f6E4FEYhhEu5RhA";
-  // 임시 토큰
-
   const [hospitalData, setHospitalData] = useState({});
   const [reserveday, setReserveday] = useState({
     year: "",

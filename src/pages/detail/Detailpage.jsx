@@ -1,4 +1,3 @@
-/* eslint-disable */
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import {
@@ -53,10 +52,6 @@ const Detail = () => {
     : false;
   const navigate = useNavigate();
 
-  // const hospitalID = "A1100401"; // 임시 하드코딩 아이디
-  // const token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1vb250ZXN0QHRlc3QudGVzdCIsInN1YiI6MywiaWF0IjoxNjg2MjM2NTQzLCJleHAiOjE3MTc3OTQxNDN9.ToJBCRSygcxpdmMC-B0DyayfbdR7f6E4FEYhhEu5RhA"
-  // 임시 하드코딩 토큰
-
   const [hospitalData, setHospitalData] = useState({});
   const [hospitalImg, setHospitalImg] = useState("");
   const [hospitalReviews, setHospitalReviews] = useState([]);
@@ -105,6 +100,18 @@ const Detail = () => {
             }
           });
         });
+      fetch(`${BEdata}reviews/user/${hospitalID}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        method: "GET",
+      })
+        .then((res) => res.json())
+        .then((reviewcheck) => { 
+          if(reviewcheck.data[0]){
+          setHospitalReviewState(reviewcheck.data[0].vote);
+          setUserReviews(reviewcheck.data[0].vote);}
+        });
     }
   }, []);
 
@@ -130,7 +137,6 @@ const Detail = () => {
       })
         .then((res) => res.json())
         .then((reviewData) => {
-          setHospitalReviewState(reviewData.data);
           if (reviewData.data.length == 1) {
             fetch(`${BEdata}reviews/user/${hospitalID}`, {
               headers: {
@@ -142,7 +148,8 @@ const Detail = () => {
               .then((reviewcheck) => {
                 setUserReviews(reviewcheck.data[0].vote);
               });
-          }
+            setHospitalReviewState(reviewData.data[0].vote)
+          } else setHospitalReviewState([]);
         })
         .catch((err) => {
           alert("잘못된 유저정보입니다");
@@ -325,37 +332,37 @@ const Detail = () => {
             <h1>이런 점이 좋았어요</h1>
           </HpInfo>
           <ReviewContainer>
-            <ReviewButton onClick={() => reviewClick("kindDoctor")}>
+            <ReviewButton onClick={() => reviewClick("kindDoctor")} clicked={hospitalReviewState} label={"kindDoctor"}>
               친절한 의사 선생님
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[0])}</span>
               )}
             </ReviewButton>
-            <ReviewButton onClick={() => reviewClick("professional")}>
+            <ReviewButton onClick={() => reviewClick("professional")} clicked={hospitalReviewState} label={"professional"}>
               전문적인 치료
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[1])}</span>
               )}
             </ReviewButton>
-            <ReviewButton onClick={() => reviewClick("kindEmployee")}>
+            <ReviewButton onClick={() => reviewClick("kindEmployee")} clicked={hospitalReviewState} label={"kindEmployee"}>
               상냥한 간호사·직원
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[2])}</span>
               )}
             </ReviewButton>
-            <ReviewButton onClick={() => reviewClick("goodReceipt")}>
+            <ReviewButton onClick={() => reviewClick("goodReceipt")} clicked={hospitalReviewState} label={"goodReceipt"}>
               편리한 접수·예약
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[3])}</span>
               )}
             </ReviewButton>
-            <ReviewButton onClick={() => reviewClick("cleanHospital")}>
+            <ReviewButton onClick={() => reviewClick("cleanHospital")} clicked={hospitalReviewState} label={"cleanHospital"}>
               깨끗한 시설
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[4])}</span>
               )}
             </ReviewButton>
-            <ReviewButton onClick={() => reviewClick("goodTraffic")}>
+            <ReviewButton onClick={() => reviewClick("goodTraffic")} clicked={hospitalReviewState} label={"goodTraffic"}>
               편한 교통·주차
               {hospitalReviews && (
                 <span>{JSON.stringify(hospitalReviews[5])}</span>
@@ -597,7 +604,16 @@ const ReviewContainer = styled.div`
 
 const ReviewButton = styled.button`
   cursor: pointer;
-  background: #f4f4f4;
+  background: ${({clicked, label})=>{ 
+    if(clicked == label){
+      return colors.primary;
+    } else {return "#f4f4f4";}
+  }};
+  color : ${({clicked, label})=>{ 
+    if(clicked == label){
+      return 'white';
+    } else {return "#333333";}
+  }};
   border: 1px solid #00ad5c;
   border-radius: 11px;
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.25);
@@ -608,7 +624,11 @@ const ReviewButton = styled.button`
   position: relative;
   text-align: start;
   span {
-    color: #00ad5c;
+    color: ${({clicked, label})=>{ 
+      if(clicked == label){
+        return 'white';
+      } else {return "#333333";}
+    }};;
     position: absolute;
     right: 10px;
   }
