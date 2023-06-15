@@ -30,14 +30,18 @@ export const ModifyForm = () => {
 
   const hpid = localStorage.getItem("user");
 
-  const [hpName, setHpName] = useState("");
-  const [hpPhone, setHpPhone] = useState("");
-  const [hpNotice, setHpNotice] = useState("");
-  const [hpInfo, setHpInfo] = useState("");
-  const [hpAddress, setAddress] = useState("");
-  const [openTimes, setOpenTimes] = useState([]);
-  const [closeTimes, setCloseTimes] = useState([]);
-  const [dutyTimesFetched, setDutyTimesFetched] = useState(false);
+  const [hpName, setHpName] = useState(""); //병원이름
+  const [hpPhone, setHpPhone] = useState(""); // 병원 번호
+  const [hpNotice, setHpNotice] = useState(""); // 병원 공지사항
+  const [hpInfo, setHpInfo] = useState(""); // 병원 정보
+  const [hpAddress, setAddress] = useState(""); // 병원 주소
+  const [openTimes, setOpenTimes] = useState([]); // 오픈시간
+  const [closeTimes, setCloseTimes] = useState([]); // 마감시간
+  const [existingImage, setExistingImage] = useState([]); // 기존 등록 이미지
+  const [dutyTimesFetched, setDutyTimesFetched] = useState(false); // 시간 요청을 한번만 하기위한 boolean
+  const [deleteImageId, setDeleteImageId] = useState(""); // 삭제할 이미지 Id
+
+  // 최초 통신 시 값이 undefined 가 나와서 if 문으로 통신
 
   if (hpid === undefined || null) {
   } else if (hpid) {
@@ -48,6 +52,7 @@ export const ModifyForm = () => {
       setHpInfo(res.data.data.dutyEtc);
       setAddress(res.data.data.dutyAddr);
 
+      // 위와 같은 이유로 오픈시간,마감시간을 값이 존재할 때 배열에 담는 부분
       if (!dutyTimesFetched) {
         const dutyOpensArray = [];
         for (let i = 0; i <= 8; i++) {
@@ -66,9 +71,13 @@ export const ModifyForm = () => {
           }
         }
         setCloseTimes(dutyCloseArray);
+        setExistingImage(res.data.data.image);
+
+        console.log(res.data.data.image[0]);
       }
 
       setDutyTimesFetched(true);
+      console.log(res.data.data.image);
     });
   }
 
@@ -377,6 +386,48 @@ export const ModifyForm = () => {
                   style={{ display: "none" }}
                 />
 
+                {existingImage.map((image, argI) => {
+                  return (
+                    <div key={argI}>
+                      <ImageBox>
+                        <div>{image.imageUrl}</div>
+                        <div>
+                          <Button
+                            btnColor={"#ffffff"}
+                            bgcolor={colors.primary}
+                            label={"취소"}
+                            width={"100px"}
+                            btnFontSize={"18px"}
+                            onClick={() => {
+                              existingImage.map((item, i) => {
+                                if (item === existingImage[argI]) {
+                                  const deleteId = item.id;
+
+                                  console.log(deleteId.id);
+
+                                  instance.delete(`/image/${deleteId}`);
+                                }
+                              });
+
+                              setExistingImage(
+                                existingImage.filter((image, i) => {
+                                  return argI !== i;
+                                })
+                              );
+                            }}
+                          ></Button>
+                        </div>
+                      </ImageBox>
+                    </div>
+                  );
+                })}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleChange}
+                  style={{ display: "none" }}
+                />
+
                 {images.map((image, argI) => {
                   return (
                     <div key={argI}>
@@ -402,6 +453,7 @@ export const ModifyForm = () => {
                     </div>
                   );
                 })}
+
                 <P> 주소, 병원명을 반드시 등록해주세요</P>
               </>
             )}

@@ -87,12 +87,16 @@ export const RegisterForm = () => {
 
   // SelectBox 에서 받아온 openTime 배열을 돌면서 dutyTimes에 저장
   openTime.forEach((option, index) => {
-    openDutyTimes[index] = option.value;
+    if (option && option.value !== "") {
+      openDutyTimes[index] = option.value;
+    }
   });
 
-  // 마감 시간 저장
+  // save deadline
   closeTime.forEach((option, index) => {
-    closeDutyTimes[index] = option.value;
+    if (option && option.value !== "") {
+      closeDutyTimes[index] = option.value;
+    }
   });
 
   // 오픈 시간 담을 변수

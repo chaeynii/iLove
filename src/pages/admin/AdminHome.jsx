@@ -1,5 +1,6 @@
 import React, { useState, Suspense } from "react";
 import styled from "styled-components";
+import { PersonalTitle } from "./HospitalClient";
 
 // 필요할 때마다 동적 로딩을 위한 react.lazy 함수 사용 코드
 // 각 컴포넌트를 로딩하기 위한 코드
@@ -68,6 +69,7 @@ export const AdminHome = () => {
           })}
         </AdminMenuBox>
         <AdminContentBox>
+          <PersonalTitle>좌측 메뉴를 선택해주세요</PersonalTitle>
           <Suspense fallback={<div>Loading...</div>}>{content}</Suspense>
         </AdminContentBox>
       </AdminBox>
