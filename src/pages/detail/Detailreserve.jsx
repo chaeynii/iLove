@@ -749,6 +749,9 @@ const NewCardBoxStyle = styled.div`
     &:hover {
       opacity: 70%;
     }
+    @media screen and (max-width: 800px) {
+      display: none;
+    }
   }
   &:disabled {
     color: white;

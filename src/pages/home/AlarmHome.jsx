@@ -36,7 +36,7 @@ export const AlarmHome = () => {
             Authorization: `Bearer ${testToken}`,
           },
         })
-        .then((res) => {
+        .then((res) => { console.log(res.data.data.length)
           setListLength(res.data.data.length);
         });
     }
