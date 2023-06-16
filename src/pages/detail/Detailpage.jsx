@@ -7,6 +7,7 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
+import Slider from "react-slick";
 import { useQuery, useMutation } from "react-query";
 import axios from "axios";
 
@@ -53,7 +54,7 @@ const Detail = () => {
   const navigate = useNavigate();
 
   const [hospitalData, setHospitalData] = useState({});
-  const [hospitalImg, setHospitalImg] = useState("");
+  const [hospitalImg, setHospitalImg] = useState([]);
   const [hospitalReviews, setHospitalReviews] = useState([]);
   const [hospitalReviewState, setHospitalReviewState] = useState({});
   const [userReviews, setUserReviews] = useState([]);
@@ -75,6 +76,7 @@ const Detail = () => {
     fetch(`${BEdata}image/hospital/${hospitalID}`)
       .then((res) => res.json())
       .then((hospitalD) => {
+        console.log(hospitalD.data);
         setHospitalImg(hospitalD.data);
       });
 
@@ -217,6 +219,26 @@ const Detail = () => {
     }
   };
 
+  const Carousel = ({ data }) => {
+    const settings = {
+      dots: true,
+      infinite: true,
+      speed: 500,
+      slidesToShow: 1,
+      slidesToScroll: 1,
+    };
+
+    return (
+      <Slider {...settings}>
+        {data.map((img, index) => (
+          <SlideImg key={index}>
+            <img src={img.imageUrl} alt={index} />
+          </SlideImg>
+        ))}
+      </Slider>
+    );
+  };
+
   return (
     <>
       <Container>
@@ -224,14 +246,13 @@ const Detail = () => {
           <NewHeader label={hospitalData.dutyName} />
         </HeaderContainer>
         <SlideContainer>
-          <SlideImg>
-            {" "}
-            {hospitalImg.imageUrl ? (
-              <img src={hospitalImg.imageUrl} alt="" />
-            ) : (
+          {hospitalImg.length >= 1 ? (
+            <Carousel data={hospitalImg} />
+          ) : (
+            <FixedImg>
               <img src={NoImage} alt="No Image" />
-            )}
-          </SlideImg>
+            </FixedImg>
+          )}
           <ArrowRigth>
             <img src={arrowButtonRight} alt="" />
           </ArrowRigth>
@@ -468,9 +489,25 @@ const SlideContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 25px;
+  .slick-slider {
+    width: 100%;
+  }
 `;
 
 const SlideImg = styled.div`
+  width: 90%;
+  img {
+    width: 90%;
+    height: 350px;
+    border-radius: 20px;
+    object-fit: cover;
+    display: inherit;
+    margin-bottom: 15px;
+  }
+`;
+
+const FixedImg = styled.div`
   width: 90%;
   img {
     width: 100%;
