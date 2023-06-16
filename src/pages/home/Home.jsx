@@ -7,6 +7,12 @@ import {
   Link,
   useNavigate,
 } from "react-router-dom";
+
+// 메인 배너 이미지
+import banner1 from "./img/banner1.jpg";
+import banner2 from "./img/banner2.jpg";
+import banner3 from "./img/banner3.jpg";
+
 import axios from "axios";
 
 import Select from "react-select";
@@ -83,12 +89,6 @@ export const Home = () => {
     navigate("/");
   };
 
-  // 키워드 검색어
-  // const [searchKeyword, setSearchKeyword] = useState("");
-
-  //키워드 검색 후 필터링 된 병원 리스트
-  // const [keywordFilteredHospitals, setKeywordFilteredHospitals] = useState([]);
-
   const handleSearch = (keyword) => {
     setSearchKeyword(keyword);
   };
@@ -136,9 +136,6 @@ export const Home = () => {
   // 고정값 김포 경도위도
   const defaultLatitude = 37.64245641626587;
   const defaultLongitude = 126.64398423537274;
-  // 고정값 광명 경도위도
-  // const defaultLatitude = 37.472215621869594;
-  // const defaultLongitude = 126.8751105269487;
 
   return (
     <>
@@ -150,7 +147,6 @@ export const Home = () => {
           autoClose={4000}
           hideProgressBar
         />
-        {/* <MainLogoImg src={mainLogo} alt="mainLogo"></MainLogoImg> */}
 
         <TopMenuBar>
           <MenuLogo>
@@ -189,9 +185,11 @@ export const Home = () => {
           linkTo={`/search?query=${encodeURIComponent(search)}`}
         />
 
-        <Banner>
+        {/* <Banner>
           <Img src={MainBanner} alt="star"></Img>
-        </Banner>
+        </Banner> */}
+
+        <MainBannerImg />
 
         <SiliderMargin>
           <MainSub>
@@ -292,7 +290,7 @@ const customStyles = {
 };
 
 const H1 = styled.p`
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 900;
   color: #121212;
   padding: 1%;
@@ -301,7 +299,7 @@ const H1 = styled.p`
 `;
 
 const H2 = styled.p`
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #121212;
   padding: 1%;
@@ -438,11 +436,13 @@ const BannerSebH1 = styled.p`
 const SimpleSlider = ({ latitude, longitude, distance }) => {
   const settings = {
     dots: true,
-    infinite: false,
+    infinite: true,
+    draggable: true,
     speed: 500,
     slidesToShow: 3,
-    slidesToScroll: 4,
+    slidesToScroll: 3,
     initialSlide: 0,
+    arrows: true,
     responsive: [
       {
         breakpoint: 1024,
@@ -477,7 +477,6 @@ const SimpleSlider = ({ latitude, longitude, distance }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 위도와 경도를 이용하여 병원 데이터를 가져오는 기능
     const hospitalApi = async () => {
       try {
         const response = await axios.get("/hospital/near", {
@@ -494,19 +493,25 @@ const SimpleSlider = ({ latitude, longitude, distance }) => {
         console.error(error);
       }
     };
-
     //위도와 경도에 유효한 값이 있는 경우에만 API를 호출합니다.
     if (latitude !== null && longitude !== null) {
       hospitalApi();
     }
-  }, [latitude, longitude, distance]);
+  }, [latitude, longitude, distance, setHospitalData]);
+
+  // 병원 데이터의 존재 여부에 따라 설정 개체 수정
+  const updatedSettings = { ...settings };
+  if (hospitalData.length === 0) {
+    // 병원 데이터가 없을 때 무한대를 false로 설정
+    updatedSettings.infinite = false;
+  }
 
   return (
     <>
       {loading ? (
         <img src={pinwheel} alt="Loading..." />
       ) : (
-        <Slider {...settings}>
+        <Slider {...updatedSettings}>
           {hospitalData.length > 0 ? (
             hospitalData.map((data) => (
               <Card key={data.id}>
@@ -536,14 +541,13 @@ const SimpleSlider = ({ latitude, longitude, distance }) => {
     </>
   );
 };
-
 const Card = styled.div`
   position: relative;
 `;
 
 const CardTop = styled.div`
   margin: 0 2% 0 2%;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.6s ease;
 
   &:hover {
     &::after {
@@ -560,16 +564,6 @@ const CardTop = styled.div`
   }
 `;
 
-const CardBottom = styled.div`
-  position: absolute;
-  width: 80%;
-  top: 50%;
-  left: 50%;
-  z-index: 1;
-  transform: translate(-50%, -50%);
-  color: #fff;
-`;
-
 const CardTitle = styled.p`
   font-size: 22px;
   font-weight: 700;
@@ -579,7 +573,7 @@ const CardTitle = styled.p`
   top: 50%;
   left: 50%;
   width: 80%;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.6s ease;
 
   ${CardTop}:hover & {
     color: white;
@@ -600,4 +594,42 @@ const Guide = styled.p`
   margin: 10% 0 10% 0;
   color: #b2b2b2;
   // text-align: center;
+`;
+
+// 캐러셀 라이브러리
+const MainBannerImg = () => {
+  // 메인배너 이미지
+  const images = [{ img: banner1 }, { img: banner2 }, { img: banner3 }];
+
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 700,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true, // 자동 캐러셀
+    autoplaySpeed: 5000, // 자동 캐러셀 속도
+    pauseOnHover: true, // hover시 정지
+    fade: true,
+  };
+
+  return (
+    <BannerCon>
+      <Slider {...settings}>
+        {images.map((img) => (
+          <BannerImg src={img.img} alt={img.img} />
+        ))}
+      </Slider>
+    </BannerCon>
+  );
+};
+const BannerImg = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+`;
+
+const BannerCon = styled.div`
+  margin: 3% 0 8% 0;
 `;
