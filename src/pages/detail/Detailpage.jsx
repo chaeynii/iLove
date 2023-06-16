@@ -258,7 +258,7 @@ const Detail = () => {
           ></Button>
           <UnderLine />
         </TopContentContainer>
-        <QueryMapBtn Link={`detail/map?id=${hospitalID}`}>
+        <QueryMapBtn onClick={() => navigate(`/detail/map?id=${hospitalID}`)}>
           <div>
             <img src={locationWhite} alt="" />
             <span>지도</span>
@@ -548,6 +548,7 @@ const UnderLine = styled.div`
 `;
 
 const QueryMapBtn = styled.button`
+  cursor: pointer;
   display: none;
   margin-top: 20px;
   width: 90%;
