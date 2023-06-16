@@ -75,9 +75,9 @@ export const Login = () => {
       .then((response) => {
         // 로그인 성공
         // 홈으로 이동
-
+        console.log(response);
         const user = response.data.data;
-
+        const verified = response.data.data.adminVerified;
         setUserRole(user);
 
         const token = user.token;
@@ -86,14 +86,18 @@ export const Login = () => {
         if (user.hospitalId) {
           localStorage.setItem("user", user.hospitalId);
         }
-
+        localStorage.setItem("verified", verified);
         localStorage.setItem("role", user.role);
         localStorage.setItem("token", token);
 
-        navigate("/");
+        if (verified === false) {
+          alert("승인 대기중입니다");
+        }
+        navigate("/jail");
       })
       .catch((error) => {
         // 오류처리
+
         toast("이메일 또는 비밀번호가 잘못되었습니다..");
       });
   };

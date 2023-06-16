@@ -7,13 +7,14 @@ import miniLogo from "../assets/miniLogo.svg";
 import myInfo from "../assets/myInfo.svg";
 import reservation from "../assets/reservation.svg";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 // 상수값 연결 링크
 import colors from "../constants/colors";
 import fontSize from "../constants/fontSize";
 
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
+import axios from "axios";
 
 export const NavigationBar = () => {
   const userRole = localStorage.getItem("role");
@@ -40,7 +41,24 @@ export const NavigationBar = () => {
   } else {
     myPageLink = "/login";
   }
+  const token = localStorage.getItem("token");
 
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (token) {
+      axios
+        .get("/users/get", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          if (res.data.data.adminVerified === false) {
+            navigate("/jail");
+          }
+        });
+    }
+  }, []);
   return (
     <>
       <Nav>

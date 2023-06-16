@@ -175,7 +175,7 @@ const UserView = () => {
       .then((response) => {
         // 회원가입 성공
         // 홈으로 이동
-        navigate("/");
+        navigate("/login");
         console.log("등록 성공", response.data);
       })
       .catch((error) => {

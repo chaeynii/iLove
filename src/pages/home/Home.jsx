@@ -75,6 +75,8 @@ export const Home = () => {
       // 토큰이 존재하므로 삭제 진행
       localStorage.removeItem("token");
       localStorage.removeItem("role");
+      localStorage.removeItem("user");
+      localStorage.removeItem("verified");
       toast("로그아웃 성공");
     } else {
       // 오류 알림표시

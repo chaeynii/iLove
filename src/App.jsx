@@ -37,6 +37,8 @@ import {
   ModifyForm,
 } from "./pages/index";
 
+import { Jail } from "./pages/login/Jail";
+
 // const queryClient = new QueryClient();
 
 function App() {
@@ -59,6 +61,7 @@ function App() {
         <Route path="/Mypage/ChildPage" element={<ChildPage />} />
         <Route path="/favorite" element={<Favorite />} />
         <Route path="/modify" element={<ModifyForm />} />
+        <Route path="/jail" element={<Jail />} />
       </Routes>
     </Router>
   );

@@ -391,7 +391,11 @@ export const ModifyForm = () => {
                   return (
                     <div key={argI}>
                       <ImageBox>
-                        <div>{image.imageUrl}</div>
+                        <div>
+                          {decodeURIComponent(
+                            image.imageName.replace(/\.png$/, "")
+                          )}
+                        </div>
                         <div>
                           <Button
                             btnColor={"#ffffff"}
@@ -430,6 +434,7 @@ export const ModifyForm = () => {
                 />
 
                 {images.map((image, argI) => {
+                  console.log(image);
                   return (
                     <div key={argI}>
                       <ImageBox>
