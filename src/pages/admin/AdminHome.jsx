@@ -68,8 +68,8 @@ export const AdminHome = () => {
             );
           })}
         </AdminMenuBox>
+
         <AdminContentBox>
-          <PersonalTitle>좌측 메뉴를 선택해주세요</PersonalTitle>
           <Suspense fallback={<div>Loading...</div>}>{content}</Suspense>
         </AdminContentBox>
       </AdminBox>

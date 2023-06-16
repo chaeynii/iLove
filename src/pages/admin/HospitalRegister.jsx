@@ -9,7 +9,7 @@ import { adminInstance } from "../../server/Fetcher";
 
 export const HospitalRegister = () => {
   const [currentPage, setCurrentPage] = useState(0); // 페이지 숫자 상태
-  const [maxPostPage, setMaxPostPage] = useState(currentPage + 1);
+  const maxPostPage = currentPage + 1;
   const [checkArray, setCheckArray] = useState([]);
   const [isAllChecked, setIsAllChecked] = useState(false);
 
@@ -44,7 +44,9 @@ export const HospitalRegister = () => {
     setIsAllChecked(!isAllChecked);
     if (!isAllChecked) {
       const ids = paginatedList.map((item) => item.id);
-      setCheckList(ids);
+      const copy = [...ids];
+      checkList.push(...copy);
+      checkArray.push(...copy);
     } else {
       setCheckList([]);
     }
@@ -133,7 +135,7 @@ export const HospitalRegister = () => {
               </TableData>
               <TableData>{item.createdAt.slice(0, 10)}</TableData>
               <TableData>{item.hospital?.dutyName}</TableData>
-              <TableData>{item.hospital.dutyAddr}</TableData>
+              <TableData>{item.hospital?.dutyAddr}</TableData>
               <TableData>{item.phoneNumber}</TableData>
               <TableData>
                 <Button
@@ -181,7 +183,7 @@ export const HospitalRegister = () => {
           label={"다음페이지"}
           bgcolor={colors.primary}
           btnColor={"white"}
-          disabled={currentPage >= maxPostPage}
+          disabled={currentPage >= maxPostPage - 1}
           onClick={() => setCurrentPage((prev) => prev + 1)}
         >
           다음 페이지

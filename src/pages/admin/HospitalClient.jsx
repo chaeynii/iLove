@@ -9,7 +9,7 @@ import { adminInstance } from "../../server/Fetcher";
 
 export const HospitalClient = () => {
   const [currentPage, setCurrentPage] = useState(0); // 페이지 숫자 상태
-  const [maxPostPage, setMaxPostPage] = useState(currentPage + 1);
+  const maxPostPage = currentPage + 1;
   const [checkArray, setCheckArray] = useState([]);
   const [isAllChecked, setIsAllChecked] = useState(false);
 
@@ -41,7 +41,9 @@ export const HospitalClient = () => {
     setIsAllChecked(!isAllChecked);
     if (!isAllChecked) {
       const ids = paginatedList.map((item) => item.id);
-      setCheckList(ids);
+      const copy = [...ids];
+      checkList.push(...copy);
+      checkArray.push(...copy);
     } else {
       setCheckList([]);
     }

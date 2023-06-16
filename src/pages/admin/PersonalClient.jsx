@@ -41,7 +41,9 @@ export const PersonalClient = () => {
     setIsAllChecked(!isAllChecked);
     if (!isAllChecked) {
       const ids = paginatedList.map((item) => item.id);
-      setCheckList(ids);
+      const copy = [...ids];
+      checkList.push(...copy);
+      checkArray.push(...copy);
     } else {
       setCheckList([]);
     }
