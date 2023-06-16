@@ -202,7 +202,8 @@ export const ChildBox = ({
       const formData = new FormData();
       formData.append("files", selectedImageFile);
       formData.append("kidId", id);
-
+      formData.append("imageName", "kid");
+      
       try {
         const response = await instance.post("image", formData, {
           headers: {
