@@ -13,7 +13,11 @@ export const Header = ({ label }) => {
     <>
       <HeaderWrap>
         <BtnBack onClick={onClickBtn}>
-          <img alt="icon-left" src={IconLeft}></img>
+          <img
+            alt="icon-left"
+            src={IconLeft}
+            style={{ cursor: "pointer" }}
+          ></img>
         </BtnBack>
         <h2>{label}</h2>
       </HeaderWrap>
