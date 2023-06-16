@@ -193,7 +193,7 @@ export const HospitalClient = () => {
 };
 
 export const PersonalTitle = styled.p`
-  padding-top: 6.5%;
+  padding-top: 5%;
   font-family: "Inter";
   font-style: normal;
   font-weight: 900;

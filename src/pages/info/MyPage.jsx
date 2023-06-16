@@ -160,9 +160,10 @@ function MyPage() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const res1 = await instance.get("users/get");
+        const res1 = await instance.get("/users/get");
 
         setUser(res1.data.data[0]);
+        console.log("fetchUserData");
         const fetchedData = {
           name: res1.data.data[0].name,
           address: res1.data.data[0].address,
@@ -237,10 +238,7 @@ function MyPage() {
 
   return (
     <Container>
-      <Header
-        label={"내정보"}
-        onClick={() => {}}
-      />
+      <Header label={"내정보"} onClick={() => {}} />
       <Space />
       <Container>
         <MyContainer>

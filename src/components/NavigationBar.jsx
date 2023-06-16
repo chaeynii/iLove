@@ -15,6 +15,7 @@ import fontSize from "../constants/fontSize";
 import React, { useEffect } from "react";
 import styled from "styled-components";
 import axios from "axios";
+import { instance } from "../server/Fetcher";
 
 export const NavigationBar = () => {
   const userRole = localStorage.getItem("role");
@@ -38,6 +39,8 @@ export const NavigationBar = () => {
     myPageLink = "/modify";
   } else if (userRole === "client") {
     myPageLink = "/Mypage";
+  } else if (userRole === "admin") {
+    myPageLink = "/admin";
   } else {
     myPageLink = "/login";
   }
@@ -46,17 +49,11 @@ export const NavigationBar = () => {
   const navigate = useNavigate();
   useEffect(() => {
     if (token) {
-      axios
-        .get("/users/get", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => {
-          if (res.data.data.adminVerified === false) {
-            navigate("/jail");
-          }
-        });
+      instance.get("/users/get").then((res) => {
+        if (res.data.data.adminVerified === false) {
+          navigate("/jail");
+        }
+      });
     }
   }, []);
   return (
@@ -64,7 +61,7 @@ export const NavigationBar = () => {
       <Nav>
         <NavUl>
           <NavLi>
-            <NavA to={reservationLink} disabled={userRole === "manager"}>
+            <NavA to={reservationLink} disabled={userRole !== "client"}>
               <NavImg src={reservation} alt="star"></NavImg>
               <NavP>예약현황</NavP>
             </NavA>
@@ -84,7 +81,7 @@ export const NavigationBar = () => {
           </NavLi>
 
           <NavLi>
-            <NavA to={favoriteLink} disabled={userRole === "manager"}>
+            <NavA to={favoriteLink} disabled={userRole !== "client"}>
               <NavImg src={star} alt="star"></NavImg>
               <NavP>즐겨찾기</NavP>
             </NavA>

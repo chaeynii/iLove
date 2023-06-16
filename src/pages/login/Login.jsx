@@ -94,7 +94,7 @@ export const Login = () => {
           alert("승인 대기중입니다");
           navigate("/jail");
         } else {
-          window.location.href = "/";
+          navigate("/");
         }
       })
       .catch((error) => {

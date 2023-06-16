@@ -84,7 +84,7 @@ const AdminBox = styled.div`
 `;
 
 const AdminMenuBox = styled.div`
-  padding-top: 14%;
+  padding-top: 12%;
   width: 30%;
   height: 100%;
   background-color: #33bd7d;

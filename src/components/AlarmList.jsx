@@ -21,8 +21,11 @@ export const AlarmList = ({ onListChange }) => {
           },
         })
         .then((res) => {
-          setList(res.data.data);
-          onListChange(res.data.data.length);
+          const response = res.data.data;
+          const alarmFilter = response.filter((item) => item.read === false);
+          console.log(res);
+          setList(response);
+          onListChange(alarmFilter.length);
         });
     }
   }, [onListChange]);

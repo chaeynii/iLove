@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { Post } from "./Post";
-import { Button, Container, NavigationBar } from "../../components";
+import { Button, Container, Header, NavigationBar } from "../../components";
 import colors from "../../constants/colors";
 import mainLogo from "../../assets/mainLogo.svg";
 import { SelectBox } from "./SelectBox";
@@ -254,6 +254,7 @@ export const ModifyForm = () => {
   return (
     <>
       <Container>
+        <Header />
         <MainLogoDiv>
           <MainLogoImg src={mainLogo}></MainLogoImg>
           <H1>병원 정보 수정</H1>

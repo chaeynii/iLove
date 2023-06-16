@@ -28,7 +28,9 @@ export const AlarmButton = () => {
           },
         })
         .then((res) => {
-          setListLength(res.data.data.length);
+          const response = res.data.data;
+          const alarmFilter = response.filter((item) => item.read === false);
+          setListLength(alarmFilter.length);
         });
     }
   }, []);
