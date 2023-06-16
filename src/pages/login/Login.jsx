@@ -92,8 +92,10 @@ export const Login = () => {
 
         if (verified === false) {
           alert("승인 대기중입니다");
+          navigate("/jail");
+        } else {
+          navigate("/");
         }
-        navigate("/jail");
       })
       .catch((error) => {
         // 오류처리
