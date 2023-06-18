@@ -35,7 +35,12 @@ const closeTimeTable = [
   { value: "2000", label: "2000" },
 ];
 
-export const SelectBox = ({ getOpenTimeData, getCloseTimeData }) => {
+export const SelectBox = ({
+  getOpenTimeData,
+  getCloseTimeData,
+  openTimes,
+  closeTimes,
+}) => {
   const [openTimeOption, setOpenTimeOption] = useState([]); // 오픈시간 담는 배열
   const [closeTimeOption, setCloseTimeOption] = useState([]); // 마감시간 담는 배열
 
@@ -64,8 +69,8 @@ export const SelectBox = ({ getOpenTimeData, getCloseTimeData }) => {
         <TimeTable key={i}>
           <div>{weekTable[i]}</div>
           <StyledSelect
-            placeholder="오픈시간" // 오픈시간 셀렉트
-            value={openTimeOption[i]}
+            placeholder={openTimes ? `${openTimes[i]}` : "영업시간"} // 오픈시간 셀렉트
+            value={openTimeOption[i] ? openTimeOption[i] : ""}
             onChange={(selectedOption) =>
               handleOpenTimeOptionChange(selectedOption, i)
             }
@@ -73,8 +78,8 @@ export const SelectBox = ({ getOpenTimeData, getCloseTimeData }) => {
           />
           <Span>부터</Span>
           <StyledSelect
-            placeholder="마감시간" // 마감시간 셀렉트
-            value={closeTimeOption[i]}
+            placeholder={closeTimes ? `${closeTimes[i]}` : "마감시간"} // 마감시간 셀렉트
+            value={closeTimeOption[i] ? closeTimeOption[i] : ""}
             onChange={(selectedOption) =>
               handleCloseTimeOptionChange(selectedOption, i)
             }

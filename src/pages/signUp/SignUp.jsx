@@ -7,6 +7,7 @@ import {
   Route,
   Link,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 import axios from "axios";
 
@@ -28,6 +29,8 @@ import {
   Footer,
   SearchBar,
 } from "../../components/index";
+
+import { MyComponent } from "./MyComponent";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import colors from "../../constants/colors";
@@ -51,30 +54,32 @@ export const SignUp = () => {
 
   return (
     <>
-      <div>
-        <SignUpDiv>
-          <SignUpImg src={mainLogo}></SignUpImg>
-          <H1>회원가입</H1>
-        </SignUpDiv>
-        <SignUpFormDiv>
-          <ChangeButtonDiv>
-            <ButtonUser
-              className={tabView === "user" ? "" : "active"}
-              onClick={() => handleChangeTab("user")}
-            >
-              일반 회원
-            </ButtonUser>
-            <ButtonHospital
-              className={tabView === "hospital" ? "active" : ""}
-              onClick={() => handleChangeTab("hospital")}
-            >
-              병원 클라이언트
-            </ButtonHospital>
-          </ChangeButtonDiv>
-          {tabView === "hospital" ? <HospitalView /> : <UserView />}
-        </SignUpFormDiv>
-      </div>
-      <NavigationBar />
+      <Container>
+        <div>
+          <SignUpDiv>
+            <SignUpImg src={mainLogo}></SignUpImg>
+            <H1>회원가입</H1>
+          </SignUpDiv>
+          <SignUpFormDiv>
+            <ChangeButtonDiv>
+              <ButtonUser
+                className={tabView === "user" ? "" : "active"}
+                onClick={() => handleChangeTab("user")}
+              >
+                일반 회원
+              </ButtonUser>
+              <ButtonHospital
+                className={tabView === "hospital" ? "active" : ""}
+                onClick={() => handleChangeTab("hospital")}
+              >
+                병원 클라이언트
+              </ButtonHospital>
+            </ChangeButtonDiv>
+            {tabView === "hospital" ? <HospitalView /> : <UserView />}
+          </SignUpFormDiv>
+        </div>
+        <NavigationBar />
+      </Container>
     </>
   );
 };
@@ -118,7 +123,6 @@ const UserView = () => {
     } else {
       setPwValid(false);
     }
-    console.log(e.target.value);
   };
 
   // 비밀번호 확인 검사
@@ -129,7 +133,6 @@ const UserView = () => {
     } else {
       setPwCheckValid(false);
     }
-    console.log(e.target.value);
   };
 
   // 핸드폰 유효성 검사
@@ -158,6 +161,7 @@ const UserView = () => {
     setNotAllow(true);
   }, [emailValid, pwValid, pwCheckValid, nameValid, phoneValid]);
 
+  const navigate = useNavigate();
   // 폼 전송 구현
   const register = () => {
     // axios를 사용하여 POST 요청 만들기
@@ -171,7 +175,7 @@ const UserView = () => {
       .then((response) => {
         // 회원가입 성공
         // 홈으로 이동
-        window.location.href = "/";
+        navigate("/login");
         console.log("등록 성공", response.data);
       })
       .catch((error) => {
@@ -194,7 +198,7 @@ const UserView = () => {
         <SignUpInputDiv>
           <InputTitle>이름</InputTitle>
           <SignUpInput
-            placeholder="아이사"
+            placeholder="이름을 입력해주세요"
             type="text"
             value={name}
             onChange={handleName}
@@ -204,7 +208,7 @@ const UserView = () => {
         <SignUpInputDiv>
           <InputTitle>이메일</InputTitle>
           <SignUpInput
-            placeholder="test123@test.com"
+            placeholder="이메일을 입력해주세요"
             type="email"
             value={email}
             onChange={handleEmail}
@@ -295,6 +299,12 @@ const HospitalView = () => {
   //버튼 활성화
   const [notAllow, setNotAllow] = useState(true);
 
+  // 병원 이름
+  const [hospitalNameInput, setHospitalNameInput] = useState("");
+
+  // 병원 ID
+  const [hpId, setHpId] = useState("");
+
   // 이메일 유효성 검사
   const handleEmail = (e) => {
     setEmail(e.target.value);
@@ -310,7 +320,6 @@ const HospitalView = () => {
     } else {
       setPwValid(false);
     }
-    console.log(e.target.value);
   };
 
   // 비밀번호 확인 검사
@@ -321,7 +330,6 @@ const HospitalView = () => {
     } else {
       setPwCheckValid(false);
     }
-    console.log(e.target.value);
   };
 
   // 핸드폰 유효성 검사
@@ -341,6 +349,10 @@ const HospitalView = () => {
     }
   };
 
+  // 병원명 검색
+  const hpName = (e) => {
+    setHospitalNameInput(e.target.value);
+  };
   // 버튼 활성화
   useEffect(() => {
     if (emailValid && pwValid && pwCheckValid && nameValid && phoneValid) {
@@ -350,12 +362,13 @@ const HospitalView = () => {
     setNotAllow(true);
   }, [emailValid, pwValid, pwCheckValid, nameValid, phoneValid]);
 
+  const navigate = useNavigate();
   // 폼 전송 구현
   const register = () => {
     // axios를 사용하여 POST 요청 만들기
     axios
-      .post("http://34.64.69.226:3000/users/managersignup", {
-        hospitalId: name,
+      .post("/users/managersignup", {
+        hospitalId: hpId,
         name: name,
         email: email,
         password: pw,
@@ -363,8 +376,7 @@ const HospitalView = () => {
       })
       .then((response) => {
         // 성공적인 응답 처리
-        window.location.href = "/";
-        console.log("등록 성공", response.data);
+        navigate("/");
       })
       .catch((error) => {
         // 오류 처리
@@ -384,9 +396,9 @@ const HospitalView = () => {
       />
       <SignUpForm>
         <SignUpInputDiv>
-          <InputTitle>담당자 성함</InputTitle>
+          <InputTitle>담당자 이름</InputTitle>
           <SignUpInput
-            placeholder="테스트"
+            placeholder="담당자 이름을 입력해주세요"
             type="text"
             value={name}
             onChange={handleName}
@@ -398,6 +410,21 @@ const HospitalView = () => {
           <SignUpInput
             placeholder="병원명을 검색해주세요"
             type="text"
+            value={hospitalNameInput}
+            onChange={hpName}
+          ></SignUpInput>
+
+          <MyComponent
+            hospitalNameInput={hospitalNameInput}
+            setHospitalNameInput={setHospitalNameInput}
+            hpId={hpId}
+            setHpId={setHpId}
+          />
+          <SignUpInput
+            placeholder="선택된 병원 ID"
+            type="text"
+            disabled={true}
+            value={hpId}
           ></SignUpInput>
           <P>
             *찾으시는 병원이 없으실 경우 하단에 신규 병원 등록 신청하기를
@@ -421,7 +448,7 @@ const HospitalView = () => {
         <SignUpInputDiv>
           <InputTitle>담당자 이메일</InputTitle>
           <SignUpInput
-            placeholder="test@naver.com"
+            placeholder="이메일을 입력해주세요"
             type="email"
             value={email}
             onChange={handleEmail}
@@ -563,6 +590,7 @@ const SignUpForm = styled.form`
   border-radius: 5px;
   padding: 10%;
   text-align: center;
+  margin-bottom: 13%;
   box-shadow: 0px 4px 5px 0px rgba(0, 0, 0, 0.1);
 `;
 const SignUpInput = styled.input`
@@ -581,6 +609,8 @@ const SignUpInputDiv = styled.div``;
 
 const InputTitle = styled.p`
   font-size: 18px;
+  text-align: left;
+  padding-left: 5%;
 `;
 
 const ChangeButtonDiv = styled.div`

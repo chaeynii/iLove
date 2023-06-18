@@ -11,10 +11,10 @@ import Detail from "./detail/Detailpage";
 import Reserve from "./detail/Detailreserve";
 import { SearchPage } from "./search/SearchPage";
 import { MapHospital } from "./map/MapHospital";
-import { MapMyPage } from "./map/MapMyPage";
 import MyPage from "./info/MyPage";
 import ChildPage from "./info/ChildPage";
 import { Favorite } from "./favorite/Favorite";
+import { ModifyForm } from "./registerForm/ModifyForm";
 
 export {
   AdminHome,
@@ -28,8 +28,8 @@ export {
   SearchPage,
   Reserve,
   MapHospital,
-  MapMyPage,
   ReservationChk,
   ChildPage,
   Favorite,
+  ModifyForm,
 };

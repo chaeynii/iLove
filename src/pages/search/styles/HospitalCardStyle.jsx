@@ -14,6 +14,7 @@ export const HospitalCardBox = styled(CardBoxStyle)`
     justify-content: left;
     align-items: center;
     margin: 1%;
+    text-align: left;
   }
   & > div:first-child {
     font-size: 30px;

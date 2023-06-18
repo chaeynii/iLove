@@ -5,11 +5,11 @@ import { useQuery, useQueryClient } from "react-query";
 import { Button } from "../../components/Button";
 import colors from "../../constants/colors";
 
-import { deleteinstance, instance } from "../../server/Fetcher";
+import { adminInstance } from "../../server/Fetcher";
 
 export const PersonalClient = () => {
   const [currentPage, setCurrentPage] = useState(0); // 페이지 숫자 상태
-  const [maxPostPage, setMaxPostPage] = useState(currentPage + 1);
+  const maxPostPage = currentPage + 1;
   const [checkArray, setCheckArray] = useState([]);
   const [isAllChecked, setIsAllChecked] = useState(false);
 
@@ -17,16 +17,17 @@ export const PersonalClient = () => {
 
   // 인스턴스 사용하는 함수
   const listQuery = useQuery("list", async () => {
-    const response = await instance.get("/admin/get/generelclient"); // "/"는 baseURL에 추가된 경로입니다
+    const response = await adminInstance.get("/admin/get/generelclient"); // "/"는 baseURL에 추가된 경로입니다
     return response.data;
   });
 
   const list = listQuery.data;
-  const [searchInput, setsearchInput] = useState(""); // 검색창 인풋
+  console.log(list);
+  const [searchInput, setSearchInput] = useState(""); // 검색창 인풋
   const [submitted, setSubmitted] = useState(false); // 검색창 submit 상태
   const [checkList, setCheckList] = useState([]); // 체크박스
   const onChange = (e) => {
-    setsearchInput(e.target.value);
+    setSearchInput(e.target.value);
     setSubmitted(false);
   };
 
@@ -40,7 +41,9 @@ export const PersonalClient = () => {
     setIsAllChecked(!isAllChecked);
     if (!isAllChecked) {
       const ids = paginatedList.map((item) => item.id);
-      setCheckList(ids);
+      const copy = [...ids];
+      checkList.push(...copy);
+      checkArray.push(...copy);
     } else {
       setCheckList([]);
     }
@@ -60,7 +63,7 @@ export const PersonalClient = () => {
 
   const arrayDelete = async () => {
     console.log("idArray", checkArray);
-    await deleteinstance.delete("/admin/deleteall", {
+    await adminInstance.delete("/admin/deleteall", {
       data: {
         userIds: checkArray,
       },
@@ -70,17 +73,9 @@ export const PersonalClient = () => {
   // 페이지네이션 데이터의 id와 체크된 열의 id 값 필터
   const handleDelete = async (item) => {
     console.log("삭제할 id:", item);
-    await deleteinstance.delete(`admin/delete/${item.id}`); //React Query에서 'invalidateQueries' 기능 사용해서 업데이트 된 목록 다시
+    await adminInstance.delete(`admin/delete/${item.id}`); //React Query에서 'invalidateQueries' 기능 사용해서 업데이트 된 목록 다시
     queryClient.invalidateQueries("list");
   };
-
-  //페이지네이션 로직
-  useEffect(() => {
-    if (currentPage <= maxPostPage - 1) {
-      const nextPage = currentPage + 1;
-      queryClient.prefetchQuery(["posts", nextPage], () => listQuery.data);
-    }
-  }, [currentPage, queryClient]);
 
   if (listQuery.isLoading) {
     return <h1>로딩중입니다..</h1>;
@@ -146,18 +141,17 @@ export const PersonalClient = () => {
             </TableRow>
           ))}
         </tbody>
-        <tbody>
-          <Button
-            width={"80px"}
-            height={"30px"}
-            label={"선택삭제"}
-            bgcolor={colors.primary}
-            btnColor={"white"}
-            onClick={arrayDelete}
-          />
-        </tbody>
       </Table>
-
+      <AlignBtn>
+        <Button
+          width={"80px"}
+          height={"30px"}
+          label={"선택삭제"}
+          bgcolor={colors.primary}
+          btnColor={"white"}
+          onClick={arrayDelete}
+        />
+      </AlignBtn>
       <ButtonBox>
         <Button
           width={"80px"}
@@ -165,8 +159,12 @@ export const PersonalClient = () => {
           label={"이전페이지"}
           bgcolor={colors.primary}
           btnColor={"white"}
-          disabled={currentPage > maxPostPage}
-          onClick={() => setCurrentPage((prev) => prev - 1)}
+          disabled={currentPage < 1}
+          onClick={() => {
+            if (currentPage >= 1) {
+              setCurrentPage((prev) => prev - 1);
+            }
+          }}
         ></Button>
         <span>Page {currentPage + 1}</span>
         <Button
@@ -175,7 +173,7 @@ export const PersonalClient = () => {
           label={"다음페이지"}
           bgcolor={colors.primary}
           btnColor={"white"}
-          disabled={currentPage >= maxPostPage}
+          disabled={currentPage > maxPostPage}
           onClick={() => setCurrentPage((prev) => prev + 1)}
         >
           다음 페이지
@@ -186,7 +184,7 @@ export const PersonalClient = () => {
 };
 
 export const PersonalTitle = styled.p`
-  padding-top: 6.5%;
+  padding-top: 5%;
   font-family: "Inter";
   font-style: normal;
   font-weight: 900;
@@ -264,4 +262,11 @@ const ButtonBox = styled.div`
     font-weight: 600;
     font-size: 24px;
   }
+`;
+
+const AlignBtn = styled.div`
+  display: flex;
+  width: 90%;
+  justify-content: flex-start;
+  padding-top: 2%;
 `;

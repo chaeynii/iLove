@@ -2,13 +2,19 @@
 
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useNavigate,
+} from "react-router-dom";
 import axios from "axios";
 
 // 알림창 라이브러리
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
-
+import { instance } from "../../server/Fetcher";
 // 이미지 링크
 import mainLogo from "../../assets/mainLogo.svg";
 
@@ -19,16 +25,12 @@ import { Button, Container, NavigationBar } from "../../components/index";
 import colors from "../../constants/colors";
 import fontSize from "../../constants/fontSize";
 
-const UserData = {
-  email: "test@naver.com",
-  pw: "123456789",
-};
-
 export const Login = () => {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [emailValid, setEmailValid] = useState(false);
   const [pwValid, setPwValid] = useState(false);
+  const [userRole, setUserRole] = useState("");
   // 버튼 활성화 비활성화 여부
   const [notAllow, setNotAllow] = useState(true);
 
@@ -60,11 +62,12 @@ export const Login = () => {
     }
     setNotAllow(true);
   }, [emailValid, pwValid]);
-
+  const navigate = useNavigate();
   // 로그인 폼 전송
+
   const getUserLoginInfo = async () => {
     // axios를 사용하여 post 요청
-    axios
+    await instance
       .post("/users/login", {
         email: email,
         password: pw,
@@ -72,18 +75,32 @@ export const Login = () => {
       .then((response) => {
         // 로그인 성공
         // 홈으로 이동
-        window.location.href = "/";
-        console.log("로그인 성공", response.data);
+        console.log(response);
+        const user = response.data.data;
+        const verified = response.data.data.adminVerified;
+        setUserRole(user);
 
-        // 토큰 저장
-        const token = response.data.data.token;
+        const token = user.token;
         // 토큰 local storage에 저장
+
+        if (user.hospitalId) {
+          localStorage.setItem("user", user.hospitalId);
+        }
+        localStorage.setItem("verified", verified);
+        localStorage.setItem("role", user.role);
         localStorage.setItem("token", token);
+
+        if (verified === false) {
+          alert("승인 대기중입니다");
+          navigate("/jail");
+        } else {
+          navigate("/");
+        }
       })
       .catch((error) => {
         // 오류처리
+
         toast("이메일 또는 비밀번호가 잘못되었습니다..");
-        console.log("로그인 실패", error);
       });
   };
 
@@ -105,7 +122,7 @@ export const Login = () => {
         <LoginFormDiv>
           <LoginForm>
             <LoginInput
-              placeholder="test123@test.com"
+              placeholder="이메일"
               type="email"
               value={email}
               onChange={handleEmail}
@@ -114,7 +131,7 @@ export const Login = () => {
               <ErrorMaessage>올바른 이메일을 입력해주세요.</ErrorMaessage>
             )}
             <LoginInput
-              placeholder="8자리 이상 입력해주세요"
+              placeholder="비밀번호"
               type="password"
               value={pw}
               onChange={handlePassword}
@@ -149,12 +166,14 @@ export const Login = () => {
               <LoginLi>비밀번호찾기</LoginLi>
             </Link>
             <LoginLi> | </LoginLi> */}
+            <LoginSeb>아직 아이사랑 회원이 아니신가요?</LoginSeb>
+
             <Link to="/signUp">
-              <LoginLi>회원가입</LoginLi>
+              <LoginLi>회원가입 &gt; </LoginLi>
             </Link>
           </LoginUl>
         </Div>
-        <NavigationBar />
+        <NavigationBar userRole={userRole} />
       </Container>
     </>
   );
@@ -205,15 +224,23 @@ const LoginBtn = styled.div`
   margin: 5%;
 `;
 const Div = styled.div`
-  padding-bottom: 3%;
+  padding-bottom: 15%;
 `;
 const LoginUl = styled.div`
-display: flex;
-justify-content: center; /* 좌우정렬 */
-padding: 1%;
-}`;
+  display: flex;
+  justify-content: center; /* 좌우정렬 */
+  padding: 1%;
+`;
 
 const LoginLi = styled.div`
   // padding: 0.5%;
-  color: #b2b2b2;
+  font-size: 18px;
+  color: #00ad5c;
+  font-weight: 700;
+`;
+
+const LoginSeb = styled.div`
+  font-size: 18px;
+  color: #7d7d7d;
+  margin-right: 1%;
 `;

@@ -1,28 +1,31 @@
 import React, { useState } from "react";
-import styled from "styled-components";
+// 공통컴포넌트
 import { CardBox, Modal } from "../../components/index";
+// css
+import styled from "styled-components";
 import IconPen from "../../assets/iconPen.svg";
 
-export const ReDetail = ({ hospitalName, memo }) => {
+export const ReDetail = ({ hospitalName, memo, onSaved, onHideTooltip }) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [memoValue, setMemoValue] = useState("");
+  const [memoValue, setMemoValue] = useState(memo ? memo : "");
 
   const openModal = () => {
     setModalOpen(true);
+    setMemoValue(memo);
+    onHideTooltip(); // onHideTooltip 함수 호출
   };
 
   const closeModal = () => {
     setModalOpen(false);
   };
 
-  // 메모 입력을 위해 input을 클릭하면 모달이 꺼지는데 어떻게 해결할지 모르겠습니다
-  //
   const handleMemoChange = (event) => {
     setMemoValue(event.target.value);
   };
 
-  const modalInputClickHandler = (e) => {
-    e.stopPropagation();
+  const handleSave = () => {
+    onSaved(memoValue);
+    closeModal();
   };
 
   return (
@@ -35,22 +38,21 @@ export const ReDetail = ({ hospitalName, memo }) => {
               placeholder="메모를 추가해보세요"
               value={memo ? memo : memoValue}
               onChange={handleMemoChange}
-              // style={{ color: "#d9d9d9" }}
             />
             <ButtonWrapper onClick={openModal}>
-              <img alt="icon-pen" src={IconPen} />
+              <img alt="icon-pen" src={IconPen} style={{ cursor: "pointer" }} />
             </ButtonWrapper>
           </InputWrapper>
           <Modal
             isOpen={modalOpen}
             onClose={closeModal}
             title="메모"
-            style={{ width: "60%" }}
+            onSaved={handleSave}
           >
-            <ModalInputWrapper onClick={modalInputClickHandler}>
+            <ModalInputWrapper onClick={(e) => e.stopPropagation()}>
               <ModalHospitalName>{hospitalName}</ModalHospitalName>
               <ModalInput
-                placeholder="메모를 입력하세요"
+                placeholder={memo ? memo : "메모를 입력하세요"}
                 value={memoValue}
                 onChange={handleMemoChange}
               />

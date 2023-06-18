@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import { instance } from "../../server/Fetcher";
 
 // 공통 컴포넌트 연결해서 테스트함
 import { Button } from "../../components/Button";
@@ -11,7 +11,7 @@ import { Container } from "../../components/Container";
 import { Footer } from "../../components/Footer";
 import { CardBox } from "../../components/CardBox";
 import { Header } from "../../components/Header";
-import { ChildBox } from "./ChildBox";
+import { ChildBox } from "./component/ChildBox";
 
 // 상수로 뽑아둔 color, fontSize 연결 링크
 import styled from "styled-components";
@@ -19,12 +19,12 @@ import colors from "../../constants/colors";
 
 import MyPage from "./MyPage";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
-const userToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imp1bkBlbWFpbC5jb20iLCJzdWIiOjIwLCJpYXQiOjE2ODY0NTkwNTUsImV4cCI6MTcxODAxNjY1NX0.IqsJIcLYwGZB8sheLdMiBIK1odVAlJsGNJ2NYaNok1E";
-
+// const token = localStorage.getItem("token")
+//   ? localStorage.getItem("token")
+//   : false;
 const Space = styled.div`
   margin-bottom: 20px;
 `;
@@ -67,67 +67,26 @@ const BackButton = styled(Button)`
 
 function ChildPage() {
   const [boxCreators, setBoxCreators] = useState([]);
+  console.log(boxCreators)
+  useEffect(()=>{
+    const getKids = async()=>{
+      const axiosGet = await instance.get('/kid/get')
+      const kidsData = axiosGet.data.data;
+      setBoxCreators(kidsData);
+    }
+    getKids()
+  },[])
 
-  useEffect(() => {
-    const getKids = async () => {
-      const axiosGet = await axios.get("/kid/get", {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      });
-      const axiosGetResponse = axiosGet.data.data;
-      axiosGetResponse.map((objects) => {
-        const originBoxCreator = () => (
-          <ChildBox
-            key={objects.id}
-            id={objects.id}
-            name={objects.name}
-            gender={objects.gender}
-            birth={objects.birth}
-            memo={objects.memo}
-            image={objects.image}
-            onRemove={handleRemove}
-          />
-        );
-        setBoxCreators((prevCreators) => [originBoxCreator, ...prevCreators]);
-      });
-    };
-    getKids();
-  }, []);
-
-  const handleClick = async () => {
-    const axiosPost = await axios.post(
-      "/kid/regist",
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      }
-    );
-    const axiosPostResponse = axiosPost.data.data;
-    console.log(axiosPostResponse);
-    const newBoxCreator = () => (
-      <ChildBox
-        key={axiosPostResponse.id}
-        id={axiosPostResponse.id}
-        onRemove={handleRemove}
-      />
-    );
-    setBoxCreators((prevCreators) => [newBoxCreator, ...prevCreators]);
+  const handleClick = async() => {
+    const axiosPost = await instance.post('/kid/regist', {})
+    const newKidData = axiosPost.data.data;
+    setBoxCreators((prevCreators) => [...prevCreators, newKidData]);
   };
 
-  const handleRemove = async (id) => {
-    await axios.delete(`/kid/${id}`, {
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-      },
-    });
-    setBoxCreators((prevCreators) =>
-      prevCreators.filter((creator) => creator().props.id !== id)
-    );
+  const handleRemove = async(id) => {
+    await instance.delete(`/kid/${id}`)
+    setBoxCreators((prevCreators) => prevCreators.filter(creator => creator.id !== id));
   };
-
   return (
     <Container>
       <Header
@@ -137,15 +96,26 @@ function ChildPage() {
         }}
       />
       <Space />
-      {boxCreators.map((createBox) => createBox())}
+      {boxCreators.map(({ id, name, gender, birth, memo, image }) => {
+        console.log(image)
+        return <ChildBox 
+          key={id} 
+          id={id} 
+          name={name} 
+          gender={gender} 
+          birth={birth} 
+          memo={memo} 
+          image={image} 
+          onRemove={handleRemove} 
+          defaultEditable={true}
+          alwaysShowEditAndRemove={true}
+        />
+      })}
       <CardBox>
-        <div>
-          <MyButton onClick={handleClick}>추가하기</MyButton>
-        </div>
+        <MyButton onClick={handleClick}>추가하기</MyButton>
       </CardBox>
-      <BackButton as={Link} to="/MyPage">
-        돌아가기
-      </BackButton>
+      <Space />
+      <BackButton as={Link} to="/MyPage">돌아가기</BackButton>
       <Space />
       <NavigationBar />
     </Container>

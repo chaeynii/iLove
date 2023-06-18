@@ -7,28 +7,68 @@ import miniLogo from "../assets/miniLogo.svg";
 import myInfo from "../assets/myInfo.svg";
 import reservation from "../assets/reservation.svg";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 // 상수값 연결 링크
 import colors from "../constants/colors";
 import fontSize from "../constants/fontSize";
 
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
+import axios from "axios";
+import { instance } from "../server/Fetcher";
 
 export const NavigationBar = () => {
+  const userRole = localStorage.getItem("role");
+
+  let myPageLink;
+  let reservationLink;
+  let searchLink;
+  let favoriteLink;
+
+  if (userRole) {
+    favoriteLink = "/favorite";
+    searchLink = "/search";
+    reservationLink = "/reserve";
+  } else {
+    favoriteLink = "/login";
+
+    reservationLink = "/login";
+  }
+
+  if (userRole === "manager") {
+    myPageLink = "/modify";
+  } else if (userRole === "client") {
+    myPageLink = "/Mypage";
+  } else if (userRole === "admin") {
+    myPageLink = "/admin";
+  } else {
+    myPageLink = "/login";
+  }
+  const token = localStorage.getItem("token");
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (token) {
+      instance.get("/users/get").then((res) => {
+        if (res.data.data.adminVerified === false) {
+          navigate("/jail");
+        }
+      });
+    }
+  }, []);
   return (
     <>
       <Nav>
         <NavUl>
           <NavLi>
-            <NavA to="/reserve">
+            <NavA to={reservationLink} disabled={userRole !== "client"}>
               <NavImg src={reservation} alt="star"></NavImg>
               <NavP>예약현황</NavP>
             </NavA>
           </NavLi>
 
           <NavLi>
-            <NavA to="/search">
+            <NavA to={"/search"} disabled={userRole === "manager"}>
               <NavImg src={map} alt="star"></NavImg>
               <NavP>병원찾기</NavP>
             </NavA>
@@ -41,14 +81,14 @@ export const NavigationBar = () => {
           </NavLi>
 
           <NavLi>
-            <NavA href="#">
+            <NavA to={favoriteLink} disabled={userRole !== "client"}>
               <NavImg src={star} alt="star"></NavImg>
               <NavP>즐겨찾기</NavP>
             </NavA>
           </NavLi>
 
           <NavLi>
-            <NavA to="Mypage">
+            <NavA to={myPageLink}>
               <NavImg src={myInfo} alt="star"></NavImg>
               <NavP>내정보</NavP>
             </NavA>
@@ -82,6 +122,13 @@ const NavLi = styled.li`
 `;
 
 const NavA = styled(Link)`
+  color: ${colors.fontColor};
+  ${({ disabled }) =>
+    disabled &&
+    `
+    pointer-events: none;
+    opacity: 0.5;
+  `}
   color: ${colors.fontColor};
 `;
 

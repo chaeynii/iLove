@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 // 공통 컴포넌트
-import { CardBox } from "../../components/index";
+import { Container, CardBox } from "../../components/index";
 // 아이콘
 import IconLeft from "../../assets/iconLeftGreen.svg";
 import IconRight from "../../assets/iconRightGreen.svg";
@@ -12,46 +12,54 @@ import Calendar from "react-calendar";
 import { ReDetail } from "./reDetail";
 // css
 import styled from "styled-components";
+//utils
+import { BE_URL, getUserToken, endpoint_reserve } from "../../utils.js";
 
 export const MyCalendar = () => {
   const curDate = new Date(); // 현재 날짜
   const [value, onChange] = useState(curDate); // 클릭한 날짜 - 초기값 현재 날짜
   const activeDate = dayjs(value); // 클릭한 날짜 (dayjs 객체로 변경)
   const activeDateString = activeDate.format("YY.MM.DD"); // 클릭한 날짜 (년-월-일)
-  const activeMonth = dayjs(value).get("month") + 1 + "월";
+  const activeMonth = dayjs(value).format("M월");
 
   const [datesOnly, setDatesOnly] = useState([]); //날짜만 추출
   const [extractedData, setExtractedData] = useState([]); //예약 정보만 추출
 
-  const BE_URL = `http://34.64.69.226:3000/`;
-  const userToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVtYWlsQGUubWFpbCIsInN1YiI6MSwiaWF0IjoxNjg2MjM0NjUxLCJleHAiOjE3MTc3OTIyNTF9.QORp6FfVmnROH3A-OCvHzYKjzZVAXjADpKcwmCwGeAA";
-  const endpoint_reserve = `reservation/user`;
+  const [showTooltip, setShowTooltip] = useState(false); // 툴팁 표시 여부 상태를 추가
+
+  const userToken = getUserToken();
 
   useEffect(() => {
     axios
-      .get(`${BE_URL}${endpoint_reserve}`, {
+      .get(`${BE_URL}${endpoint_reserve}user`, {
         headers: {
           Authorization: `Bearer ${userToken}`,
         },
       })
       .then((res) => {
-        console.log(res.data);
-
         // 추출된 정보들을 저장할 배열
         const resData = res.data.data;
-        // createdAt의 날짜, hospital의 dutyName, reservedTime, memo만 추출한 배열
+        // hospital의 dutyName, reservedDate, reservedTime, memo만 추출한 배열
         const extractedData = resData.map((item) => ({
-          date: item.createdAt.split("T")[0], // createdAt에서 날짜만 추출
+          id: item.id,
+          date: dayjs(item.reservedDate, "YYYYMMDD").format("YYYY-MM-DD"),
           dutyName: item.hospital.dutyName,
           reservedTime: item.reservedTime,
           memo: item.memo,
         }));
 
-        console.log(extractedData);
+        // 날짜와 시간에 따라 extractedData 배열 정렬
+        extractedData.sort((a, b) => {
+          // 날짜를 먼저 비교
+          if (a.date > b.date) return 1;
+          if (a.date < b.date) return -1;
 
-        // 날짜를 기준으로 배열 정렬
-        extractedData.sort((a, b) => (a.date > b.date ? 1 : -1));
+          // 날짜가 동일한 경우 시간을 비교
+          if (a.reservedTime > b.reservedTime) return 1;
+          if (a.reservedTime < b.reservedTime) return -1;
+
+          return 0;
+        });
 
         // 날짜만 추출
         const datesOnly = extractedData.map((item) => item.date);
@@ -88,22 +96,28 @@ export const MyCalendar = () => {
     return null; // 예약 없는 경우는 클래스 이름 없음
   };
 
-  const ReDate = ({ date }) => {
-    const formattedDate = dayjs(date).format("MM월DD일");
-    return (
-      <div>
-        <h2>{formattedDate}</h2>
-      </div>
-    );
+  const viewDate = ({ date }) => {
+    const formattedDate = dayjs(date).format("MM/DD");
+    return `${formattedDate}`;
   };
 
-  const ReHour = ({ time }) => {
-    return (
-      <div>
-        <h3>{time}</h3>
-      </div>
-    );
+  const viewHour = ({ time }) => {
+    const formattedTime = `${time.slice(0, 2)}:${time.slice(2)}`;
+    return `${formattedTime}`;
   };
+
+  // 날짜 범위 계산하는 코드
+  const calculateCal = (activeDate, targetDate) => {
+    const diffInDays = dayjs(targetDate).diff(dayjs(activeDate), "day");
+    const isSameMonth = dayjs(activeDate).isSame(targetDate, "month");
+
+    if (isSameMonth || diffInDays <= 7) {
+      return true; // 일치하는 조건인 경우 true 반환
+    }
+
+    return false; // 일치하지 않는 경우 false 반환
+  };
+
   // 디데이 계산하는 코드
   const calculateDday = (activeDate, targetDate) => {
     const diffInDays = dayjs(targetDate).diff(dayjs(activeDate), "day");
@@ -115,18 +129,74 @@ export const MyCalendar = () => {
         return `D-${diffInDays}`;
       }
     } else {
-      return "Today";
+      if (dayjs(activeDate).isSame(targetDate, "day")) {
+        return "Today";
+      } else {
+        return `D-1`; // targetDate가 activeDate 다음날인 경우
+      }
     }
+  };
+
+  // 예약 memo 업데이트 하는 코드
+  const handleSavedMemo = (date, reservedTime, memo) => {
+    // 추출된 예약 정보 배열에서 해당 날짜와 일치하는 항목의 memo 값을 업데이트
+    const updatedData = extractedData.map((item) => {
+      if (
+        item.date === dayjs(date).format("YYYY-MM-DD") &&
+        item.reservedTime === reservedTime
+      ) {
+        // 예약 ID를 가져와서 API 호출에 사용할 URL 생성
+        const reservationId = item.id;
+        const url = `${BE_URL}${endpoint_reserve}memo/${reservationId}`;
+
+        // memo를 업데이트하기 위한 데이터 생성
+        const data = {
+          memo: memo,
+        };
+
+        // axios를 사용하여 PATCH 요청 전송
+        axios
+          .patch(url, data, {
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+            },
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+
+        return {
+          ...item,
+          memo: memo,
+        };
+      }
+      return item;
+    });
+
+    setExtractedData(updatedData); // 업데이트된 예약 정보 배열 설정
+  };
+
+  // 말풍선에 나타날 내용
+  const msg = `펜 아이콘을 눌러 예약 메모를 작성해보세요!`;
+
+  // 말풍선을 보여주는 함수
+  const handleShowTooltip = () => {
+    setShowTooltip(true);
+  };
+
+  // 말풍선을 숨기는 함수
+  const handleHideTooltip = () => {
+    setShowTooltip(false);
   };
 
   return (
     <>
-      <CardBox linkTo={"#"} bxShadow="0px 4px 4px rgba(0, 0, 0, 0.25)">
+      <CardBox bxShadow="0px 4px 4px rgba(0, 0, 0, 0.25)">
         <ShowDate>
           <h1>{activeDateString}</h1>
         </ShowDate>
       </CardBox>
-      <CardBox linkTo={"#"} bxShadow={"0px 4px 4px rgba(0, 0, 0, 0.25)"}>
+      <CardBox bxShadow={"0px 4px 4px rgba(0, 0, 0, 0.25)"}>
         <ShowCalendar>
           <ReCalendar
             locale="ko"
@@ -143,7 +213,6 @@ export const MyCalendar = () => {
         </ShowCalendar>
       </CardBox>
       <CardBox
-        linkTo={"#"}
         bxShadow={"0px 4px 4px rgba(0, 0, 0, 0.25)"}
         style={{
           display: "flex",
@@ -153,23 +222,44 @@ export const MyCalendar = () => {
         }}
       >
         <DiaryHeader>
-          <h2>{activeMonth}</h2>
+          <h2>예약 상세</h2>
         </DiaryHeader>
-        <DiaryMain>
-          {extractedData.map((item, index) => (
-            <DiaryItemWrapper key={index}>
-              <DiaryItem>
-                <ReTime>
-                  <ReDate date={item.date} />
-                  <ReHour time={item.reservedTime} />
-                </ReTime>
-                <ReDetail hospitalName={item.dutyName} memo={item.memo} />
-                <DueDate>
-                  <h2>{calculateDday(activeDate, item.date)}</h2>
-                </DueDate>
-              </DiaryItem>
-            </DiaryItemWrapper>
-          ))}
+        <DiaryMain
+          onMouseEnter={handleShowTooltip}
+          onMouseLeave={handleHideTooltip}
+        >
+          {/* 말풍선을 showTooltip 함수를 통해 표시 */}
+          {showTooltip && <div className="tooltip">{msg}</div>}
+          {extractedData
+            .filter(
+              (item) =>
+                (dayjs(item.date).isSame(activeDate, "day") ||
+                  dayjs(item.date).isAfter(activeDate, "day")) &&
+                calculateCal(activeDate, item.date)
+            )
+            .map((item, index) => (
+              <DiaryItemWrapper key={index}>
+                <DiaryItem>
+                  <ReTime>
+                    <h3>{viewDate({ date: item.date })}</h3>
+                    <p>{viewHour({ time: item.reservedTime })}</p>
+                  </ReTime>
+                  <ReDetail
+                    hospitalName={item.dutyName}
+                    memo={item.memo}
+                    onSaved={(memo) =>
+                      handleSavedMemo(item.date, item.reservedTime, memo)
+                    }
+                    onHideTooltip={handleHideTooltip} // handleHideTooltip 함수를 전달
+                  />{" "}
+                  <DueDate
+                    isToday={calculateDday(activeDate, item.date) === "Today"}
+                  >
+                    <h2>{calculateDday(activeDate, item.date)}</h2>
+                  </DueDate>
+                </DiaryItem>
+              </DiaryItemWrapper>
+            ))}
         </DiaryMain>
       </CardBox>
     </>
@@ -320,7 +410,7 @@ const DiaryHeader = styled.div`
     width: 100%;
     font-size: 20px;
     font-weight: bold;
-    color: #121212;
+    color: #00ad5c;
     margin-bottom: 10px;
   }
 `;
@@ -344,6 +434,61 @@ const DiaryMain = styled.div`
   & > div:nth-child(3) {
     flex-grow: 0.5;
   }
+
+  &:hover > .tooltip,
+  &:active > .tooltip {
+    display: block;
+  }
+
+  .tooltip {
+    white-space: pre-line;
+    display: none;
+    position: absolute;
+    bottom: 95%;
+    left: 80%;
+    background-color: rgba(0, 173, 92, 0.3);
+    border: rgba(0, 173, 92, 0.5) solid 1px;
+    border-radius: 5px;
+    color: #121212;
+    font-size: 12px;
+    font-weight: bold;
+    height: auto;
+    letter-spacing: -0.25px;
+    margin-top: 6.8px;
+    padding: 5px 11px;
+    width: max-content;
+    z-index: 100;
+    transform: translate(-44%, 110%);
+  }
+
+  /* 말풍선 테두리와 꼬리를 위한 before, after */
+  .tooltip::after {
+    border-color: rgba(0, 173, 92, 0.5) transparent;
+    border-style: solid;
+    border-width: 0 6px 8px 6.5px;
+    content: "";
+    display: block;
+    left: 50%;
+    transform: translateX(-50%) rotate(180deg);
+    position: absolute;
+    bottom: -8px; /* 아래로 내리는 위치 조정 */
+    width: 0;
+    z-index: 1;
+  }
+
+  .tooltip::before {
+    border-color: rgba(0, 173, 92, 0.5) transparent;
+    border-style: solid;
+    border-width: 0 6px 8px 6.5px;
+    content: "";
+    display: block;
+    left: 50%;
+    transform: translateX(-50%) rotate(180deg);
+    position: absolute;
+    bottom: -8px; /* 아래로 내리는 위치 조정 */
+    width: 0;
+    z-index: 0;
+  }
 `;
 
 const DiaryItemWrapper = styled.div`
@@ -362,6 +507,23 @@ const ReTime = styled.div`
   justify-content: space-between;
   width: 30%;
   margin-right: 20px;
+
+  & > h3 {
+    width: 100%;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  & > p {
+    width: 100%;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    border: 1px solid #00ad5c;
+    border-radius: 40px;
+    background-color: #00ad5c;
+    padding: 5px 0 5px;
+  }
 `;
 
 const DueDate = styled.div`
@@ -375,7 +537,20 @@ const DueDate = styled.div`
     width: 100%;
     font-size: 20px;
     font-weight: bold;
-    color: #121212;
     margin-bottom: 10px;
+    color: ${(props) => (props.isToday ? "#00ad5c" : "#121212")};
+    animation: ${(props) => (props.isToday ? "bounce 1s infinite" : "none")};
+  }
+
+  @keyframes bounce {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+    100% {
+      transform: translateY(0);
+    }
   }
 `;

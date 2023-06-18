@@ -13,7 +13,11 @@ export const Header = ({ label }) => {
     <>
       <HeaderWrap>
         <BtnBack onClick={onClickBtn}>
-          <img alt="icon-left" src={IconLeft}></img>
+          <img
+            alt="icon-left"
+            src={IconLeft}
+            style={{ cursor: "pointer" }}
+          ></img>
         </BtnBack>
         <h2>{label}</h2>
       </HeaderWrap>
@@ -25,12 +29,12 @@ export const Header = ({ label }) => {
 const HeaderWrap = styled.div`
   width: 100%;
   height: 80px;
+  display: flex;
+  position: relative;
 
   border-bottom: 1px solid #b2b2b2;
 
   padding: 0 30px 0 30px;
-
-  display: inline-block;
   line-height: 80px;
   text-align: center;
   justify-content: center;
@@ -39,17 +43,21 @@ const HeaderWrap = styled.div`
     font-size: 20px;
     font-weight: bold;
     color: #00ad5c;
-
-    position: absolute;
-    left: 50%;
-    margin-left: -5%;
   }
 `;
 
 const BtnBack = styled.button`
+  display: block;
+  position: absolute;
+  right: 90%;
+  transform: translate(-100%, 0);
+
   background: none;
   border: none;
-  float: left;
   line-height: 80px;
   padding-top: 7px;
+
+  & img:hover {
+    filter: invert(70%);
+  }
 `;

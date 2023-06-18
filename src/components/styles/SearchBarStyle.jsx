@@ -11,11 +11,22 @@ export const Wrapper = styled.div`
     width: 100%;
     display: flex;
     justify-content: space-between;
+    margin-bottom: 2%;
+  }
+
+  & > div p {
+    font-size: 16px;
+    width: 50px;
   }
 
   & button {
     background: none;
     border: none;
+    cursor: pointer;
+  }
+
+  & img:hover {
+    filter: invert(50%);
   }
 `;
 
@@ -25,7 +36,7 @@ export const InputBox = styled.div`
   margin-top: 2%;
   padding: 2% 2.5%;
   box-sizing: border-box;
-  border-radius: 28px;
+  border-radius: 100px;
   text-align: center;
 
   & form {

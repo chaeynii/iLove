@@ -1,14 +1,13 @@
 /* eslint-disable */
 import React from "react";
-import { Link } from "react-router-dom";
 import styled from "styled-components";
 
-export const CardBox = ({ children, linkTo, bxShadow}) => {
+export const CardBox = ({ children, bxShadow}) => {
   return (
     <CardBoxStyle 
       bxShadow={bxShadow}
     >
-      <Link to={linkTo}>{children}</Link>
+      {children}
     </CardBoxStyle>
   );
 };

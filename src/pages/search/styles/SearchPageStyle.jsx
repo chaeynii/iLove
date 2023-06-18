@@ -20,6 +20,7 @@ export const SearchHeader = styled.div`
   & > span {
     font-size: 20px;
     margin-left: 2%;
+    padding: 2%;
   }
 `;
 
@@ -55,5 +56,9 @@ export const DropdownContainer = styled.div`
     margin: 5% 0;
     cursor: pointer;
     font-size: 16px;
+  }
+
+  & img:hover {
+    filter: invert(50%);
   }
 `;

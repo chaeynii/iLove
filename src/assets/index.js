@@ -20,3 +20,8 @@ export { default as IconStarFilled } from "./iconStarFilled.svg";
 export { default as addressList } from "./addressList.json";
 export { default as IconSearch } from "./iconSearch.svg";
 export { default as IconAlarm } from "./iconAlarm.svg";
+
+//MyPage
+export { default as IconMypageLocation } from "./iconMypageLocation.svg";
+export { default as IconMypageTel } from "./iconMypageTel.svg";
+export { default as IconEmail } from "./iconEmail.svg";
