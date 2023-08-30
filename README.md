@@ -179,8 +179,8 @@ DATABASE_URL='{MySQL DB 경로}'
 
 <details><summary>병원 검색 및 예약</summary>
 <img src = './uploads/searchandreserv.gif' width =60% />
-  ![image](https://github.com/chaeynii/iLove/assets/114732554/3121b567-8672-453f-ab36-0ade5f263445)
-
+<img src = '[./uploads/searchandreserv.gif](https://kdt-gitlab.elice.io/sw_track/class_04/web_2_project/team05/back-end/-/raw/master/uploads/searchandreserv.gif)' width =60% />
+  
 </details>
 
 <details><summary>병원 관계자 및 관리자</summary>
